@@ -3,6 +3,8 @@ package com.jugurdzija.homeshelf.data
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import androidx.exifinterface.media.ExifInterface
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -70,12 +72,24 @@ class ReferenceImageStoreImpl @Inject constructor(
     override suspend fun decodeBitmap(item: ReferenceItem, sampleSize: Int): Bitmap? =
         withContext(Dispatchers.IO) {
             if (!item.file.exists()) return@withContext null
-            BitmapFactory.decodeFile(
+            val bitmap = BitmapFactory.decodeFile(
                 item.file.absolutePath,
                 BitmapFactory.Options().apply {
                     inSampleSize = sampleSize
                     inPreferredConfig = Bitmap.Config.ARGB_8888
                 }
+            ) ?: return@withContext null
+            val orientation = ExifInterface(item.file.absolutePath).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
             )
+            val degrees = when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                else -> 0f
+            }
+            if (degrees == 0f) bitmap
+            else Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, Matrix().apply { postRotate(degrees) }, true)
         }
 }

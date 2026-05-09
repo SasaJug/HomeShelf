@@ -5,6 +5,7 @@ import android.util.Log
 import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -42,6 +43,33 @@ fun bindCameraX(
             )
         } catch (e: Exception) {
             Log.e("CameraXController", "Failed to bind camera", e)
+        }
+    }, ContextCompat.getMainExecutor(context))
+}
+
+fun bindCameraXCapture(
+    context: Context,
+    lifecycleOwner: LifecycleOwner,
+    previewView: PreviewView,
+    onReady: (ImageCapture) -> Unit
+) {
+    val future = ProcessCameraProvider.getInstance(context)
+    future.addListener({
+        try {
+            val cameraProvider = future.get()
+            val preview = Preview.Builder().build()
+                .also { it.setSurfaceProvider(previewView.surfaceProvider) }
+            val imageCapture = ImageCapture.Builder().build()
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                CameraSelector.DEFAULT_BACK_CAMERA,
+                preview,
+                imageCapture
+            )
+            onReady(imageCapture)
+        } catch (e: Exception) {
+            Log.e("CameraXController", "Failed to bind capture camera", e)
         }
     }, ContextCompat.getMainExecutor(context))
 }

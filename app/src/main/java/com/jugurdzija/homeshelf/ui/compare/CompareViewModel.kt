@@ -6,11 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
+import com.jugurdzija.homeshelf.homography.HomographyProcessor
+import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
+import com.jugurdzija.homeshelf.ui.common.GUIDE_SIMILARITY_THRESHOLD
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -59,11 +64,40 @@ class CompareViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val matches = embedder.embedAll(bitmap, referencesWithBitmaps)
-                _state.value = CompareUiState.Streaming(matches)
+                val top = matches.firstOrNull()
+                if (top != null && top.similarity >= CAPTURE_SIMILARITY_THRESHOLD) {
+                    _state.value = CompareUiState.Captured(bitmap, matches)
+                    return@launch
+                }
+                val guideBitmap = if (top != null && top.similarity >= GUIDE_SIMILARITY_THRESHOLD) {
+                    referencesWithBitmaps.firstOrNull { it.first.id == top.item.id }?.second
+                } else null
+                _state.value = CompareUiState.Streaming(matches, guideBitmap)
             } finally {
                 inferenceInFlight.set(false)
             }
         }
+    }
+
+    fun onCapturedFrame(frozenBitmap: Bitmap) {
+        val current = _state.value as? CompareUiState.Captured ?: return
+        val topMatch = current.matches.firstOrNull() ?: return
+        val referenceBitmap = referencesWithBitmaps.firstOrNull { it.first.id == topMatch.item.id }?.second ?: return
+
+        viewModelScope.launch {
+            val aligned = withContext(Dispatchers.Default) {
+                HomographyProcessor.align(frozenBitmap, referenceBitmap)
+            }
+            if (aligned != null) {
+                _state.value = CompareUiState.Aligned(aligned, referenceBitmap, current.matches)
+            } else {
+                _state.value = CompareUiState.Error("Could not align — try holding the camera steady", current.matches)
+            }
+        }
+    }
+
+    fun onScanAgain() {
+        _state.value = CompareUiState.Streaming(emptyList())
     }
 
     fun onPermissionDenied() {
