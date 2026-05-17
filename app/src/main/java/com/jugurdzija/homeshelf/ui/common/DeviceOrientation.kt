@@ -19,11 +19,9 @@ data class DeviceOrientation(val pitch: Float = 0f, val roll: Float = 0f)
 const val LEVEL_THRESHOLD_DEG = 5f
 
 /*
-This file provides a custom Jetpack Compose Hook
-that  tracks device pitch (via Accelerometer) and roll (via Gravity sensor, if available).
+This file provides a custom Jetpack Compose Hook that  tracks device pitch (via Accelerometer) and roll (via Gravity sensor, if available).
 Smoothing is applied for stabilization.
 The goal is to help user capture planar reference photo as much as possible.
-Note: There is no way to track, so the method is not perfect.
  */
 
 @Composable

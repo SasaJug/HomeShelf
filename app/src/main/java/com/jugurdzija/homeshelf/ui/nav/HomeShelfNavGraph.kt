@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.compare.CompareScreen
+import com.jugurdzija.homeshelf.ui.detail.AlignedDetailScreen
 import com.jugurdzija.homeshelf.ui.detail.BitmapDetailHolder
 import com.jugurdzija.homeshelf.ui.detail.ImageDetailScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
@@ -62,12 +63,8 @@ fun HomeShelfNavGraph(
             )
         }
         composable(Routes.DETAIL_BITMAP) {
-            val bitmap = BitmapDetailHolder.pending
-            if (bitmap != null) {
-                ImageDetailScreen(
-                    bitmap = bitmap,
-                    onBack = { navController.popBackStack() }
-                )
+            if (BitmapDetailHolder.pending != null) {
+                AlignedDetailScreen(onBack = { navController.popBackStack() })
             } else {
                 navController.popBackStack()
             }

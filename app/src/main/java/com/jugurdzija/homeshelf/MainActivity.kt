@@ -9,14 +9,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.jugurdzija.homeshelf.ui.nav.HomeShelfNavGraph
-import com.jugurdzija.homeshelf.ui.theme.MyCustomTheme
+import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyCustomTheme {
+            HomeShelfTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

@@ -3,6 +3,8 @@ package com.jugurdzija.homeshelf.ui.compare
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.data.GuideLineStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
@@ -22,14 +24,17 @@ import javax.inject.Inject
 @HiltViewModel
 class CompareViewModel @Inject constructor(
     private val store: ReferenceImageStore,
-    private val embedder: EmbedderOwner
+    private val embedder: EmbedderOwner,
+    private val guideLineStore: GuideLineStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<CompareUiState>(CompareUiState.Loading)
     val state: StateFlow<CompareUiState> = _state.asStateFlow()
 
     private var referencesWithBitmaps: List<Pair<ReferenceItem, Bitmap>> = emptyList()
+    private var topReferenceItem: ReferenceItem? = null
     private val inferenceInFlight = AtomicBoolean(false)
+    private var cachedGuideLines: Pair<String, List<GuideLine>>? = null
 
     init {
         viewModelScope.launch {
@@ -65,38 +70,54 @@ class CompareViewModel @Inject constructor(
             try {
                 val matches = embedder.embedAll(bitmap, referencesWithBitmaps)
                 val top = matches.firstOrNull()
+                val refItem = if (top != null) referencesWithBitmaps.firstOrNull { it.first.id == top.item.id }?.first else null
+                val guideLines = if (refItem != null && top != null && top.similarity >= GUIDE_SIMILARITY_THRESHOLD)
+                    loadGuideLinesCached(refItem.file.absolutePath) else emptyList()
+
                 if (top != null && top.similarity >= CAPTURE_SIMILARITY_THRESHOLD) {
-                    _state.value = CompareUiState.Captured(bitmap, matches)
+                    topReferenceItem = refItem
+                    _state.value = CompareUiState.CapturePending(matches, guideLines)
                     return@launch
                 }
-                val guideBitmap = if (top != null && top.similarity >= GUIDE_SIMILARITY_THRESHOLD) {
-                    referencesWithBitmaps.firstOrNull { it.first.id == top.item.id }?.second
-                } else null
-                _state.value = CompareUiState.Streaming(matches, guideBitmap)
+                _state.value = CompareUiState.Streaming(matches, guideLines)
             } finally {
                 inferenceInFlight.set(false)
             }
         }
     }
 
-    fun onCapturedFrame(frozenBitmap: Bitmap) {
-        val current = _state.value as? CompareUiState.Captured ?: return
-        val topMatch = current.matches.firstOrNull() ?: return
-        val referenceBitmap = referencesWithBitmaps.firstOrNull { it.first.id == topMatch.item.id }?.second ?: return
+    fun onPreviewBitmapCaptured(previewBitmap: Bitmap) {
+        val s = _state.value as? CompareUiState.CapturePending ?: return
+        val capturedMatches = s.matches
+        val capturedGuideLines = s.guideLines
+        _state.value = CompareUiState.Captured(previewBitmap, capturedMatches, capturedGuideLines)
+
+        val refItem = topReferenceItem ?: return
+        val referenceBitmap = referencesWithBitmaps.firstOrNull { it.first.id == refItem.id }?.second ?: return
 
         viewModelScope.launch {
+            val guideLines = loadGuideLinesCached(refItem.file.absolutePath)
             val aligned = withContext(Dispatchers.Default) {
-                HomographyProcessor.align(frozenBitmap, referenceBitmap)
+                HomographyProcessor.align(previewBitmap, referenceBitmap)
             }
             if (aligned != null) {
-                _state.value = CompareUiState.Aligned(aligned, referenceBitmap, current.matches)
+                _state.value = CompareUiState.Aligned(aligned, referenceBitmap, capturedMatches, guideLines, refItem.file.absolutePath)
             } else {
-                _state.value = CompareUiState.Error("Could not align — try holding the camera steady", current.matches)
+                _state.value = CompareUiState.Error("Could not align — try holding the camera steady", capturedMatches, guideLines)
             }
         }
     }
 
+    private suspend fun loadGuideLinesCached(filePath: String): List<GuideLine> {
+        val cached = cachedGuideLines
+        if (cached != null && cached.first == filePath) return cached.second
+        val lines = guideLineStore.load(filePath)
+        cachedGuideLines = filePath to lines
+        return lines
+    }
+
     fun onScanAgain() {
+        topReferenceItem = null
         _state.value = CompareUiState.Streaming(emptyList())
     }
 

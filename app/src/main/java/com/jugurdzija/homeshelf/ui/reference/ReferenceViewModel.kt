@@ -1,13 +1,10 @@
 package com.jugurdzija.homeshelf.ui.reference
 
-import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceItem
-import com.jugurdzija.homeshelf.ui.common.decodeBitmapFromUri
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,13 +44,8 @@ class ReferenceViewModel @Inject constructor(
         }
     }
 
-    fun onCaptureSuccess(context: Context, uri: Uri) {
+    fun onCaptureBitmap(bitmap: Bitmap) {
         viewModelScope.launch {
-            val bitmap = decodeBitmapFromUri(context, uri) ?: run {
-                val current = (_state.value as? ReferenceListUiState.Loaded)?.items ?: emptyList()
-                _state.value = ReferenceListUiState.Error("Failed to decode image", current)
-                return@launch
-            }
             store.saveReference(bitmap)
             reload()
         }

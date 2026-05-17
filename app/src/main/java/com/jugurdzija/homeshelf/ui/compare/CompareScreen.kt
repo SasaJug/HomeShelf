@@ -1,13 +1,10 @@
 package com.jugurdzija.homeshelf.ui.compare
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,11 +34,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -49,11 +46,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch
+import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.FrameThrottlingAnalyzer
-import com.jugurdzija.homeshelf.ui.common.GUIDE_IMAGE_TRANSPARENCY
 import com.jugurdzija.homeshelf.ui.common.bindCameraX
 import com.jugurdzija.homeshelf.ui.detail.BitmapDetailHolder
 import org.opencv.android.OpenCVLoader
@@ -64,30 +61,13 @@ fun CompareScreen(
     onBack: () -> Unit,
     onNavigateToDetail: () -> Unit,
 ) {
-
     val vm: CompareViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val context = LocalContext.current
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) {
         OpenCVLoader.initLocal()
-    }
-
-    var hasPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasPermission = granted
-        if (!granted) vm.onPermissionDenied()
-    }
-    LaunchedEffect(Unit) {
-        if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
     Scaffold(
@@ -153,8 +133,8 @@ fun CompareScreen(
                     }
                 }
 
-                is CompareUiState.Streaming, is CompareUiState.Error, is CompareUiState.Captured -> {
-                    if (hasPermission) {
+                is CompareUiState.Streaming, is CompareUiState.Error, is CompareUiState.CapturePending, is CompareUiState.Captured -> {
+                    CameraPermissionGate(onDenied = { vm.onPermissionDenied() }) {
                         val previewView = remember { PreviewView(context) }
 
                         LaunchedEffect(previewView) {
@@ -168,9 +148,10 @@ fun CompareScreen(
                             )
                         }
 
-                        LaunchedEffect(s is CompareUiState.Captured) {
-                            if (s is CompareUiState.Captured) {
-                                vm.onCapturedFrame(s.frameBitmap)
+                        if (s is CompareUiState.CapturePending) {
+                            LaunchedEffect(Unit) {
+                                val bitmap = previewView.bitmap
+                                if (bitmap != null) vm.onPreviewBitmapCaptured(bitmap)
                             }
                         }
 
@@ -179,8 +160,11 @@ fun CompareScreen(
                                 bitmap = s.frameBitmap.asImageBitmap(),
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
+                                contentScale = ContentScale.Crop
                             )
+                            if (s.guideLines.isNotEmpty()) {
+                                GuideLineOverlay(guideLines = s.guideLines, modifier = Modifier.fillMaxSize())
+                            }
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -201,21 +185,22 @@ fun CompareScreen(
                                 modifier = Modifier.fillMaxSize()
                             )
 
-                            val guideBitmap = (s as? CompareUiState.Streaming)?.guideBitmap
-                                ?: (s as? CompareUiState.Error)?.guideBitmap
-                            if (guideBitmap != null) {
-                                Image(
-                                    bitmap = guideBitmap.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Fit,
-                                    alpha = GUIDE_IMAGE_TRANSPARENCY
+                            val guideLines = (s as? CompareUiState.Streaming)?.guideLines
+                                ?: (s as? CompareUiState.Error)?.guideLines
+                                ?: (s as? CompareUiState.CapturePending)?.guideLines
+                                ?: emptyList()
+
+                            if (guideLines.isNotEmpty()) {
+                                GuideLineOverlay(
+                                    guideLines = guideLines,
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                         }
 
                         val matches = (s as? CompareUiState.Streaming)?.matches
                             ?: (s as? CompareUiState.Error)?.matches
+                            ?: (s as? CompareUiState.CapturePending)?.matches
                             ?: (s as? CompareUiState.Captured)?.matches
                             ?: emptyList()
 
@@ -239,8 +224,6 @@ fun CompareScreen(
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
-                    } else {
-                        CircularProgressIndicator(Modifier.align(Alignment.Center))
                     }
                 }
 
@@ -249,8 +232,11 @@ fun CompareScreen(
                         bitmap = s.alignedBitmap.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Crop
                     )
+                    if (s.guideLines.isNotEmpty()) {
+                        GuideLineOverlay(guideLines = s.guideLines, modifier = Modifier.fillMaxSize())
+                    }
 
                     MatchesOverlay(
                         matches = s.matches,
@@ -271,6 +257,8 @@ fun CompareScreen(
                         Button(
                             onClick = {
                                 BitmapDetailHolder.pending = s.alignedBitmap
+                                BitmapDetailHolder.pendingGuideLines = s.guideLines
+                                BitmapDetailHolder.pendingReferenceFilePath = s.referenceFilePath
                                 onNavigateToDetail()
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -340,4 +328,20 @@ private fun similarityColor(similarity: Double) = when {
     similarity >= 0.9 -> MaterialTheme.colorScheme.primary
     similarity >= 0.7 -> MaterialTheme.colorScheme.tertiary
     else -> MaterialTheme.colorScheme.error
+}
+
+@Composable
+private fun GuideLineOverlay(guideLines: List<com.jugurdzija.homeshelf.data.GuideLine>, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val stroke = 2.dp.toPx()
+        guideLines.forEach { line ->
+            if (line.isHorizontal) {
+                val y = line.position * size.height
+                drawLine(Color.Yellow, Offset(0f, y), Offset(size.width, y), stroke)
+            } else {
+                val x = line.position * size.width
+                drawLine(Color.Yellow, Offset(x, 0f), Offset(x, size.height), stroke)
+            }
+        }
+    }
 }

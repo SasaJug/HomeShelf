@@ -67,12 +67,7 @@ class ImageEmbedderHelper(
         }
     }
 
-    //  If both the vectors are aligned, the angle between them
-    //  will be 0. cos 0 = 1. So, mathematically, this distance metric will
-    //  be used to find the most similar image.
     fun embed(firstBitmap: Bitmap, secondBitmap: Bitmap): ResultBundle? {
-        // Inference time is the difference between the system time at the start and finish of the
-        // process
         val startTime = SystemClock.uptimeMillis()
 
         val firstMpImage = BitmapImageBuilder(firstBitmap).build()
@@ -91,13 +86,21 @@ class ImageEmbedderHelper(
         return null
     }
 
+    fun embedSingle(bitmap: Bitmap): FloatArray? {
+        val mpImage = BitmapImageBuilder(bitmap).build()
+        return imageEmbedder
+            ?.embed(mpImage)
+            ?.embeddingResult()
+            ?.embeddings()
+            ?.firstOrNull()
+            ?.floatEmbedding()
+    }
+
     fun clearImageEmbedder() {
         imageEmbedder?.close()
         imageEmbedder = null
     }
 
-    // Wraps results from inference, the time it takes for inference to be
-    // performed.
     data class ResultBundle(
         val similarity: Double,
         val inferenceTime: Long,

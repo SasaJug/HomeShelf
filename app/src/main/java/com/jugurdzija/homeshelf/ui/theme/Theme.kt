@@ -12,7 +12,7 @@ private val LightColors = lightColorScheme(
 )
 
 @Composable
-fun MyCustomTheme(content: @Composable () -> Unit) {
+fun HomeShelfTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LightColors,
         content = content

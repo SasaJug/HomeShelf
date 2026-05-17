@@ -1,12 +1,5 @@
 package com.jugurdzija.homeshelf.ui.reference
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,7 +14,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,12 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.LevelIndicatorOverlay
-import com.jugurdzija.homeshelf.ui.common.bindCameraXCapture
+import com.jugurdzija.homeshelf.ui.common.bindCameraXPreview
 import com.jugurdzija.homeshelf.ui.common.rememberDeviceOrientation
-import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,22 +45,7 @@ fun ReferenceCaptureScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val orientationState = rememberDeviceOrientation()
     val orientation by orientationState
-    var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var isCapturing by remember { mutableStateOf(false) }
-
-    var hasPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted -> hasPermission = granted }
-
-    LaunchedEffect(Unit) {
-        if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
-    }
 
     Scaffold(
         topBar = {
@@ -88,14 +64,14 @@ fun ReferenceCaptureScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (hasPermission) {
+            CameraPermissionGate {
                 val previewView = remember { PreviewView(context) }
                 LaunchedEffect(previewView) {
-                    bindCameraXCapture(
+                    bindCameraXPreview(
                         context = context,
                         lifecycleOwner = lifecycleOwner,
                         previewView = previewView
-                    ) { capture -> imageCapture = capture }
+                    )
                 }
 
                 AndroidView(
@@ -112,28 +88,12 @@ fun ReferenceCaptureScreen(
 
                 Button(
                     onClick = {
-                        val capture = imageCapture ?: return@Button
+                        val bitmap = previewView.bitmap ?: return@Button
                         isCapturing = true
-                        val dir = File(context.filesDir, "captures").apply { mkdirs() }
-                        val file = File(dir, "cap_${System.currentTimeMillis()}.jpg")
-                        val options = ImageCapture.OutputFileOptions.Builder(file).build()
-                        capture.takePicture(
-                            options,
-                            ContextCompat.getMainExecutor(context),
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    val uri = output.savedUri ?: Uri.fromFile(file)
-                                    vm.onCaptureSuccess(context.applicationContext, uri)
-                                    onBack()
-                                }
-
-                                override fun onError(e: ImageCaptureException) {
-                                    isCapturing = false
-                                }
-                            }
-                        )
+                        vm.onCaptureBitmap(bitmap)
+                        onBack()
                     },
-                    enabled = imageCapture != null && !isCapturing,
+                    enabled = !isCapturing,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 32.dp)
@@ -149,12 +109,6 @@ fun ReferenceCaptureScreen(
                         )
                     }
                 }
-            } else {
-                Text(
-                    text = "Camera permission required",
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge
-                )
             }
         }
     }
