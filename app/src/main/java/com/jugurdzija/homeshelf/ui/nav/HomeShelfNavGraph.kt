@@ -17,9 +17,11 @@ import com.jugurdzija.homeshelf.ui.detail.ImageDetailScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceViewModel
+import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
 
 @Composable
 fun HomeShelfNavGraph(
+    onLogout: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -32,7 +34,8 @@ fun HomeShelfNavGraph(
                 onNavigateToCompare = { navController.navigate(Routes.COMPARE) },
                 onNavigateToDetail = { filePath ->
                     navController.navigate("detail/file/${Uri.encode(filePath)}")
-                }
+                },
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) }
             )
         }
         composable(Routes.REFERENCE_CAPTURE) { backStackEntry ->
@@ -60,6 +63,12 @@ fun HomeShelfNavGraph(
             ImageDetailScreen(
                 filePath = filePath,
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onLogout = onLogout
             )
         }
         composable(Routes.DETAIL_BITMAP) {

@@ -6,4 +6,5 @@ object Routes {
     const val COMPARE = "compare"
     const val DETAIL_FILE = "detail/file/{filePath}"
     const val DETAIL_BITMAP = "detail/bitmap"
+    const val SETTINGS = "settings"
 }

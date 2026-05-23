@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,13 +48,23 @@ fun ReferenceScreen(
     onNavigateToCapture: () -> Unit,
     onNavigateToCompare: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("References") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("References") },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                }
+            )
+        }
     ) { padding ->
         Box(
             modifier = Modifier

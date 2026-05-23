@@ -1,5 +1,6 @@
 package com.jugurdzija.homeshelf
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,7 +22,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeShelfNavGraph()
+                    HomeShelfNavGraph(
+                        onLogout = {
+                            startActivity(Intent(this, SignInActivity::class.java))
+                            finish()
+                        }
+                    )
                 }
             }
         }
