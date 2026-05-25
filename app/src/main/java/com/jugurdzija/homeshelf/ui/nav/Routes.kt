@@ -7,4 +7,5 @@ object Routes {
     const val DETAIL_FILE = "detail/file/{filePath}"
     const val DETAIL_BITMAP = "detail/bitmap"
     const val SETTINGS = "settings"
+    const val GOLDEN_SAVE = "golden_save"
 }

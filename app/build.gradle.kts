@@ -30,6 +30,21 @@ android {
     packaging {
         resources.excludes += setOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
     }
+
+    flavorDimensions += "variant"
+
+    productFlavors {
+        create("production") {
+            dimension = "variant"
+            resValue("string", "app_name", "HomeShelf")
+        }
+        create("capture") {
+            dimension = "variant"
+            applicationIdSuffix = ".capture"
+            versionNameSuffix = "-capture"
+            resValue("string", "app_name", "Capture")
+        }
+    }
 }
 
 dependencies {

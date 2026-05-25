@@ -1,8 +1,8 @@
 package com.jugurdzija.homeshelf.ui.compare
 
-import android.graphics.Bitmap
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch
+import android.graphics.Bitmap
 
 sealed interface CompareUiState {
     data object Loading : CompareUiState
