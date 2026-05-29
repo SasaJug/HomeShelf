@@ -76,7 +76,7 @@ class CompareViewModel @Inject constructor(
 
                 if (top != null && top.similarity >= CAPTURE_SIMILARITY_THRESHOLD) {
                     topReferenceItem = refItem
-                    _state.value = CompareUiState.CapturePending(matches, bitmap, guideLines, framesAnalyzed, captureAttempt)
+                    _state.value = CompareUiState.CapturePending(matches, guideLines, framesAnalyzed, captureAttempt)
                     return@launch
                 }
                 _state.value = CompareUiState.Streaming(matches, guideLines)

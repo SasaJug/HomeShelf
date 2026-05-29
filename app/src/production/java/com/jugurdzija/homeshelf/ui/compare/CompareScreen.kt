@@ -3,7 +3,6 @@ package com.jugurdzija.homeshelf.ui.compare
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -38,14 +36,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
-import com.jugurdzija.homeshelf.ui.common.FrameThrottlingAnalyzer
+import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.GuideLineOverlay
 import com.jugurdzija.homeshelf.ui.common.MatchesOverlay
-import com.jugurdzija.homeshelf.ui.common.bindCameraX
 import com.jugurdzija.homeshelf.ui.detail.BitmapDetailHolder
 import org.opencv.android.OpenCVLoader
 
@@ -58,7 +53,6 @@ fun CompareScreen(
     val vm: CompareViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) {
         OpenCVLoader.initLocal()
@@ -129,25 +123,15 @@ fun CompareScreen(
 
                 is CompareUiState.Streaming, is CompareUiState.Error, is CompareUiState.CapturePending, is CompareUiState.Captured -> {
                     CameraPermissionGate(onDenied = { vm.onPermissionDenied() }) {
-                        val previewView = remember { PreviewView(context) }
-
-                        LaunchedEffect(previewView) {
-                            bindCameraX(
-                                context = context,
-                                lifecycleOwner = lifecycleOwner,
-                                previewView = previewView,
-                                analyzer = FrameThrottlingAnalyzer(skipFactor = 15) { bitmap ->
-                                    vm.onFrameReceived(bitmap)
-                                }
-                            )
-                        }
-
-                        if (s is CompareUiState.CapturePending) {
-                            LaunchedEffect(Unit) {
-                                val bitmap = previewView.bitmap
+                        CameraPreview(
+                            showPreview = s !is CompareUiState.Captured,
+                            onFrameReceived = vm::onFrameReceived,
+                            captureKey = s as? CompareUiState.CapturePending,
+                            onBitmapCaptured = { bitmap ->
                                 if (bitmap != null) vm.onPreviewBitmapCaptured(bitmap)
-                            }
-                        }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
 
                         if (s is CompareUiState.Captured) {
                             Image(
@@ -174,11 +158,6 @@ fun CompareScreen(
                                 }
                             }
                         } else {
-                            AndroidView(
-                                factory = { previewView },
-                                modifier = Modifier.fillMaxSize()
-                            )
-
                             val guideLines = (s as? CompareUiState.Streaming)?.guideLines
                                 ?: (s as? CompareUiState.Error)?.guideLines
                                 ?: (s as? CompareUiState.CapturePending)?.guideLines
@@ -271,4 +250,3 @@ fun CompareScreen(
         }
     }
 }
-

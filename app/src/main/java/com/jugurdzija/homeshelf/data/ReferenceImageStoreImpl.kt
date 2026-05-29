@@ -1,30 +1,29 @@
 package com.jugurdzija.homeshelf.data
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class ReferenceImageStoreImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @Named("storageRoot") private val storageRoot: File
 ) : ReferenceImageStore {
 
     private val filenamePattern = Regex("""^ref_(\d+)_(.+)$""")
 
     private fun referencesDir(): File =
-        File(context.filesDir, "references").apply { mkdirs() }
+        File(storageRoot, "references").apply { mkdirs() }
 
     private fun migrateIfNeeded() {
-        val legacy = File(context.filesDir, "reference/reference.jpg")
+        val legacy = File(storageRoot, "reference/reference.jpg")
         if (!legacy.exists()) return
         val dest = File(referencesDir(), "ref_${System.currentTimeMillis()}_Reference_1.jpg")
         legacy.copyTo(dest, overwrite = true)

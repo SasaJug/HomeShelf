@@ -3,7 +3,6 @@ package com.jugurdzija.homeshelf.ui.compare
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,21 +25,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
-import com.jugurdzija.homeshelf.ui.common.FrameThrottlingAnalyzer
+import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.GuideLineOverlay
 import com.jugurdzija.homeshelf.ui.common.MatchesOverlay
-import com.jugurdzija.homeshelf.ui.common.bindCameraX
 import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureHolder
 import org.opencv.android.OpenCVLoader
 
@@ -53,7 +48,6 @@ fun CompareScreen(
     val vm: CompareViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) {
         OpenCVLoader.initLocal()
@@ -124,50 +118,37 @@ fun CompareScreen(
 
                 is CompareUiState.Streaming, is CompareUiState.Error, is CompareUiState.CapturePending -> {
                     CameraPermissionGate(onDenied = { vm.onPermissionDenied() }) {
-                        val previewView = remember { PreviewView(context) }
-
-                        LaunchedEffect(previewView) {
-                            bindCameraX(
-                                context = context,
-                                lifecycleOwner = lifecycleOwner,
-                                previewView = previewView,
-                                analyzer = FrameThrottlingAnalyzer(skipFactor = 15) { bitmap ->
-                                    vm.onFrameReceived(bitmap)
-                                }
-                            )
-                        }
-
-                        if (s is CompareUiState.CapturePending) {
-                            LaunchedEffect(Unit) {
-                                val top = s.matches.firstOrNull()
-                                if (top != null) {
-                                    GoldenCaptureHolder.bitmap = s.capturedBitmap
+                        CameraPreview(
+                            showPreview = true,
+                            onFrameReceived = vm::onFrameReceived,
+                            captureKey = s as? CompareUiState.CapturePending,
+                            onBitmapCaptured = { bitmap ->
+                                val capturePending = s as? CompareUiState.CapturePending
+                                val top = capturePending?.matches?.firstOrNull()
+                                if (capturePending != null && top != null && bitmap != null) {
+                                    GoldenCaptureHolder.bitmap = bitmap
                                     GoldenCaptureHolder.referenceLabel = top.item.label
                                     GoldenCaptureHolder.similarityScore = top.similarity
                                     GoldenCaptureHolder.similarityThreshold = CAPTURE_SIMILARITY_THRESHOLD
-                                    GoldenCaptureHolder.allMatchScores = s.matches.associate { it.item.label to it.similarity }
-                                    GoldenCaptureHolder.framesAnalyzed = s.framesAnalyzed
-                                    GoldenCaptureHolder.captureAttempt = s.captureAttempt
+                                    GoldenCaptureHolder.allMatchScores = capturePending.matches.associate { it.item.label to it.similarity }
+                                    GoldenCaptureHolder.framesAnalyzed = capturePending.framesAnalyzed
+                                    GoldenCaptureHolder.captureAttempt = capturePending.captureAttempt
                                     onNavigateToGoldenSave()
                                 }
-                            }
-                        } else {
-                            AndroidView(
-                                factory = { previewView },
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        val guideLines = (s as? CompareUiState.Streaming)?.guideLines
+                            ?: (s as? CompareUiState.Error)?.guideLines
+                            ?: (s as? CompareUiState.CapturePending)?.guideLines
+                            ?: emptyList()
+
+                        if (guideLines.isNotEmpty()) {
+                            GuideLineOverlay(
+                                guideLines = guideLines,
                                 modifier = Modifier.fillMaxSize()
                             )
-
-                            val guideLines = (s as? CompareUiState.Streaming)?.guideLines
-                                ?: (s as? CompareUiState.Error)?.guideLines
-                                ?: (s as? CompareUiState.CapturePending)?.guideLines
-                                ?: emptyList()
-
-                            if (guideLines.isNotEmpty()) {
-                                GuideLineOverlay(
-                                    guideLines = guideLines,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
                         }
 
                         val matches = (s as? CompareUiState.Streaming)?.matches
@@ -201,4 +182,3 @@ fun CompareScreen(
         }
     }
 }
-

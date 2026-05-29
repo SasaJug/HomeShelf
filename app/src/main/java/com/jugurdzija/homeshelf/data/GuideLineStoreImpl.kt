@@ -1,21 +1,20 @@
 package com.jugurdzija.homeshelf.data
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class GuideLineStoreImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @Named("storageRoot") private val storageRoot: File
 ) : GuideLineStore {
 
     private fun linesFile(imageFilePath: String): File {
         val name = File(imageFilePath).nameWithoutExtension
-        return File(context.filesDir, "grids/$name").apply { mkdirs() }.let {
+        return File(storageRoot, "grids/$name").apply { mkdirs() }.let {
             File(it, "lines.csv")
         }
     }

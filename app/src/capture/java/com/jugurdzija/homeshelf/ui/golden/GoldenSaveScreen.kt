@@ -107,6 +107,7 @@ fun GoldenSaveScreen(
             MetaRow("Threshold", holder.similarityThreshold?.let { "%.4f".format(it) } ?: "-")
             MetaRow("Frames analyzed", holder.framesAnalyzed?.toString() ?: "-")
             MetaRow("Capture attempt", holder.captureAttempt?.toString() ?: "-")
+            holder.bitmap?.let { MetaRow("Image dimensions", "${it.width} × ${it.height}") }
 
             holder.allMatchScores?.takeIf { it.size > 1 }?.let { scores ->
                 Spacer(Modifier.height(4.dp))

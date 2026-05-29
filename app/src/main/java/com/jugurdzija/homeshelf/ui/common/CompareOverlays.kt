@@ -15,12 +15,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch
+import java.io.File
 
 @Composable
 fun MatchesOverlay(
@@ -67,11 +71,49 @@ fun MatchesOverlay(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun MatchesOverlayEmptyPreview() {
+    MatchesOverlay(matches = emptyList())
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MatchesOverlayLoadedPreview() {
+    val fakeFile = File("/fake/path.jpg")
+    MatchesOverlay(
+        matches = listOf(
+            ReferenceMatch(ReferenceItem("ref_1", "Reference 1", fakeFile), similarity = 0.94, inferenceMs = 12),
+            ReferenceMatch(ReferenceItem("ref_2", "Reference 2", fakeFile), similarity = 0.72, inferenceMs = 11),
+            ReferenceMatch(ReferenceItem("ref_3", "Reference 3", fakeFile), similarity = 0.45, inferenceMs = 10),
+        )
+    )
+}
+
 @Composable
 fun similarityColor(similarity: Double) = when {
     similarity >= 0.9 -> MaterialTheme.colorScheme.primary
     similarity >= 0.7 -> MaterialTheme.colorScheme.tertiary
     else -> MaterialTheme.colorScheme.error
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GuideLineOverlayEmptyPreview() {
+    GuideLineOverlay(guideLines = emptyList(), modifier = Modifier.size(300.dp, 400.dp))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GuideLineOverlayLoadedPreview() {
+    GuideLineOverlay(
+        modifier = Modifier.size(300.dp, 400.dp),
+        guideLines = listOf(
+            GuideLine(id = 0, isHorizontal = true, position = 0.33f),
+            GuideLine(id = 1, isHorizontal = true, position = 0.66f),
+            GuideLine(id = 2, isHorizontal = false, position = 0.5f),
+        )
+    )
 }
 
 @Composable

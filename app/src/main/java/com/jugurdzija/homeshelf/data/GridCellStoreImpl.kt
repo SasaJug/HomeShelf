@@ -1,23 +1,22 @@
 package com.jugurdzija.homeshelf.data
 
-import android.content.Context
 import android.graphics.Bitmap
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class GridCellStoreImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @Named("storageRoot") private val storageRoot: File
 ) : GridCellStore {
 
     private fun cellsDir(imageFilePath: String): File {
         val name = File(imageFilePath).nameWithoutExtension
-        return File(context.filesDir, "grids/$name").apply { mkdirs() }
+        return File(storageRoot, "grids/$name").apply { mkdirs() }
     }
 
     override suspend fun save(imageFilePath: String, cells: List<GridCell>) = withContext(Dispatchers.IO) {

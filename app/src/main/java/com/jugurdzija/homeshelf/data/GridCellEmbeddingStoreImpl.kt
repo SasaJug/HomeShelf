@@ -1,21 +1,20 @@
 package com.jugurdzija.homeshelf.data
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class GridCellEmbeddingStoreImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @Named("storageRoot") private val storageRoot: File
 ) : GridCellEmbeddingStore {
 
     private fun embeddingsFile(imageFilePath: String): File {
         val name = File(imageFilePath).nameWithoutExtension
-        val dir = File(context.filesDir, "grids/$name").apply { mkdirs() }
+        val dir = File(storageRoot, "grids/$name").apply { mkdirs() }
         return File(dir, "embeddings.csv")
     }
 
