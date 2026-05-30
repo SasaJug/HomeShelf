@@ -10,6 +10,7 @@ class GridProcessor @Inject constructor() {
 
     fun extract(bitmap: Bitmap, hPixels: List<Float>, vPixels: List<Float>): List<GridCell> {
         if (hPixels.size < 2 || vPixels.size < 2) return emptyList()
+        val numCols = vPixels.size - 1
         val cells = mutableListOf<GridCell>()
         hPixels.zipWithNext().forEachIndexed { rowIdx, (top, bottom) ->
             vPixels.zipWithNext().forEachIndexed { colIdx, (left, right) ->
@@ -18,7 +19,7 @@ class GridProcessor @Inject constructor() {
                 val w = (right - left).toInt().coerceIn(1, bitmap.width - x)
                 val h = (bottom - top).toInt().coerceIn(1, bitmap.height - y)
                 val crop = Bitmap.createBitmap(bitmap, x, y, w, h)
-                cells.add(GridCell(name = "${'A' + colIdx}${rowIdx + 1}", bitmap = crop))
+                cells.add(GridCell(index = rowIdx * numCols + colIdx, name = "${'A' + colIdx}${rowIdx + 1}", bitmap = crop))
             }
         }
         return cells

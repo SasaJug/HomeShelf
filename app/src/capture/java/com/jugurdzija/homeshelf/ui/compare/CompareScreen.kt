@@ -31,12 +31,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.GuideLineOverlay
 import com.jugurdzija.homeshelf.ui.common.MatchesOverlay
-import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureHolder
 import org.opencv.android.OpenCVLoader
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,6 +49,14 @@ fun CompareScreen(
 
     LaunchedEffect(Unit) {
         OpenCVLoader.initLocal()
+    }
+
+    LaunchedEffect(vm.events) {
+        vm.events.collect { event ->
+            when (event) {
+                is CompareViewModel.CompareEvent.NavigateToSave -> onNavigateToGoldenSave()
+            }
+        }
     }
 
     Scaffold(
@@ -123,18 +129,7 @@ fun CompareScreen(
                             onFrameReceived = vm::onFrameReceived,
                             captureKey = s as? CompareUiState.CapturePending,
                             onBitmapCaptured = { bitmap ->
-                                val capturePending = s as? CompareUiState.CapturePending
-                                val top = capturePending?.matches?.firstOrNull()
-                                if (capturePending != null && top != null && bitmap != null) {
-                                    GoldenCaptureHolder.bitmap = bitmap
-                                    GoldenCaptureHolder.referenceLabel = top.item.label
-                                    GoldenCaptureHolder.similarityScore = top.similarity
-                                    GoldenCaptureHolder.similarityThreshold = CAPTURE_SIMILARITY_THRESHOLD
-                                    GoldenCaptureHolder.allMatchScores = capturePending.matches.associate { it.item.label to it.similarity }
-                                    GoldenCaptureHolder.framesAnalyzed = capturePending.framesAnalyzed
-                                    GoldenCaptureHolder.captureAttempt = capturePending.captureAttempt
-                                    onNavigateToGoldenSave()
-                                }
+                                if (bitmap != null) vm.onBitmapCaptured(bitmap)
                             },
                             modifier = Modifier.fillMaxSize()
                         )

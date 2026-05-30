@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (storagePermissionGranted) {
-                        HomeShelfNavGraph(onLogout = { finish() })
+                        HomeShelfNavGraph()
                     } else {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Button(

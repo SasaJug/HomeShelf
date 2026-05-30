@@ -55,8 +55,12 @@ fun GoldenManageScreen(
 ) {
     val state by vm.state.collectAsState()
 
-    LaunchedEffect(Unit) {
-        vm.navigateToView.collect { onNavigateToView() }
+    LaunchedEffect(vm.events) {
+        vm.events.collect { event ->
+            when (event) {
+                is GoldenManageViewModel.Event.NavigateToView -> onNavigateToView()
+            }
+        }
     }
 
     GoldenManageContent(

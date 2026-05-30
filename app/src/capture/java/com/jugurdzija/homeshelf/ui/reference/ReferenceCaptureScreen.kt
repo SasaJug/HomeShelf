@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.LevelIndicatorOverlay
@@ -34,7 +35,7 @@ import com.jugurdzija.homeshelf.ui.common.rememberDeviceOrientation
 @Composable
 fun ReferenceCaptureScreen(
     onBack: () -> Unit,
-    vm: ReferenceViewModel
+    vm: ReferenceViewModel = hiltViewModel()
 ) {
     val orientationState = rememberDeviceOrientation()
     val orientation by orientationState

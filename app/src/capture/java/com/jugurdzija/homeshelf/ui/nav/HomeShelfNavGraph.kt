@@ -13,7 +13,6 @@ import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.compare.CompareScreen
 import com.jugurdzija.homeshelf.ui.compare.CompareViewModel
 import com.jugurdzija.homeshelf.ui.detail.ImageDetailScreen
-import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureHolder
 import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenSaveScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
@@ -23,7 +22,6 @@ import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
 
 @Composable
 fun HomeShelfNavGraph(
-    onLogout: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -62,17 +60,12 @@ fun HomeShelfNavGraph(
                 navController.getBackStackEntry(Routes.COMPARE)
             }
             val compareVm: CompareViewModel = hiltViewModel(compareEntry)
-            if (GoldenCaptureHolder.bitmap != null) {
-                GoldenSaveScreen(
-                    onBack = {
-                        compareVm.onScanAgain()
-                        navController.popBackStack(Routes.REFERENCE, inclusive = false)
-                    }
-                )
-            } else {
-                compareVm.onScanAgain()
-                navController.popBackStack(Routes.REFERENCE, inclusive = false)
-            }
+            GoldenSaveScreen(
+                onBack = {
+                    compareVm.onScanAgain()
+                    navController.popBackStack(Routes.REFERENCE, inclusive = false)
+                }
+            )
         }
         composable(
             route = Routes.DETAIL_FILE,
@@ -88,7 +81,6 @@ fun HomeShelfNavGraph(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
-                onLogout = onLogout
             )
         }
         composable(Routes.GOLDEN_MANAGE) {

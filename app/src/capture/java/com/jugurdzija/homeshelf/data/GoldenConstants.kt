@@ -17,4 +17,8 @@ internal object GoldenConstants {
     const val KEY_IMAGE_HEIGHT = "image_height"
     const val KEY_DEVICE_MODEL = "device_model"
     const val KEY_ANDROID_API = "android_api"
+    const val KEY_REFERENCE_FILE_PATH = "reference_file_path"
+    const val KEY_GROUND_TRUTH = "ground_truth"
+    const val KEY_CELL_INDEX = "cell_index"
+    const val KEY_CHANGE_TYPE = "change_type"
 }

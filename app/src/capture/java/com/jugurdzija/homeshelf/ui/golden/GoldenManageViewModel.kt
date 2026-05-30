@@ -5,12 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -22,6 +21,10 @@ class GoldenManageViewModel @Inject constructor(
     private val goldenStore: GoldenStore
 ) : ViewModel() {
 
+    sealed interface Event {
+        data object NavigateToView : Event
+    }
+
     sealed interface State {
         data object Loading : State
         data object Empty : State
@@ -31,8 +34,8 @@ class GoldenManageViewModel @Inject constructor(
     private val _state = MutableStateFlow<State>(State.Loading)
     val state: StateFlow<State> = _state.asStateFlow()
 
-    private val _navigateToView = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val navigateToView: SharedFlow<Unit> = _navigateToView.asSharedFlow()
+    private val _events = Channel<Event>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
     init { load() }
 
@@ -47,7 +50,7 @@ class GoldenManageViewModel @Inject constructor(
     fun onItemClick(name: String) {
         viewModelScope.launch {
             goldenStore.loadIntoHolder(name)
-            _navigateToView.emit(Unit)
+            _events.send(Event.NavigateToView)
         }
     }
 
