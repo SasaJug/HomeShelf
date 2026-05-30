@@ -8,4 +8,6 @@ object Routes {
     const val DETAIL_BITMAP = "detail/bitmap"
     const val SETTINGS = "settings"
     const val GOLDEN_SAVE = "golden_save"
+    const val GOLDEN_MANAGE = "golden_manage"
+    const val GOLDEN_VIEW = "golden_view"
 }

@@ -44,6 +44,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun GoldenSaveScreen(
     onBack: () -> Unit,
+    readOnly: Boolean = false,
     vm: GoldenSaveViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -54,7 +55,10 @@ fun GoldenSaveScreen(
         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
     }
     var name by remember {
-        mutableStateOf("${holder.referenceLabel ?: "unknown"}_$timestamp")
+        mutableStateOf(
+            if (readOnly) holder.name ?: ""
+            else "${holder.referenceLabel ?: "unknown"}_$timestamp"
+        )
     }
 
     LaunchedEffect(saveState) {
@@ -64,7 +68,7 @@ fun GoldenSaveScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Save Golden Photo") },
+                title = { Text(if (readOnly) "Golden Photo" else "Save Golden Photo") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Discard")
@@ -93,10 +97,11 @@ fun GoldenSaveScreen(
 
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { if (!readOnly) name = it },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                readOnly = readOnly
             )
 
             Spacer(Modifier.height(4.dp))
@@ -123,25 +128,29 @@ fun GoldenSaveScreen(
                 is GoldenSaveViewModel.SaveState.Error -> {
                     Text(s.message, color = MaterialTheme.colorScheme.error)
                 }
+
                 else -> {}
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) {
-                    Text("Discard")
-                }
-                Button(
-                    onClick = { vm.save(context, name.trim()) },
-                    modifier = Modifier.weight(1f),
-                    enabled = saveState !is GoldenSaveViewModel.SaveState.Saving && name.isNotBlank()
+            if (!readOnly) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    if (saveState is GoldenSaveViewModel.SaveState.Saving) {
-                        CircularProgressIndicator()
-                    } else {
-                        Text("Save")
+                    OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) {
+                        Text("Discard")
+                    }
+                    Button(
+                        onClick = { vm.save(context, name.trim()) },
+                        modifier = Modifier.weight(1f),
+                        enabled = saveState !is GoldenSaveViewModel.SaveState.Saving && name.isNotBlank()
+                    ) {
+                        if (saveState is GoldenSaveViewModel.SaveState.Saving) {
+                            CircularProgressIndicator()
+                        } else {
+                            Text("Save")
+                        }
                     }
                 }
             }
@@ -155,7 +164,11 @@ private fun MetaRow(label: String, value: String) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }

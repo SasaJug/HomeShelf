@@ -8,33 +8,31 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import com.jugurdzija.homeshelf.di.DiConstants
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class ReferenceImageStoreImpl @Inject constructor(
-    @Named("storageRoot") private val storageRoot: File
+    @Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
 ) : ReferenceImageStore {
 
-    private val filenamePattern = Regex("""^ref_(\d+)_(.+)$""")
-
-    private fun referencesDir(): File =
-        File(storageRoot, "references").apply { mkdirs() }
-
-    private fun migrateIfNeeded() {
-        val legacy = File(storageRoot, "reference/reference.jpg")
-        if (!legacy.exists()) return
-        val dest = File(referencesDir(), "ref_${System.currentTimeMillis()}_Reference_1.jpg")
-        legacy.copyTo(dest, overwrite = true)
-        legacy.delete()
-        legacy.parentFile?.delete()
+    private companion object {
+        const val DIR_REFERENCES = "references"
+        const val FILE_EXTENSION = "jpg"
+        const val FILENAME_PREFIX = "ref_"
+        const val LABEL_PREFIX = "Reference "
     }
 
+    private val filenamePattern = Regex("""^${FILENAME_PREFIX}(\d+)_(.+)$""")
+
+    private fun referencesDir(): File =
+        File(storageRoot, DIR_REFERENCES).apply { mkdirs() }
+
     override suspend fun loadAll(): List<ReferenceItem> = withContext(Dispatchers.IO) {
-        migrateIfNeeded()
         referencesDir()
-            .listFiles { f -> f.extension == "jpg" && f.nameWithoutExtension.matches(filenamePattern) }
+            .listFiles { f -> f.extension == FILE_EXTENSION && f.nameWithoutExtension.matches(filenamePattern) }
             ?.mapNotNull { file ->
                 val match = filenamePattern.matchEntire(file.nameWithoutExtension) ?: return@mapNotNull null
                 val epoch = match.groupValues[1].toLongOrNull() ?: return@mapNotNull null
@@ -50,12 +48,12 @@ class ReferenceImageStoreImpl @Inject constructor(
     override suspend fun saveReference(bitmap: Bitmap): ReferenceItem = withContext(Dispatchers.IO) {
         val existing = loadAll()
         val maxNum = existing.mapNotNull { item ->
-            item.label.removePrefix("Reference ").toIntOrNull()
+            item.label.removePrefix(LABEL_PREFIX).toIntOrNull()
         }.maxOrNull() ?: 0
-        val label = "Reference ${maxNum + 1}"
+        val label = "$LABEL_PREFIX${maxNum + 1}"
         val slug = label.replace(' ', '_')
         val millis = System.currentTimeMillis()
-        val file = File(referencesDir(), "ref_${millis}_${slug}.jpg")
+        val file = File(referencesDir(), "${FILENAME_PREFIX}${millis}_${slug}.${FILE_EXTENSION}")
         FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
         ReferenceItem(id = file.nameWithoutExtension, label = label, file = file)
     }

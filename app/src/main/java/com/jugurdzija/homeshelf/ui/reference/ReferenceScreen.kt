@@ -38,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.data.ReferenceItem
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,11 +51,36 @@ fun ReferenceScreen(
     onNavigateToCompare: () -> Unit,
     onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToManage: (() -> Unit)? = null,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
 
+    ReferenceContent(
+        state = state,
+        thumbnails = thumbnails,
+        onNavigateToCapture = onNavigateToCapture,
+        onNavigateToCompare = onNavigateToCompare,
+        onNavigateToDetail = onNavigateToDetail,
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToManage = onNavigateToManage,
+        onDelete = vm::onDelete
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReferenceContent(
+    state: ReferenceListUiState,
+    thumbnails: Map<String, Bitmap>,
+    onNavigateToCapture: () -> Unit,
+    onNavigateToCompare: () -> Unit,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToManage: (() -> Unit)?,
+    onDelete: (String) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -119,7 +146,7 @@ fun ReferenceScreen(
                             ReferenceListItem(
                                 item = item,
                                 thumbnail = thumbnails[item.id],
-                                onDelete = { vm.onDelete(item.id) },
+                                onDelete = { onDelete(item.id) },
                                 onClick = { onNavigateToDetail(item.file.absolutePath) }
                             )
                             HorizontalDivider()
@@ -145,6 +172,12 @@ fun ReferenceScreen(
                     enabled = state is ReferenceListUiState.Loaded,
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Compare") }
+                if (onNavigateToManage != null) {
+                    Button(
+                        onClick = onNavigateToManage,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Golden Captures") }
+                }
             }
         }
     }
@@ -199,3 +232,73 @@ private fun ReferenceListItem(
         }
     }
 }
+
+
+@Preview(showBackground = true, name = "Loading")
+@Composable
+private fun ReferenceScreenLoadingPreview() {
+    ReferenceContent(
+        state = ReferenceListUiState.Loading,
+        thumbnails = emptyMap(),
+        onNavigateToCapture = {},
+        onNavigateToCompare = {},
+        onNavigateToDetail = {},
+        onNavigateToSettings = {},
+        onNavigateToManage = null,
+        onDelete = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Empty")
+@Composable
+private fun ReferenceScreenEmptyPreview() {
+    ReferenceContent(
+        state = ReferenceListUiState.Empty,
+        thumbnails = emptyMap(),
+        onNavigateToCapture = {},
+        onNavigateToCompare = {},
+        onNavigateToDetail = {},
+        onNavigateToSettings = {},
+        onNavigateToManage = null,
+        onDelete = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Loaded")
+@Composable
+private fun ReferenceScreenLoadedPreview() {
+    val items = listOf(
+        ReferenceItem(id = "1", label = "Front shelf", file = File("front.jpg")),
+        ReferenceItem(id = "2", label = "Back shelf", file = File("back.jpg")),
+        ReferenceItem(id = "3", label = "Side shelf", file = File("side.jpg")),
+    )
+    ReferenceContent(
+        state = ReferenceListUiState.Loaded(items),
+        thumbnails = emptyMap(),
+        onNavigateToCapture = {},
+        onNavigateToCompare = {},
+        onNavigateToDetail = {},
+        onNavigateToSettings = {},
+        onNavigateToManage = {},
+        onDelete = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Error")
+@Composable
+private fun ReferenceScreenErrorPreview() {
+    val items = listOf(
+        ReferenceItem(id = "1", label = "Front shelf", file = File("front.jpg")),
+    )
+    ReferenceContent(
+        state = ReferenceListUiState.Error("Failed to load thumbnail", items),
+        thumbnails = emptyMap(),
+        onNavigateToCapture = {},
+        onNavigateToCompare = {},
+        onNavigateToDetail = {},
+        onNavigateToSettings = {},
+        onNavigateToManage = null,
+        onDelete = {}
+    )
+}
+

@@ -4,7 +4,10 @@ import android.content.Context
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jugurdzija.homeshelf.data.GoldenConstants
+import com.jugurdzija.homeshelf.di.DiConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Named
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +20,9 @@ import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
-class GoldenSaveViewModel @Inject constructor() : ViewModel() {
+class GoldenSaveViewModel @Inject constructor(
+    @Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
+) : ViewModel() {
 
     sealed interface SaveState {
         data object Idle : SaveState
@@ -38,10 +43,10 @@ class GoldenSaveViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _saveState.value = SaveState.Saving
             try {
-                val dir = File(context.filesDir, "golden/comparisons/$name")
+                val dir = File(storageRoot, "${GoldenConstants.DIR_COMPARISONS}/$name")
                 dir.mkdirs()
 
-                FileOutputStream(File(dir, "photo.jpg")).use { out ->
+                FileOutputStream(File(dir, GoldenConstants.FILE_PHOTO)).use { out ->
                     bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 95, out)
                 }
 
@@ -49,21 +54,21 @@ class GoldenSaveViewModel @Inject constructor() : ViewModel() {
                 holder.allMatchScores?.forEach { (label, score) -> allScores.put(label, score) }
 
                 val meta = JSONObject().apply {
-                    put("timestamp", Instant.now().toString())
-                    put("name", name)
-                    put("reference_label", holder.referenceLabel)
-                    put("similarity_score", holder.similarityScore)
-                    put("similarity_threshold", holder.similarityThreshold)
-                    put("all_match_scores", allScores)
-                    put("frames_analyzed", holder.framesAnalyzed)
-                    put("capture_attempt", holder.captureAttempt)
-                    put("image_width", bitmap.width)
-                    put("image_height", bitmap.height)
-                    put("device_model", "${Build.MANUFACTURER} ${Build.MODEL}")
-                    put("android_api", Build.VERSION.SDK_INT)
+                    put(GoldenConstants.KEY_TIMESTAMP, Instant.now().toString())
+                    put(GoldenConstants.KEY_NAME, name)
+                    put(GoldenConstants.KEY_REFERENCE_LABEL, holder.referenceLabel)
+                    put(GoldenConstants.KEY_SIMILARITY_SCORE, holder.similarityScore)
+                    put(GoldenConstants.KEY_SIMILARITY_THRESHOLD, holder.similarityThreshold)
+                    put(GoldenConstants.KEY_ALL_MATCH_SCORES, allScores)
+                    put(GoldenConstants.KEY_FRAMES_ANALYZED, holder.framesAnalyzed)
+                    put(GoldenConstants.KEY_CAPTURE_ATTEMPT, holder.captureAttempt)
+                    put(GoldenConstants.KEY_IMAGE_WIDTH, bitmap.width)
+                    put(GoldenConstants.KEY_IMAGE_HEIGHT, bitmap.height)
+                    put(GoldenConstants.KEY_DEVICE_MODEL, "${Build.MANUFACTURER} ${Build.MODEL}")
+                    put(GoldenConstants.KEY_ANDROID_API, Build.VERSION.SDK_INT)
                 }
 
-                File(dir, "meta.json").writeText(meta.toString(2))
+                File(dir, GoldenConstants.FILE_META).writeText(meta.toString(2))
                 _saveState.value = SaveState.Saved
             } catch (e: Exception) {
                 _saveState.value = SaveState.Error(e.message ?: "Unknown error")

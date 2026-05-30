@@ -15,7 +15,7 @@ object StorageModule {
 
     @Provides
     @Singleton
-    @Named("storageRoot")
+    @Named(DiConstants.NAMED_STORAGE_ROOT)
     fun provideStorageRoot(): File =
         File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "HomeShelf")
             .apply { mkdirs() }

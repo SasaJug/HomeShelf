@@ -14,6 +14,7 @@ import com.jugurdzija.homeshelf.ui.compare.CompareScreen
 import com.jugurdzija.homeshelf.ui.compare.CompareViewModel
 import com.jugurdzija.homeshelf.ui.detail.ImageDetailScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureHolder
+import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenSaveScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
@@ -36,7 +37,8 @@ fun HomeShelfNavGraph(
                 onNavigateToDetail = { filePath ->
                     navController.navigate("detail/file/${Uri.encode(filePath)}")
                 },
-                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) }
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
+                onNavigateToManage = { navController.navigate(Routes.GOLDEN_MANAGE) }
             )
         }
         composable(Routes.REFERENCE_CAPTURE) { backStackEntry ->
@@ -64,12 +66,12 @@ fun HomeShelfNavGraph(
                 GoldenSaveScreen(
                     onBack = {
                         compareVm.onScanAgain()
-                        navController.popBackStack()
+                        navController.popBackStack(Routes.REFERENCE, inclusive = false)
                     }
                 )
             } else {
                 compareVm.onScanAgain()
-                navController.popBackStack()
+                navController.popBackStack(Routes.REFERENCE, inclusive = false)
             }
         }
         composable(
@@ -87,6 +89,18 @@ fun HomeShelfNavGraph(
             SettingsScreen(
                 onBack = { navController.popBackStack() },
                 onLogout = onLogout
+            )
+        }
+        composable(Routes.GOLDEN_MANAGE) {
+            GoldenManageScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToView = { navController.navigate(Routes.GOLDEN_VIEW) }
+            )
+        }
+        composable(Routes.GOLDEN_VIEW) {
+            GoldenSaveScreen(
+                onBack = { navController.popBackStack() },
+                readOnly = true
             )
         }
     }

@@ -5,13 +5,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import com.jugurdzija.homeshelf.di.DiConstants
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class GridCellStoreImpl @Inject constructor(
-    @Named("storageRoot") private val storageRoot: File
+    @Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
 ) : GridCellStore {
 
     private fun cellsDir(imageFilePath: String): File {

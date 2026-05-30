@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.io.File
+import com.jugurdzija.homeshelf.di.DiConstants
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -16,6 +17,6 @@ object StorageModule {
 
     @Provides
     @Singleton
-    @Named("storageRoot")
+    @Named(DiConstants.NAMED_STORAGE_ROOT)
     fun provideStorageRoot(@ApplicationContext context: Context): File = context.filesDir
 }
