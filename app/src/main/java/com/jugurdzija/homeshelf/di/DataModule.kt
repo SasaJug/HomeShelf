@@ -8,6 +8,8 @@ import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStoreImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
+import com.jugurdzija.homeshelf.usecase.ReferencePipeline
+import com.jugurdzija.homeshelf.usecase.ReferencePipelineImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -29,6 +31,10 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindReferenceDataStore(impl: ReferenceDataStoreImpl): ReferenceDataStore
+
+    @Binds
+    @Singleton
+    abstract fun bindReferencePipeline(impl: ReferencePipelineImpl): ReferencePipeline
 
     @Binds
     @Singleton
