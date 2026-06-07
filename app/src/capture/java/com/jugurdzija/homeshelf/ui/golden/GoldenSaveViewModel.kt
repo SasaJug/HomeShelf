@@ -6,7 +6,7 @@ import com.jugurdzija.homeshelf.data.CaptureData
 import com.jugurdzija.homeshelf.data.ChangeType
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.GuideLineStore
+import com.jugurdzija.homeshelf.data.ReferenceDataStore
 import com.jugurdzija.homeshelf.data.GroundTruthCell
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GoldenSaveViewModel @Inject constructor(
     private val goldenStore: GoldenStore,
-    private val guideLineStore: GuideLineStore
+    private val referenceDataStore: ReferenceDataStore
 ) : ViewModel() {
 
     data class GoldenSaveUiState(
@@ -72,7 +72,7 @@ class GoldenSaveViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            val lines = guideLineStore.load(refPath)
+            val lines = referenceDataStore.load(refPath).guideLines
             _guideLineState.value = if (lines.size >= 4) GuideLineState.Ready(lines)
             else GuideLineState.Unavailable
         }

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.CaptureSettingsStore
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.GuideLineStore
+import com.jugurdzija.homeshelf.data.ReferenceDataStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class CompareViewModel @Inject constructor(
     private val store: ReferenceImageStore,
     private val embedder: EmbedderOwner,
-    private val guideLineStore: GuideLineStore,
+    private val referenceDataStore: ReferenceDataStore,
     private val settingsStore: CaptureSettingsStore,
     private val goldenStore: GoldenStore
 ) : ViewModel() {
@@ -106,7 +106,7 @@ class CompareViewModel @Inject constructor(
     private suspend fun loadGuideLinesCached(filePath: String): List<GuideLine> {
         val cached = cachedGuideLines
         if (cached != null && cached.first == filePath) return cached.second
-        val lines = guideLineStore.load(filePath)
+        val lines = referenceDataStore.load(filePath).guideLines
         cachedGuideLines = filePath to lines
         return lines
     }

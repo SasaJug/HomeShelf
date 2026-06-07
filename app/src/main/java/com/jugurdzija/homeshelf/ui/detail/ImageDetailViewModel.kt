@@ -9,10 +9,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.GridCellEmbeddingStore
 import com.jugurdzija.homeshelf.data.GridCellStore
-import com.jugurdzija.homeshelf.data.GuideLineStore
+import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.data.ReferenceDataStore
+import com.jugurdzija.homeshelf.data.ReferencePhotoData
 import com.jugurdzija.homeshelf.embedding.GridCellEmbedder
 import com.jugurdzija.homeshelf.homography.GridProcessor
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
@@ -25,9 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ImageDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val guideLineStore: GuideLineStore,
+    private val referenceDataStore: ReferenceDataStore,
     private val gridCellStore: GridCellStore,
-    private val gridCellEmbeddingStore: GridCellEmbeddingStore,
     private val gridProcessor: GridProcessor,
     private val gridCellEmbedder: GridCellEmbedder
 ) : ViewModel() {
@@ -43,7 +42,7 @@ class ImageDetailViewModel @Inject constructor(
     init {
         if (filePath.isNotEmpty()) {
             viewModelScope.launch {
-                val loaded = guideLineStore.load(filePath)
+                val loaded = referenceDataStore.load(filePath).guideLines
                 guideLines.addAll(loaded)
                 nextId = (loaded.maxOfOrNull { it.id } ?: -1) + 1
             }
@@ -54,7 +53,6 @@ class ImageDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _processState.value = GridProcessState.Processing
             try {
-                guideLineStore.save(filePath, guideLines.toList())
                 val (hPixels, vPixels) = mapLinesToImageCoords(
                     guideLines.toList(), canvasWidth, canvasHeight, bitmap.width, bitmap.height
                 )
@@ -64,7 +62,15 @@ class ImageDetailViewModel @Inject constructor(
                 } else {
                     gridCellStore.save(filePath, cells)
                     val embeddings = gridCellEmbedder.embed(cells)
-                    gridCellEmbeddingStore.save(filePath, embeddings)
+                    val existing = referenceDataStore.load(filePath)
+                    referenceDataStore.save(
+                        filePath,
+                        ReferencePhotoData(
+                            guideLines = guideLines.toList(),
+                            embeddings = embeddings.mapValues { it.value.toList() },
+                            descriptions = existing.descriptions
+                        )
+                    )
                     _processState.value = GridProcessState.Done(cells.size)
                 }
             } catch (e: Exception) {
@@ -76,5 +82,4 @@ class ImageDetailViewModel @Inject constructor(
     fun resetProcessState() {
         _processState.value = GridProcessState.Idle
     }
-
 }
