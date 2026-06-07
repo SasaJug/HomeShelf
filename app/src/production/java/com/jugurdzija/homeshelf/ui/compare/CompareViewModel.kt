@@ -8,16 +8,14 @@ import com.jugurdzija.homeshelf.data.GuideLineStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
-import com.jugurdzija.homeshelf.homography.HomographyProcessor
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import com.jugurdzija.homeshelf.ui.common.GUIDE_SIMILARITY_THRESHOLD
+import com.jugurdzija.homeshelf.ui.detail.BitmapDetailHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -88,24 +86,15 @@ class CompareViewModel @Inject constructor(
 
     fun onPreviewBitmapCaptured(previewBitmap: Bitmap) {
         val s = _state.value as? CompareUiState.CapturePending ?: return
-        val capturedMatches = s.matches
-        val capturedGuideLines = s.guideLines
-        _state.value = CompareUiState.Captured(previewBitmap, capturedMatches, capturedGuideLines)
-
         val refItem = topReferenceItem ?: return
         val referenceBitmap = referencesWithBitmaps.firstOrNull { it.first.id == refItem.id }?.second ?: return
 
-        viewModelScope.launch {
-            val guideLines = loadGuideLinesCached(refItem.file.absolutePath)
-            val aligned = withContext(Dispatchers.Default) {
-                HomographyProcessor.align(previewBitmap, referenceBitmap)
-            }
-            if (aligned != null) {
-                _state.value = CompareUiState.Aligned(aligned, referenceBitmap, capturedMatches, guideLines, refItem.file.absolutePath)
-            } else {
-                _state.value = CompareUiState.Error("Could not align — try holding the camera steady", capturedMatches, guideLines)
-            }
-        }
+        BitmapDetailHolder.capturedBitmap = previewBitmap
+        BitmapDetailHolder.referenceBitmap = referenceBitmap
+        BitmapDetailHolder.referenceFilePath = refItem.file.absolutePath
+
+        val guideLines = cachedGuideLines?.takeIf { it.first == refItem.file.absolutePath }?.second ?: s.guideLines
+        _state.value = CompareUiState.Aligned(previewBitmap, s.matches, guideLines)
     }
 
     private suspend fun loadGuideLinesCached(filePath: String): List<GuideLine> {

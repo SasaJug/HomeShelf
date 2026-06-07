@@ -37,6 +37,7 @@ class GoldenStoreImpl @Inject constructor(
                 GoldenItem(
                     name = subDir.name,
                     referenceLabel = json.optString(GoldenConstants.KEY_REFERENCE_LABEL, subDir.name),
+                    referenceFilePath = json.optString(GoldenConstants.KEY_REFERENCE_FILE_PATH, ""),
                     timestamp = json.optString(GoldenConstants.KEY_TIMESTAMP, ""),
                     dir = subDir,
                     groundTruth = groundTruth

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -41,7 +40,6 @@ import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.GuideLineOverlay
 import com.jugurdzija.homeshelf.ui.common.MatchesOverlay
-import com.jugurdzija.homeshelf.ui.detail.BitmapDetailHolder
 import org.opencv.android.OpenCVLoader
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,10 +119,10 @@ fun CompareScreen(
                     }
                 }
 
-                is CompareUiState.Streaming, is CompareUiState.Error, is CompareUiState.CapturePending, is CompareUiState.Captured -> {
+                is CompareUiState.Streaming, is CompareUiState.Error, is CompareUiState.CapturePending -> {
                     CameraPermissionGate(onDenied = { vm.onPermissionDenied() }) {
                         CameraPreview(
-                            showPreview = s !is CompareUiState.Captured,
+                            showPreview = true,
                             onFrameReceived = vm::onFrameReceived,
                             captureKey = s as? CompareUiState.CapturePending,
                             onBitmapCaptured = { bitmap ->
@@ -133,48 +131,18 @@ fun CompareScreen(
                             modifier = Modifier.fillMaxSize()
                         )
 
-                        if (s is CompareUiState.Captured) {
-                            Image(
-                                bitmap = s.frameBitmap.asImageBitmap(),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            if (s.guideLines.isNotEmpty()) {
-                                GuideLineOverlay(guideLines = s.guideLines, modifier = Modifier.fillMaxSize())
-                            }
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CircularProgressIndicator(modifier = Modifier.size(40.dp))
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        text = "Aligning…",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-                        } else {
-                            val guideLines = (s as? CompareUiState.Streaming)?.guideLines
-                                ?: (s as? CompareUiState.Error)?.guideLines
-                                ?: (s as? CompareUiState.CapturePending)?.guideLines
-                                ?: emptyList()
+                        val guideLines = (s as? CompareUiState.Streaming)?.guideLines
+                            ?: (s as? CompareUiState.Error)?.guideLines
+                            ?: (s as? CompareUiState.CapturePending)?.guideLines
+                            ?: emptyList()
 
-                            if (guideLines.isNotEmpty()) {
-                                GuideLineOverlay(
-                                    guideLines = guideLines,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
+                        if (guideLines.isNotEmpty()) {
+                            GuideLineOverlay(guideLines = guideLines, modifier = Modifier.fillMaxSize())
                         }
 
                         val matches = (s as? CompareUiState.Streaming)?.matches
                             ?: (s as? CompareUiState.Error)?.matches
                             ?: (s as? CompareUiState.CapturePending)?.matches
-                            ?: (s as? CompareUiState.Captured)?.matches
                             ?: emptyList()
 
                         MatchesOverlay(
@@ -202,7 +170,7 @@ fun CompareScreen(
 
                 is CompareUiState.Aligned -> {
                     Image(
-                        bitmap = s.alignedBitmap.asImageBitmap(),
+                        bitmap = s.capturedBitmap.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -228,12 +196,7 @@ fun CompareScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
-                            onClick = {
-                                BitmapDetailHolder.pending = s.alignedBitmap
-                                BitmapDetailHolder.pendingGuideLines = s.guideLines
-                                BitmapDetailHolder.pendingReferenceFilePath = s.referenceFilePath
-                                onNavigateToDetail()
-                            },
+                            onClick = { onNavigateToDetail() },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("View Result")

@@ -1,16 +1,16 @@
 package com.jugurdzija.homeshelf
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.jugurdzija.homeshelf.ui.common.AuthGate
 import com.jugurdzija.homeshelf.ui.nav.HomeShelfNavGraph
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -22,12 +22,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeShelfNavGraph(
-                        onLogout = {
-                            startActivity(Intent(this, SignInActivity::class.java))
-                            finish()
-                        }
-                    )
+                    AuthGate { onLogout ->
+                        HomeShelfNavGraph(onLogout = onLogout)
+                    }
                 }
             }
         }

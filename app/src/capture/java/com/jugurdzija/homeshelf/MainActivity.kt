@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.jugurdzija.homeshelf.ui.common.AuthGate
 import com.jugurdzija.homeshelf.ui.nav.HomeShelfNavGraph
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,7 +47,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (storagePermissionGranted) {
-                        HomeShelfNavGraph()
+                        AuthGate { onLogout ->
+                            HomeShelfNavGraph(onLogout = onLogout)
+                        }
                     } else {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Button(

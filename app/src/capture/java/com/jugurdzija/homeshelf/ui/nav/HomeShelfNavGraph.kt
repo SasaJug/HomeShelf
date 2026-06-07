@@ -19,9 +19,14 @@ import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceViewModel
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
+import com.jugurdzija.homeshelf.ui.test.TestResultsScreen
+import com.jugurdzija.homeshelf.ui.test.TestRunScreen
+import com.jugurdzija.homeshelf.ui.test.TestSelectScreen
+import com.jugurdzija.homeshelf.ui.test.TestViewModel
 
 @Composable
 fun HomeShelfNavGraph(
+    onLogout: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -36,7 +41,8 @@ fun HomeShelfNavGraph(
                     navController.navigate("detail/file/${Uri.encode(filePath)}")
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onNavigateToManage = { navController.navigate(Routes.GOLDEN_MANAGE) }
+                onNavigateToManage = { navController.navigate(Routes.GOLDEN_MANAGE) },
+                onNavigateToTest = { navController.navigate(Routes.TEST_SELECT) }
             )
         }
         composable(Routes.REFERENCE_CAPTURE) { backStackEntry ->
@@ -81,6 +87,7 @@ fun HomeShelfNavGraph(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
+                onLogout = onLogout
             )
         }
         composable(Routes.GOLDEN_MANAGE) {
@@ -93,6 +100,34 @@ fun HomeShelfNavGraph(
             GoldenSaveScreen(
                 onBack = { navController.popBackStack() },
                 readOnly = true
+            )
+        }
+        composable(Routes.TEST_SELECT) {
+            val vm: TestViewModel = hiltViewModel()
+            TestSelectScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToRun = { navController.navigate(Routes.TEST_RUN) },
+                vm = vm
+            )
+        }
+        composable(Routes.TEST_RUN) { backStackEntry ->
+            val selectEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Routes.TEST_SELECT)
+            }
+            val vm: TestViewModel = hiltViewModel(selectEntry)
+            TestRunScreen(
+                onNavigateToResults = { navController.navigate(Routes.TEST_RESULTS) },
+                vm = vm
+            )
+        }
+        composable(Routes.TEST_RESULTS) { backStackEntry ->
+            val selectEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Routes.TEST_SELECT)
+            }
+            val vm: TestViewModel = hiltViewModel(selectEntry)
+            TestResultsScreen(
+                onBack = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
+                vm = vm
             )
         }
     }

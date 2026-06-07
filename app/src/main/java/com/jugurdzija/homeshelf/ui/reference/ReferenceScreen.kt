@@ -52,6 +52,7 @@ fun ReferenceScreen(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToManage: (() -> Unit)? = null,
+    onNavigateToTest: (() -> Unit)? = null,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -65,6 +66,7 @@ fun ReferenceScreen(
         onNavigateToDetail = onNavigateToDetail,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToManage = onNavigateToManage,
+        onNavigateToTest = onNavigateToTest,
         onDelete = vm::onDelete
     )
 }
@@ -79,6 +81,7 @@ private fun ReferenceContent(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToManage: (() -> Unit)?,
+    onNavigateToTest: (() -> Unit)?,
     onDelete: (String) -> Unit
 ) {
     Scaffold(
@@ -178,6 +181,12 @@ private fun ReferenceContent(
                         modifier = Modifier.fillMaxWidth()
                     ) { Text("Golden Captures") }
                 }
+                if (onNavigateToTest != null) {
+                    Button(
+                        onClick = onNavigateToTest,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Run Tests") }
+                }
             }
         }
     }
@@ -245,6 +254,7 @@ private fun ReferenceScreenLoadingPreview() {
         onNavigateToDetail = {},
         onNavigateToSettings = {},
         onNavigateToManage = null,
+        onNavigateToTest = null,
         onDelete = {}
     )
 }
@@ -260,6 +270,7 @@ private fun ReferenceScreenEmptyPreview() {
         onNavigateToDetail = {},
         onNavigateToSettings = {},
         onNavigateToManage = null,
+        onNavigateToTest = null,
         onDelete = {}
     )
 }
@@ -280,6 +291,7 @@ private fun ReferenceScreenLoadedPreview() {
         onNavigateToDetail = {},
         onNavigateToSettings = {},
         onNavigateToManage = {},
+        onNavigateToTest = null,
         onDelete = {}
     )
 }
@@ -298,6 +310,7 @@ private fun ReferenceScreenErrorPreview() {
         onNavigateToDetail = {},
         onNavigateToSettings = {},
         onNavigateToManage = null,
+        onNavigateToTest = null,
         onDelete = {}
     )
 }

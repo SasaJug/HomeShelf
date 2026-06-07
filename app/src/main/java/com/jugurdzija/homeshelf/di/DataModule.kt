@@ -8,6 +8,8 @@ import com.jugurdzija.homeshelf.data.GuideLineStore
 import com.jugurdzija.homeshelf.data.GuideLineStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStoreImpl
+import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
+import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +35,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindGridCellEmbeddingStore(impl: GridCellEmbeddingStoreImpl): GridCellEmbeddingStore
+
+    @Binds
+    @Singleton
+    abstract fun bindComparisonPipeline(impl: ComparisonPipelineImpl): ComparisonPipeline
 }

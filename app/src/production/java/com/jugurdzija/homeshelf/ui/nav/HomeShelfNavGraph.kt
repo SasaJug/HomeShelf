@@ -72,7 +72,7 @@ fun HomeShelfNavGraph(
             )
         }
         composable(Routes.DETAIL_BITMAP) {
-            if (BitmapDetailHolder.pending != null) {
+            if (BitmapDetailHolder.capturedBitmap != null) {
                 AlignedDetailScreen(onBack = { navController.popBackStack() })
             } else {
                 navController.popBackStack()

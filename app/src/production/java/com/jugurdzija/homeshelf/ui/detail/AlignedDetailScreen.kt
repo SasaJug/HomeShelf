@@ -48,19 +48,19 @@ private val SimilarityRed = Color(0xFFE53935)
 @Composable
 fun AlignedDetailScreen(onBack: () -> Unit) {
     val vm: AlignedDetailViewModel = hiltViewModel()
-    val bitmap = BitmapDetailHolder.pending ?: run { onBack(); return }
-    val guideLines = BitmapDetailHolder.pendingGuideLines
+    val capturedBitmap = BitmapDetailHolder.capturedBitmap ?: run { onBack(); return }
     val state by vm.state.collectAsState()
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
-    LaunchedEffect(canvasSize) {
-        if (canvasSize != IntSize.Zero) {
-            vm.analyzeGrid(canvasSize.width, canvasSize.height, bitmap, guideLines)
-        }
+    LaunchedEffect(Unit) {
+        vm.analyze()
     }
 
-    val hLines = remember(guideLines) { guideLines.filter { it.isHorizontal }.sortedBy { it.position } }
-    val vLines = remember(guideLines) { guideLines.filter { !it.isHorizontal }.sortedBy { it.position } }
+    val displayBitmap = if (state is AlignedDetailState.Done) {
+        (state as AlignedDetailState.Done).alignedBitmap
+    } else {
+        capturedBitmap
+    }
 
     Scaffold(
         topBar = {
@@ -80,40 +80,53 @@ fun AlignedDetailScreen(onBack: () -> Unit) {
                 .padding(padding)
         ) {
             Image(
-                bitmap = bitmap.asImageBitmap(),
+                bitmap = displayBitmap.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { canvasSize = it },
                 contentScale = ContentScale.Crop
             )
 
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onSizeChanged { canvasSize = it }
-            ) {
-                val stroke = 2.dp.toPx()
-                guideLines.forEach { line ->
-                    if (line.isHorizontal) {
-                        val y = line.position * size.height
-                        drawLine(Color.Yellow, Offset(0f, y), Offset(size.width, y), stroke)
-                    } else {
-                        val x = line.position * size.width
-                        drawLine(Color.Yellow, Offset(x, 0f), Offset(x, size.height), stroke)
+            if (state is AlignedDetailState.Done) {
+                val done = state as AlignedDetailState.Done
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val stroke = 2.dp.toPx()
+                    done.guideLines.forEach { line ->
+                        if (line.isHorizontal) {
+                            val y = line.position * size.height
+                            drawLine(Color.Yellow, Offset(0f, y), Offset(size.width, y), stroke)
+                        } else {
+                            val x = line.position * size.width
+                            drawLine(Color.Yellow, Offset(x, 0f), Offset(x, size.height), stroke)
+                        }
                     }
                 }
+                val hLines = remember(done.guideLines) { done.guideLines.filter { it.isHorizontal }.sortedBy { it.position } }
+                val vLines = remember(done.guideLines) { done.guideLines.filter { !it.isHorizontal }.sortedBy { it.position } }
+                SimilarityOverlay(
+                    similarities = done.similarities,
+                    hLines = hLines,
+                    vLines = vLines,
+                    canvasSize = canvasSize,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
-            when (val s = state) {
+            when (state) {
                 is AlignedDetailState.Processing -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                is AlignedDetailState.Done -> {
-                    SimilarityOverlay(
-                        similarities = s.similarities,
-                        hLines = hLines,
-                        vLines = vLines,
-                        canvasSize = canvasSize,
-                        modifier = Modifier.fillMaxSize()
+                is AlignedDetailState.AlignmentFailed -> {
+                    Text(
+                        text = "Alignment failed. Try holding the camera steady.",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                            .padding(12.dp),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
                 is AlignedDetailState.NoReference -> {
@@ -140,7 +153,7 @@ fun AlignedDetailScreen(onBack: () -> Unit) {
                 }
                 is AlignedDetailState.Error -> {
                     Text(
-                        text = s.message,
+                        text = (state as AlignedDetailState.Error).message,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
@@ -150,7 +163,7 @@ fun AlignedDetailScreen(onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                is AlignedDetailState.Idle -> {}
+                else -> {}
             }
         }
     }
