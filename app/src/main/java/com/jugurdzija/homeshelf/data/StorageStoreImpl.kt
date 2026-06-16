@@ -118,4 +118,14 @@ class StorageStoreImpl @Inject constructor(
             writeMeta(meta.copy(updatedAt = System.currentTimeMillis()))
         }
     }
+
+    override suspend fun getLatestPhotoFile(id: String): File? = withContext(Dispatchers.IO) {
+        val file = File(latestDir(id), FILE_PHOTO)
+        if (file.exists()) file else null
+    }
+
+    override suspend fun delete(id: String) = withContext(Dispatchers.IO) {
+        storageDir(id).deleteRecursively()
+        Unit
+    }
 }

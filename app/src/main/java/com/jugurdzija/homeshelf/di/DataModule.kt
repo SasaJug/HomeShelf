@@ -2,6 +2,8 @@ package com.jugurdzija.homeshelf.di
 
 import com.jugurdzija.homeshelf.data.GridCellStore
 import com.jugurdzija.homeshelf.data.GridCellStoreImpl
+import com.jugurdzija.homeshelf.data.PendingCaptureStore
+import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceDataStore
 import com.jugurdzija.homeshelf.data.ReferenceDataStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
@@ -51,4 +53,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindStorageSavePipeline(impl: StorageSavePipelineImpl): StorageSavePipeline
+
+    @Binds
+    @Singleton
+    abstract fun bindPendingCaptureStore(impl: PendingCaptureStoreImpl): PendingCaptureStore
 }

@@ -35,8 +35,6 @@ import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.GuideLineOverlay
 import com.jugurdzija.homeshelf.ui.common.MatchesOverlay
-import org.opencv.android.OpenCVLoader
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompareScreen(
@@ -46,10 +44,6 @@ fun CompareScreen(
     val vm: CompareViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        OpenCVLoader.initLocal()
-    }
 
     LaunchedEffect(vm.events) {
         vm.events.collect { event ->

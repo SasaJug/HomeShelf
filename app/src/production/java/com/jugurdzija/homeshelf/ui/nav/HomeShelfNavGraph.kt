@@ -14,9 +14,11 @@ import com.jugurdzija.homeshelf.ui.compare.CompareScreen
 import com.jugurdzija.homeshelf.ui.detail.AlignedDetailScreen
 import com.jugurdzija.homeshelf.ui.detail.BitmapDetailHolder
 import com.jugurdzija.homeshelf.ui.detail.ImageDetailScreen
+import com.jugurdzija.homeshelf.ui.edit.EditScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceViewModel
+import com.jugurdzija.homeshelf.ui.scan.ScanScreen
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
 
 @Composable
@@ -30,12 +32,30 @@ fun HomeShelfNavGraph(
     ) {
         composable(Routes.REFERENCE) {
             ReferenceScreen(
-                onNavigateToCapture = { navController.navigate(Routes.REFERENCE_CAPTURE) },
-                onNavigateToCompare = { navController.navigate(Routes.COMPARE) },
-                onNavigateToDetail = { filePath ->
-                    navController.navigate("detail/file/${Uri.encode(filePath)}")
+                onNavigateToEdit = { storageId ->
+                    navController.navigate("edit?storageId=$storageId")
                 },
-                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) }
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
+                onNavigateToScan = { navController.navigate(Routes.SCAN) }
+            )
+        }
+        composable(Routes.SCAN) {
+            ScanScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToEdit = { storageId ->
+                    navController.navigate(if (storageId != null) "edit?storageId=$storageId" else "edit")
+                }
+            )
+        }
+        composable(
+            route = Routes.EDIT,
+            arguments = listOf(navArgument("storageId") { type = NavType.StringType; nullable = true; defaultValue = null })
+        ) { backStackEntry ->
+            val storageId = backStackEntry.arguments?.getString("storageId")
+            EditScreen(
+                storageId = storageId,
+                onSaved = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
+                onDiscarded = { navController.popBackStack() }
             )
         }
         composable(Routes.REFERENCE_CAPTURE) { backStackEntry ->
