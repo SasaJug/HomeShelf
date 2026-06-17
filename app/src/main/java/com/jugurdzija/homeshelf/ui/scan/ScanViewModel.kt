@@ -9,7 +9,6 @@ import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.data.StorageItem
 import com.jugurdzija.homeshelf.data.StorageStore
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
-import com.jugurdzija.homeshelf.homography.HomographyProcessor
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,6 +21,11 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
+sealed interface ScanNavEvent {
+    data class ToReview(val storageId: String) : ScanNavEvent
+    data class ToEdit(val storageId: String?) : ScanNavEvent
+}
+
 @HiltViewModel
 class ScanViewModel @Inject constructor(
     private val storageStore: StorageStore,
@@ -29,13 +33,11 @@ class ScanViewModel @Inject constructor(
     private val pendingCaptureStore: PendingCaptureStore
 ) : ViewModel() {
 
-    data class EditTarget(val storageId: String?)
-
     private val _state = MutableStateFlow<ScanUiState>(ScanUiState.Loading)
     val state: StateFlow<ScanUiState> = _state.asStateFlow()
 
-    private val _navigateToEdit = MutableSharedFlow<EditTarget>(extraBufferCapacity = 1)
-    val navigateToEdit: SharedFlow<EditTarget> = _navigateToEdit
+    private val _navEvent = MutableSharedFlow<ScanNavEvent>(extraBufferCapacity = 1)
+    val navEvent: SharedFlow<ScanNavEvent> = _navEvent
 
     private var storagesWithBitmaps: List<Pair<StorageItem, Bitmap>> = emptyList()
     private var referenceItems: List<Pair<ReferenceItem, Bitmap>> = emptyList()
@@ -100,26 +102,13 @@ class ScanViewModel @Inject constructor(
     }
 
     fun onCaptureBitmap(bitmap: Bitmap) {
-        val s = _state.value
-        val detected = (s as? ScanUiState.Streaming)?.detected
-        val guideLines = (s as? ScanUiState.Streaming)?.guideLines ?: emptyList()
+        val detected = (_state.value as? ScanUiState.Streaming)?.detected
         viewModelScope.launch {
+            pendingCaptureStore.save(bitmap)
             if (detected != null) {
-                val referenceBitmap = storagesWithBitmaps.first { it.first.id == detected.id }.second
-                val aligned = HomographyProcessor.align(bitmap, referenceBitmap)
-                if (aligned == null) {
-                    _state.value = ScanUiState.Error(
-                        "Alignment failed — try capturing again",
-                        detected,
-                        guideLines
-                    )
-                    return@launch
-                }
-                pendingCaptureStore.save(aligned)
-                _navigateToEdit.emit(EditTarget(detected.id))
+                _navEvent.emit(ScanNavEvent.ToReview(detected.id))
             } else {
-                pendingCaptureStore.save(bitmap)
-                _navigateToEdit.emit(EditTarget(null))
+                _navEvent.emit(ScanNavEvent.ToEdit(null))
             }
         }
     }

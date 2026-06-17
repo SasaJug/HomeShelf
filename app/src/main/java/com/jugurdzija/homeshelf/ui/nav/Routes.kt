@@ -5,6 +5,7 @@ object Routes {
     const val REFERENCE_CAPTURE = "reference_capture"
     const val COMPARE = "compare"
     const val SCAN = "scan"
+    const val REVIEW = "review/{storageId}"
     const val EDIT = "edit?storageId={storageId}"
     const val DETAIL_FILE = "detail/file/{filePath}"
     const val DETAIL_BITMAP = "detail/bitmap"

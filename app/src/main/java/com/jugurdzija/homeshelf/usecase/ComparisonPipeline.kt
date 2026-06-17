@@ -16,9 +16,5 @@ sealed interface ComparisonResult {
 }
 
 interface ComparisonPipeline {
-    suspend fun run(
-        capturedBitmap: Bitmap,
-        referenceBitmap: Bitmap,
-        referenceFilePath: String
-    ): ComparisonResult
+    suspend fun run(capturedBitmap: Bitmap, storageId: String): ComparisonResult
 }

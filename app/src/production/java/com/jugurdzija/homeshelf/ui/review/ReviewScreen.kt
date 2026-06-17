@@ -1,4 +1,4 @@
-package com.jugurdzija.homeshelf.ui.detail
+package com.jugurdzija.homeshelf.ui.review
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -16,7 +16,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +42,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.usecase.StorageSaveResult
 
 private val SimilarityGreen = Color(0xFF4CAF50)
 private val SimilarityYellow = Color(0xFFFFEB3B)
@@ -46,29 +50,53 @@ private val SimilarityRed = Color(0xFFE53935)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlignedDetailScreen(onBack: () -> Unit) {
-    val vm: AlignedDetailViewModel = hiltViewModel()
-    val capturedBitmap = BitmapDetailHolder.capturedBitmap ?: run { onBack(); return }
+fun ReviewScreen(
+    onToReference: () -> Unit,
+    onToEdit: (String) -> Unit,
+    vm: ReviewViewModel = hiltViewModel()
+) {
     val state by vm.state.collectAsState()
+    val saveState by vm.saveState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
-    LaunchedEffect(Unit) {
-        vm.analyze()
+    LaunchedEffect(vm.navEvent) {
+        vm.navEvent.collect { event ->
+            when (event) {
+                ReviewNavEvent.ToReference -> onToReference()
+                is ReviewNavEvent.ToEdit -> onToEdit(event.storageId)
+            }
+        }
     }
 
-    val displayBitmap = if (state is AlignedDetailState.Done) {
-        (state as AlignedDetailState.Done).alignedBitmap
-    } else {
-        capturedBitmap
+    LaunchedEffect(saveState) {
+        val result = saveState
+        if (result is StorageSaveResult.Error) {
+            snackbarHostState.showSnackbar(result.message)
+            vm.resetSaveState()
+        }
+    }
+
+    val topBarTitle = when (val s = state) {
+        is ReviewUiState.Done -> s.storageName
+        is ReviewUiState.CompareError -> s.storageName
+        ReviewUiState.Loading -> "Analyzing…"
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Analysis") },
+                title = { Text(topBarTitle) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = vm::discard) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Discard")
+                    }
+                },
+                actions = {
+                    if (state is ReviewUiState.Done) {
+                        TextButton(onClick = vm::navigateToEdit) { Text("Edit") }
+                        TextButton(onClick = vm::save) { Text("Save") }
                     }
                 }
             )
@@ -79,47 +107,48 @@ fun AlignedDetailScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Image(
-                bitmap = displayBitmap.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onSizeChanged { canvasSize = it },
-                contentScale = ContentScale.Crop
-            )
-
-            if (state is AlignedDetailState.Done) {
-                val done = state as AlignedDetailState.Done
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val stroke = 2.dp.toPx()
-                    done.guideLines.forEach { line ->
-                        if (line.isHorizontal) {
-                            val y = line.position * size.height
-                            drawLine(Color.Yellow, Offset(0f, y), Offset(size.width, y), stroke)
-                        } else {
-                            val x = line.position * size.width
-                            drawLine(Color.Yellow, Offset(x, 0f), Offset(x, size.height), stroke)
-                        }
-                    }
-                }
-                val hLines = remember(done.guideLines) { done.guideLines.filter { it.isHorizontal }.sortedBy { it.position } }
-                val vLines = remember(done.guideLines) { done.guideLines.filter { !it.isHorizontal }.sortedBy { it.position } }
-                SimilarityOverlay(
-                    similarities = done.similarities,
-                    hLines = hLines,
-                    vLines = vLines,
-                    canvasSize = canvasSize,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            when (state) {
-                is AlignedDetailState.Processing -> {
+            when (val s = state) {
+                ReviewUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                is AlignedDetailState.AlignmentFailed -> {
+                is ReviewUiState.Done -> {
+                    Image(
+                        bitmap = s.alignedBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onSizeChanged { canvasSize = it },
+                        contentScale = ContentScale.Fit
+                    )
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val stroke = 2.dp.toPx()
+                        s.guideLines.forEach { line ->
+                            if (line.isHorizontal) {
+                                val y = line.position * size.height
+                                drawLine(Color.Yellow, Offset(0f, y), Offset(size.width, y), stroke)
+                            } else {
+                                val x = line.position * size.width
+                                drawLine(Color.Yellow, Offset(x, 0f), Offset(x, size.height), stroke)
+                            }
+                        }
+                    }
+                    val hLines = remember(s.guideLines) {
+                        s.guideLines.filter { it.isHorizontal }.sortedBy { it.position }
+                    }
+                    val vLines = remember(s.guideLines) {
+                        s.guideLines.filter { !it.isHorizontal }.sortedBy { it.position }
+                    }
+                    SimilarityOverlay(
+                        similarities = s.similarities,
+                        hLines = hLines,
+                        vLines = vLines,
+                        canvasSize = canvasSize,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                is ReviewUiState.CompareError -> {
                     Text(
-                        text = "Alignment failed. Try holding the camera steady.",
+                        text = s.message,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
@@ -129,41 +158,6 @@ fun AlignedDetailScreen(onBack: () -> Unit) {
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                is AlignedDetailState.NoReference -> {
-                    Text(
-                        text = "No reference embeddings found.\nProcess the reference image grid first.",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-                            .padding(12.dp),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                is AlignedDetailState.NoCells -> {
-                    Text(
-                        text = "No grid cells found.",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-                            .padding(12.dp),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                is AlignedDetailState.Error -> {
-                    Text(
-                        text = (state as AlignedDetailState.Error).message,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-                            .padding(12.dp),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                else -> {}
             }
         }
     }

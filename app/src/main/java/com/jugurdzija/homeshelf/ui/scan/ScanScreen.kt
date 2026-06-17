@@ -42,6 +42,7 @@ import com.jugurdzija.homeshelf.ui.common.rememberDeviceOrientation
 @Composable
 fun ScanScreen(
     onBack: () -> Unit,
+    onNavigateToReview: (String) -> Unit,
     onNavigateToEdit: (String?) -> Unit,
     vm: ScanViewModel = hiltViewModel()
 ) {
@@ -51,11 +52,14 @@ fun ScanScreen(
     var isCapturing by remember { mutableStateOf(false) }
     var captureTriggered by remember { mutableStateOf(false) }
 
-    LaunchedEffect(vm.navigateToEdit) {
-        vm.navigateToEdit.collect { target ->
+    LaunchedEffect(vm.navEvent) {
+        vm.navEvent.collect { event ->
             isCapturing = false
             captureTriggered = false
-            onNavigateToEdit(target.storageId)
+            when (event) {
+                is ScanNavEvent.ToReview -> onNavigateToReview(event.storageId)
+                is ScanNavEvent.ToEdit -> onNavigateToEdit(event.storageId)
+            }
         }
     }
 
