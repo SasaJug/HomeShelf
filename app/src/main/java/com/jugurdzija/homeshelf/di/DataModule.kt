@@ -2,14 +2,20 @@ package com.jugurdzija.homeshelf.di
 
 import com.jugurdzija.homeshelf.data.GridCellStore
 import com.jugurdzija.homeshelf.data.GridCellStoreImpl
+import com.jugurdzija.homeshelf.data.PendingCaptureStore
+import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceDataStore
 import com.jugurdzija.homeshelf.data.ReferenceDataStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStoreImpl
+import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.data.StorageStoreImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
 import com.jugurdzija.homeshelf.usecase.ReferencePipeline
 import com.jugurdzija.homeshelf.usecase.ReferencePipelineImpl
+import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
+import com.jugurdzija.homeshelf.usecase.StorageSavePipelineImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -39,4 +45,16 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindComparisonPipeline(impl: ComparisonPipelineImpl): ComparisonPipeline
+
+    @Binds
+    @Singleton
+    abstract fun bindStorageStore(impl: StorageStoreImpl): StorageStore
+
+    @Binds
+    @Singleton
+    abstract fun bindStorageSavePipeline(impl: StorageSavePipelineImpl): StorageSavePipeline
+
+    @Binds
+    @Singleton
+    abstract fun bindPendingCaptureStore(impl: PendingCaptureStoreImpl): PendingCaptureStore
 }

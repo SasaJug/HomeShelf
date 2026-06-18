@@ -3,8 +3,8 @@ package com.jugurdzija.homeshelf.ui.reference
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.ReferenceImageStore
-import com.jugurdzija.homeshelf.data.ReferenceItem
+import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.data.StorageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReferenceViewModel @Inject constructor(
-    private val store: ReferenceImageStore
+    private val store: StorageStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ReferenceListUiState>(ReferenceListUiState.Loading)
@@ -35,21 +35,16 @@ class ReferenceViewModel @Inject constructor(
         }
     }
 
-    private fun loadThumbnails(items: List<ReferenceItem>) {
+    private fun loadThumbnails(items: List<StorageItem>) {
         viewModelScope.launch {
             items.filter { !_thumbnails.value.containsKey(it.id) }.forEach { item ->
-                val bmp = store.decodeBitmap(item, sampleSize = 4)
+                val bmp = store.decodeLatestBitmap(item.id, sampleSize = 4)
                 if (bmp != null) _thumbnails.update { it + (item.id to bmp) }
             }
         }
     }
 
-    fun onCaptureBitmap(bitmap: Bitmap) {
-        viewModelScope.launch {
-            store.saveReference(bitmap)
-            reload()
-        }
-    }
+    fun onCaptureBitmap(bitmap: Bitmap) {}
 
     fun onDelete(id: String) {
         viewModelScope.launch {

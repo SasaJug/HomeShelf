@@ -38,56 +38,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.jugurdzija.homeshelf.data.ReferenceItem
-import java.io.File
+import com.jugurdzija.homeshelf.data.StorageItem
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReferenceScreen(
-    onNavigateToCapture: () -> Unit,
-    onNavigateToCompare: () -> Unit,
-    onNavigateToDetail: (String) -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToManage: (() -> Unit)? = null,
-    onNavigateToTest: (() -> Unit)? = null,
+    onNavigateToScan: () -> Unit,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
 
-    ReferenceContent(
-        state = state,
-        thumbnails = thumbnails,
-        onNavigateToCapture = onNavigateToCapture,
-        onNavigateToCompare = onNavigateToCompare,
-        onNavigateToDetail = onNavigateToDetail,
-        onNavigateToSettings = onNavigateToSettings,
-        onNavigateToManage = onNavigateToManage,
-        onNavigateToTest = onNavigateToTest,
-        onDelete = vm::onDelete
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReferenceContent(
-    state: ReferenceListUiState,
-    thumbnails: Map<String, Bitmap>,
-    onNavigateToCapture: () -> Unit,
-    onNavigateToCompare: () -> Unit,
-    onNavigateToDetail: (String) -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToManage: (() -> Unit)?,
-    onNavigateToTest: (() -> Unit)?,
-    onDelete: (String) -> Unit
-) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("References") },
+                title = { Text("Storages") },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
@@ -112,13 +84,13 @@ private fun ReferenceContent(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "No reference images yet.",
+                            "No storages yet.",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "Tap Add Reference to capture one.",
+                            "Tap Scan Storage to add one.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -143,14 +115,14 @@ private fun ReferenceContent(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 148.dp)
+                        contentPadding = PaddingValues(bottom = 88.dp)
                     ) {
                         items(items, key = { it.id }) { item ->
-                            ReferenceListItem(
+                            StorageListItem(
                                 item = item,
                                 thumbnail = thumbnails[item.id],
-                                onDelete = { onDelete(item.id) },
-                                onClick = { onNavigateToDetail(item.file.absolutePath) }
+                                onDelete = { vm.onDelete(item.id) },
+                                onClick = { onNavigateToEdit(item.id) }
                             )
                             HorizontalDivider()
                         }
@@ -158,47 +130,30 @@ private fun ReferenceContent(
                 }
             }
 
-            Column(
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Button(
-                    onClick = onNavigateToCapture,
+                    onClick = onNavigateToScan,
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("Add Reference") }
-                Button(
-                    onClick = onNavigateToCompare,
-                    enabled = state is ReferenceListUiState.Loaded,
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Compare") }
-                if (onNavigateToManage != null) {
-                    Button(
-                        onClick = onNavigateToManage,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Golden Captures") }
-                }
-                if (onNavigateToTest != null) {
-                    Button(
-                        onClick = onNavigateToTest,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Run Tests") }
-                }
+                ) { Text("Scan Storage") }
             }
         }
     }
 }
 
 @Composable
-private fun ReferenceListItem(
-    item: ReferenceItem,
+private fun StorageListItem(
+    item: StorageItem,
     thumbnail: Bitmap?,
     onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
+    val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,7 +171,7 @@ private fun ReferenceListItem(
             if (thumbnail != null) {
                 Image(
                     bitmap = thumbnail.asImageBitmap(),
-                    contentDescription = item.label,
+                    contentDescription = item.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -227,91 +182,23 @@ private fun ReferenceListItem(
                 )
             }
         }
-        Text(
-            text = item.label,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = dateFormat.format(Date(item.updatedAt)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete ${item.label}",
+                contentDescription = "Delete ${item.name}",
                 tint = MaterialTheme.colorScheme.error
             )
         }
     }
 }
-
-
-@Preview(showBackground = true, name = "Loading")
-@Composable
-private fun ReferenceScreenLoadingPreview() {
-    ReferenceContent(
-        state = ReferenceListUiState.Loading,
-        thumbnails = emptyMap(),
-        onNavigateToCapture = {},
-        onNavigateToCompare = {},
-        onNavigateToDetail = {},
-        onNavigateToSettings = {},
-        onNavigateToManage = null,
-        onNavigateToTest = null,
-        onDelete = {}
-    )
-}
-
-@Preview(showBackground = true, name = "Empty")
-@Composable
-private fun ReferenceScreenEmptyPreview() {
-    ReferenceContent(
-        state = ReferenceListUiState.Empty,
-        thumbnails = emptyMap(),
-        onNavigateToCapture = {},
-        onNavigateToCompare = {},
-        onNavigateToDetail = {},
-        onNavigateToSettings = {},
-        onNavigateToManage = null,
-        onNavigateToTest = null,
-        onDelete = {}
-    )
-}
-
-@Preview(showBackground = true, name = "Loaded")
-@Composable
-private fun ReferenceScreenLoadedPreview() {
-    val items = listOf(
-        ReferenceItem(id = "1", label = "Front shelf", file = File("front.jpg")),
-        ReferenceItem(id = "2", label = "Back shelf", file = File("back.jpg")),
-        ReferenceItem(id = "3", label = "Side shelf", file = File("side.jpg")),
-    )
-    ReferenceContent(
-        state = ReferenceListUiState.Loaded(items),
-        thumbnails = emptyMap(),
-        onNavigateToCapture = {},
-        onNavigateToCompare = {},
-        onNavigateToDetail = {},
-        onNavigateToSettings = {},
-        onNavigateToManage = {},
-        onNavigateToTest = null,
-        onDelete = {}
-    )
-}
-
-@Preview(showBackground = true, name = "Error")
-@Composable
-private fun ReferenceScreenErrorPreview() {
-    val items = listOf(
-        ReferenceItem(id = "1", label = "Front shelf", file = File("front.jpg")),
-    )
-    ReferenceContent(
-        state = ReferenceListUiState.Error("Failed to load thumbnail", items),
-        thumbnails = emptyMap(),
-        onNavigateToCapture = {},
-        onNavigateToCompare = {},
-        onNavigateToDetail = {},
-        onNavigateToSettings = {},
-        onNavigateToManage = null,
-        onNavigateToTest = null,
-        onDelete = {}
-    )
-}
-

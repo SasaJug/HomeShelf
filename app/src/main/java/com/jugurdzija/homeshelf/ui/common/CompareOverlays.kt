@@ -91,6 +91,38 @@ fun MatchesOverlayLoadedPreview() {
 }
 
 @Composable
+fun DetectionBadge(
+    detectedName: String?,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+        tonalElevation = 4.dp
+    ) {
+        Text(
+            text = if (detectedName != null) "Detected: $detectedName" else "New storage",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DetectionBadgeDetectedPreview() {
+    DetectionBadge(detectedName = "Pantry Shelf")
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DetectionBadgeNewPreview() {
+    DetectionBadge(detectedName = null)
+}
+
+@Composable
 fun similarityColor(similarity: Double) = when {
     similarity >= 0.9 -> MaterialTheme.colorScheme.primary
     similarity >= 0.7 -> MaterialTheme.colorScheme.tertiary
