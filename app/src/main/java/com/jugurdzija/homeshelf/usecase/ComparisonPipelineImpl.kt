@@ -36,6 +36,7 @@ class ComparisonPipelineImpl @Inject constructor(
         )
         val cells = gridProcessor.extract(aligned, hPixels, vPixels)
         if (cells.isEmpty()) return ComparisonResult.NoCells
+        val referenceCells = gridProcessor.extract(referenceBitmap, hPixels, vPixels)
 
         val refEmbeddings = data.embeddings.mapValues { it.value.toFloatArray() }
         val embeddings = gridCellEmbedder.embed(cells)
@@ -43,6 +44,6 @@ class ComparisonPipelineImpl @Inject constructor(
             val refVec = refEmbeddings[name]
             if (refVec != null) cosineSimilarity(vec, refVec) else 0f
         }
-        return ComparisonResult.Success(aligned, data.guideLines, similarities)
+        return ComparisonResult.Success(aligned, data.guideLines, similarities, referenceCells, cells)
     }
 }

@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.llm.CellPair
+import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
@@ -29,7 +31,8 @@ class ReviewViewModel @Inject constructor(
     private val pendingCaptureStore: PendingCaptureStore,
     private val storageStore: StorageStore,
     private val comparisonPipeline: ComparisonPipeline,
-    private val storageSavePipeline: StorageSavePipeline
+    private val storageSavePipeline: StorageSavePipeline,
+    private val shelfDiffAnalyzer: ShelfDiffAnalyzer
 ) : ViewModel() {
 
     val storageId: String = checkNotNull(savedStateHandle["storageId"])
@@ -39,6 +42,9 @@ class ReviewViewModel @Inject constructor(
 
     private val _saveState = MutableStateFlow<StorageSaveResult?>(null)
     val saveState: StateFlow<StorageSaveResult?> = _saveState.asStateFlow()
+
+    private val _aiDiffState = MutableStateFlow<AiDiffState>(AiDiffState.NotRequested)
+    val aiDiffState: StateFlow<AiDiffState> = _aiDiffState.asStateFlow()
 
     private val _navEvent = MutableSharedFlow<ReviewNavEvent>(extraBufferCapacity = 1)
     val navEvent: SharedFlow<ReviewNavEvent> = _navEvent
@@ -56,7 +62,9 @@ class ReviewViewModel @Inject constructor(
                     storageName = storageName,
                     alignedBitmap = result.alignedBitmap,
                     guideLines = result.guideLines,
-                    similarities = result.similarities
+                    similarities = result.similarities,
+                    referenceCells = result.referenceCells,
+                    newCells = result.newCells
                 )
                 ComparisonResult.AlignmentFailed -> ReviewUiState.CompareError(storageName, "Alignment failed — try capturing again")
                 ComparisonResult.NoGuideLines -> ReviewUiState.CompareError(storageName, "No guide lines saved for this storage")
@@ -89,6 +97,24 @@ class ReviewViewModel @Inject constructor(
 
     fun resetSaveState() {
         _saveState.value = null
+    }
+
+    fun analyzeWithAi() {
+        val done = _state.value as? ReviewUiState.Done ?: return
+        if (_aiDiffState.value is AiDiffState.Loading) return
+        _aiDiffState.value = AiDiffState.Loading
+        viewModelScope.launch {
+            val newCellsByName = done.newCells.associateBy { it.name }
+            val pairs = done.referenceCells.mapNotNull { refCell ->
+                val newCell = newCellsByName[refCell.name] ?: return@mapNotNull null
+                CellPair(cellId = refCell.name, referenceBitmap = refCell.bitmap, newBitmap = newCell.bitmap)
+            }
+            val result = shelfDiffAnalyzer.analyze(pairs)
+            _aiDiffState.value = result.fold(
+                onSuccess = { AiDiffState.Done(it) },
+                onFailure = { AiDiffState.Error(it.message ?: "AI analysis failed") }
+            )
+        }
     }
 
     fun discard() {
