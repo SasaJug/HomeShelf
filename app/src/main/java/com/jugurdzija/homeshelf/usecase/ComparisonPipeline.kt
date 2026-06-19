@@ -1,13 +1,16 @@
 package com.jugurdzija.homeshelf.usecase
 
 import android.graphics.Bitmap
+import com.jugurdzija.homeshelf.data.GridCell
 import com.jugurdzija.homeshelf.data.GuideLine
 
 sealed interface ComparisonResult {
     data class Success(
         val alignedBitmap: Bitmap,
         val guideLines: List<GuideLine>,
-        val similarities: Map<String, Float>
+        val similarities: Map<String, Float>,
+        val referenceCells: List<GridCell>,
+        val newCells: List<GridCell>
     ) : ComparisonResult
     data object AlignmentFailed : ComparisonResult
     data object NoGuideLines : ComparisonResult

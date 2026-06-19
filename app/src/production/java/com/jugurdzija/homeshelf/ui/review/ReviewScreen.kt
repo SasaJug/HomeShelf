@@ -4,9 +4,14 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -57,6 +62,7 @@ fun ReviewScreen(
 ) {
     val state by vm.state.collectAsState()
     val saveState by vm.saveState.collectAsState()
+    val aiDiffState by vm.aiDiffState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -95,6 +101,10 @@ fun ReviewScreen(
                 },
                 actions = {
                     if (state is ReviewUiState.Done) {
+                        TextButton(
+                            onClick = vm::analyzeWithAi,
+                            enabled = aiDiffState !is AiDiffState.Loading
+                        ) { Text("Analyze with AI") }
                         TextButton(onClick = vm::navigateToEdit) { Text("Edit") }
                         TextButton(onClick = vm::save) { Text("Save") }
                     }
@@ -144,6 +154,12 @@ fun ReviewScreen(
                         vLines = vLines,
                         canvasSize = canvasSize,
                         modifier = Modifier.fillMaxSize()
+                    )
+                    AiDiffPanel(
+                        aiDiffState = aiDiffState,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
                     )
                 }
                 is ReviewUiState.CompareError -> {
@@ -198,6 +214,59 @@ private fun SimilarityOverlay(
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AiDiffPanel(
+    aiDiffState: AiDiffState,
+    modifier: Modifier = Modifier
+) {
+    when (aiDiffState) {
+        AiDiffState.NotRequested -> Unit
+        AiDiffState.Loading -> {
+            Box(
+                modifier = modifier
+                    .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        is AiDiffState.Error -> {
+            Text(
+                text = "AI analysis failed: ${aiDiffState.message}",
+                modifier = modifier
+                    .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
+                    .padding(12.dp),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+        is AiDiffState.Done -> {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 220.dp)
+                    .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
+                items(aiDiffState.results) { result ->
+                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                        Text(
+                            text = "${result.cellId} — ${if (result.changed) "Changed" else "No change"}",
+                            color = if (result.changed) SimilarityRed else SimilarityGreen,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = result.description,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
         }
     }
