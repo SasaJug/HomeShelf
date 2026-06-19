@@ -25,7 +25,7 @@ fun HomeShelfNavGraph(
         composable(Routes.REFERENCE) {
             ReferenceScreen(
                 onNavigateToEdit = { storageId ->
-                    navController.navigate("edit?storageId=$storageId")
+                    navController.navigate(Routes.edit(storageId))
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 onNavigateToScan = { navController.navigate(Routes.SCAN) }
@@ -35,10 +35,10 @@ fun HomeShelfNavGraph(
             ScanScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToReview = { storageId ->
-                    navController.navigate("review/$storageId")
+                    navController.navigate(Routes.review(storageId))
                 },
                 onNavigateToEdit = { storageId ->
-                    navController.navigate(if (storageId != null) "edit?storageId=$storageId" else "edit")
+                    navController.navigate(Routes.edit(storageId))
                 }
             )
         }
@@ -49,7 +49,7 @@ fun HomeShelfNavGraph(
             ReviewScreen(
                 onToReference = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
                 onToEdit = { storageId ->
-                    navController.navigate("edit?storageId=$storageId")
+                    navController.navigate(Routes.edit(storageId))
                 }
             )
         }

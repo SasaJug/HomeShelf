@@ -38,7 +38,7 @@ fun HomeShelfNavGraph(
         composable(Routes.REFERENCE) {
             ReferenceScreen(
                 onNavigateToEdit = { storageId ->
-                    navController.navigate("edit?storageId=$storageId")
+                    navController.navigate(Routes.edit(storageId))
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 onNavigateToScan = { navController.navigate(Routes.SCAN) }
@@ -48,7 +48,7 @@ fun HomeShelfNavGraph(
             ScanScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToEdit = { storageId ->
-                    navController.navigate(if (storageId != null) "edit?storageId=$storageId" else "edit")
+                    navController.navigate(Routes.edit(storageId))
                 }
             )
         }
