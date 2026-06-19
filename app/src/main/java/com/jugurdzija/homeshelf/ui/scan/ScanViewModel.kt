@@ -7,7 +7,7 @@ import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.data.StorageItem
-import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +28,7 @@ sealed interface ScanNavEvent {
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    private val storageStore: StorageStore,
+    private val storageRepository: StorageRepository,
     private val embedder: EmbedderOwner,
     private val pendingCaptureStore: PendingCaptureStore
 ) : ViewModel() {
@@ -46,9 +46,9 @@ class ScanViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val items = storageStore.loadAll()
+            val items = storageRepository.loadAll()
             storagesWithBitmaps = items.mapNotNull { item ->
-                storageStore.decodeLatestBitmap(item.id)?.let { item to it }
+                storageRepository.decodeLatestBitmap(item.id)?.let { item to it }
             }
             referenceItems = storagesWithBitmaps.map { (item, bitmap) ->
                 ReferenceItem(id = item.id, label = item.name, file = File("")) to bitmap
@@ -96,7 +96,7 @@ class ScanViewModel @Inject constructor(
     private suspend fun loadGuideLinesCached(storageId: String): List<GuideLine> {
         val cached = cachedGuideLines
         if (cached != null && cached.first == storageId) return cached.second
-        val lines = storageStore.loadLatestData(storageId).guideLines
+        val lines = storageRepository.loadLatestData(storageId).guideLines
         cachedGuideLines = storageId to lines
         return lines
     }

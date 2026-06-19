@@ -3,7 +3,7 @@ package com.jugurdzija.homeshelf.data
 import android.graphics.Bitmap
 import java.io.File
 
-interface StorageStore {
+interface StorageRepository {
     suspend fun loadAll(): List<StorageItem>
     suspend fun decodeLatestBitmap(id: String, sampleSize: Int = 1): Bitmap?
     suspend fun getLatestPhotoFile(id: String): File?

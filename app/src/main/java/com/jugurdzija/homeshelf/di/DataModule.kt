@@ -8,8 +8,8 @@ import com.jugurdzija.homeshelf.data.ReferenceDataStore
 import com.jugurdzija.homeshelf.data.ReferenceDataStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceImageStore
 import com.jugurdzija.homeshelf.data.ReferenceImageStoreImpl
-import com.jugurdzija.homeshelf.data.StorageStore
-import com.jugurdzija.homeshelf.data.StorageStoreImpl
+import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.StorageRepositoryImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
 import com.jugurdzija.homeshelf.usecase.ReferencePipeline
@@ -48,7 +48,7 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindStorageStore(impl: StorageStoreImpl): StorageStore
+    abstract fun bindStorageStore(impl: StorageRepositoryImpl): StorageRepository
 
     @Binds
     @Singleton
