@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReferenceViewModel @Inject constructor(
-    private val store: StorageRepository
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ReferenceListUiState>(ReferenceListUiState.Loading)
@@ -28,7 +28,7 @@ class ReferenceViewModel @Inject constructor(
 
     private fun reload() {
         viewModelScope.launch {
-            val items = store.loadAll()
+            val items = storageRepository.loadAll()
             _state.value = if (items.isEmpty()) ReferenceListUiState.Empty
                            else ReferenceListUiState.Loaded(items)
             loadThumbnails(items)
@@ -38,17 +38,15 @@ class ReferenceViewModel @Inject constructor(
     private fun loadThumbnails(items: List<StorageItem>) {
         viewModelScope.launch {
             items.filter { !_thumbnails.value.containsKey(it.id) }.forEach { item ->
-                val bmp = store.decodeLatestBitmap(item.id, sampleSize = 4)
+                val bmp = storageRepository.decodeLatestBitmap(item.id, sampleSize = 4)
                 if (bmp != null) _thumbnails.update { it + (item.id to bmp) }
             }
         }
     }
 
-    fun onCaptureBitmap(bitmap: Bitmap) {}
-
     fun onDelete(id: String) {
         viewModelScope.launch {
-            store.delete(id)
+            storageRepository.delete(id)
             _thumbnails.update { it - id }
             reload()
         }
