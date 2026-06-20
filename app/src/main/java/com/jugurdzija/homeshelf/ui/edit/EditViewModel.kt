@@ -56,13 +56,12 @@ class EditViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val pending = pendingCaptureStore.load()
-            _bitmapState.value = if (pending != null) {
-                pending
-            } else if (storageId != null) {
-                storageRepository.decodeLatestBitmap(storageId)
-            } else {
-                null
-            }
+            _bitmapState.value = pending
+                ?: if (storageId != null) {
+                    storageRepository.decodeLatestBitmap(storageId)
+                } else {
+                    null
+                }
         }
         if (storageId != null) {
             viewModelScope.launch {

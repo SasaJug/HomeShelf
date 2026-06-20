@@ -60,10 +60,8 @@ fun HomeShelfNavGraph(
                 nullable = true
                 defaultValue = null
             })
-        ) { backStackEntry ->
-            val storageId = backStackEntry.arguments?.getString("storageId")
+        ) {
             EditScreen(
-                storageId = storageId,
                 onSaved = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
                 onDiscarded = { navController.popBackStack(Routes.REFERENCE, inclusive = false) }
             )
