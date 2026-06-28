@@ -7,28 +7,21 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -92,22 +85,35 @@ fun GoldenSaveScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (readOnly) "Golden Photo" else "Save Golden Photo") },
+                title = {},
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Discard")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (!readOnly) {
+                        if (saveState is GoldenSaveViewModel.SaveState.Saving) {
+                            CircularProgressIndicator(
+                                strokeWidth = 2.dp,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(end = 16.dp)
+                            )
+                        } else {
+                            TextButton(onClick = { vm.save() }) {
+                                Text("Save")
+                            }
+                        }
                     }
                 }
             )
         }
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             uiState.captureData.bitmap?.let { bmp ->
                 val lines = (guideLineState as? GoldenSaveViewModel.GuideLineState.Ready)?.guideLines
@@ -120,11 +126,7 @@ fun GoldenSaveScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(bmp.width.toFloat() / bmp.height.toFloat())
-                    )
-                    Text(
-                        "Tap a cell to annotate what changed.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                            .align(Alignment.Center)
                     )
                 } else {
                     Image(
@@ -133,96 +135,29 @@ fun GoldenSaveScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(bmp.width.toFloat() / bmp.height.toFloat())
+                            .align(Alignment.Center)
                     )
-                    if (!readOnly && guideLineState is GoldenSaveViewModel.GuideLineState.Loading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    }
                 }
             }
 
-            OutlinedTextField(
-                value = uiState.name,
-                onValueChange = { if (!readOnly) vm.setName(it) },
-                label = { Text("Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                readOnly = readOnly
-            )
-
-            Spacer(Modifier.height(4.dp))
-            Text("Metadata", style = MaterialTheme.typography.titleSmall)
-
-            MetaRow("Reference", uiState.captureData.referenceLabel ?: "-")
-            MetaRow("Similarity score", uiState.captureData.similarityScore?.let { "%.4f".format(it) } ?: "-")
-            MetaRow("Threshold", uiState.captureData.similarityThreshold?.let { "%.4f".format(it) } ?: "-")
-            MetaRow("Frames analyzed", uiState.captureData.framesAnalyzed?.toString() ?: "-")
-            MetaRow("Capture attempt", uiState.captureData.captureAttempt?.toString() ?: "-")
-            uiState.captureData.bitmap?.let { MetaRow("Image dimensions", "${it.width} × ${it.height}") }
-
-            uiState.captureData.allMatchScores?.takeIf { it.size > 1 }?.let { scores ->
-                Spacer(Modifier.height(4.dp))
-                Text("All match scores", style = MaterialTheme.typography.titleSmall)
-                scores.entries.sortedByDescending { it.value }.forEach { (label, score) ->
-                    MetaRow(label, "%.4f".format(score))
-                }
+            if (guideLineState is GoldenSaveViewModel.GuideLineState.Loading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            if (readOnly && uiState.captureData.groundTruth.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
-                Text("Ground Truth", style = MaterialTheme.typography.titleSmall)
-                uiState.captureData.groundTruth.sortedBy { it.cellIndex }.forEach { cell ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            "Cell ${cell.cellIndex}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+            if (saveState is GoldenSaveViewModel.SaveState.Error) {
+                Text(
+                    text = (saveState as GoldenSaveViewModel.SaveState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                        .background(
+                            MaterialTheme.colorScheme.errorContainer,
+                            RoundedCornerShape(8.dp)
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .background(cell.changeType.chipColor.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    cell.changeType.symbol,
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Text(cell.changeType.label, style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            when (val s = saveState) {
-                is GoldenSaveViewModel.SaveState.Error -> Text(s.message, color = MaterialTheme.colorScheme.error)
-                else -> {}
-            }
-
-            if (!readOnly) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) {
-                        Text("Discard")
-                    }
-                    Button(
-                        onClick = { vm.save() },
-                        modifier = Modifier.weight(1f),
-                        enabled = saveState !is GoldenSaveViewModel.SaveState.Saving && uiState.name.isNotBlank()
-                    ) {
-                        if (saveState is GoldenSaveViewModel.SaveState.Saving) CircularProgressIndicator()
-                        else Text("Save")
-                    }
-                }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                )
             }
         }
     }
@@ -362,14 +297,3 @@ private val ChangeType.chipColor: Color
         ChangeType.ITEM_REMOVED -> Color(0xFFC62828)
         ChangeType.ITEM_REPLACED -> Color(0xFFE65100)
     }
-
-@Composable
-private fun MetaRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
