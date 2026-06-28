@@ -1,6 +1,5 @@
 package com.jugurdzija.homeshelf.ui.nav
 
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -12,13 +11,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.compare.CompareScreen
 import com.jugurdzija.homeshelf.ui.compare.CompareViewModel
-import com.jugurdzija.homeshelf.ui.detail.ImageDetailScreen
 import com.jugurdzija.homeshelf.ui.edit.EditScreen
+import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenSaveScreen
-import com.jugurdzija.homeshelf.ui.reference.ReferenceCaptureScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
-import com.jugurdzija.homeshelf.ui.reference.ReferenceViewModel
 import com.jugurdzija.homeshelf.ui.scan.ScanScreen
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
 import com.jugurdzija.homeshelf.ui.test.TestResultsScreen
@@ -41,12 +38,18 @@ fun HomeShelfNavGraph(
                     navController.navigate(Routes.edit(storageId))
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onNavigateToScan = { navController.navigate(Routes.SCAN) }
+                onNavigateToScan = { navController.navigate(Routes.SCAN) },
+                onCaptureTestPhoto = { storageId ->
+                    navController.navigate(Routes.goldenCapture(storageId))
+                }
             )
         }
         composable(Routes.SCAN) {
             ScanScreen(
                 onBack = { navController.popBackStack() },
+                onNavigateToReview = { storageId ->
+                    navController.navigate(Routes.edit(storageId))
+                },
                 onNavigateToEdit = { storageId ->
                     navController.navigate(Routes.edit(storageId))
                 }
@@ -61,43 +64,31 @@ fun HomeShelfNavGraph(
                 onDiscarded = { navController.popBackStack() }
             )
         }
-        composable(Routes.REFERENCE_CAPTURE) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Routes.REFERENCE)
-            }
-            val vm: ReferenceViewModel = hiltViewModel(parentEntry)
-            ReferenceCaptureScreen(
-                onBack = { navController.popBackStack() },
-                vm = vm
-            )
-        }
         composable(Routes.COMPARE) {
             CompareScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToGoldenSave = { navController.navigate(Routes.GOLDEN_SAVE) }
             )
         }
-        composable(Routes.GOLDEN_SAVE) { backStackEntry ->
-            val compareEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Routes.COMPARE)
-            }
-            val compareVm: CompareViewModel = hiltViewModel(compareEntry)
-            GoldenSaveScreen(
-                onBack = {
-                    compareVm.onScanAgain()
-                    navController.popBackStack(Routes.REFERENCE, inclusive = false)
-                }
+        composable(
+            route = Routes.GOLDEN_CAPTURE,
+            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+        ) {
+            GoldenCaptureScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToSave = { navController.navigate(Routes.GOLDEN_SAVE) }
             )
         }
-        composable(
-            route = Routes.DETAIL_FILE,
-            arguments = listOf(navArgument("filePath") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val encoded = backStackEntry.arguments?.getString("filePath") ?: ""
-            val filePath = Uri.decode(encoded)
-            ImageDetailScreen(
-                filePath = filePath,
-                onBack = { navController.popBackStack() }
+        composable(Routes.GOLDEN_SAVE) { backStackEntry ->
+            val compareEntry = remember(backStackEntry) {
+                runCatching { navController.getBackStackEntry(Routes.COMPARE) }.getOrNull()
+            }
+            val compareVm: CompareViewModel? = compareEntry?.let { hiltViewModel(it) }
+            GoldenSaveScreen(
+                onBack = {
+                    compareVm?.onScanAgain()
+                    navController.popBackStack(Routes.REFERENCE, inclusive = false)
+                }
             )
         }
         composable(Routes.SETTINGS) {

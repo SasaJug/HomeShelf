@@ -32,6 +32,7 @@ class ShelfDiffAnalyzerImpl @Inject constructor() : ShelfDiffAnalyzer {
         Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
             modelName = MODEL_NAME,
             generationConfig = generationConfig {
+                temperature = 0f
                 responseMimeType = "application/json"
                 responseSchema = Schema.array(
                     Schema.obj(

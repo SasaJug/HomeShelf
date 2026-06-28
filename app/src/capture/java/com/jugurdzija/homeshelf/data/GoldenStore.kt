@@ -8,6 +8,7 @@ interface GoldenStore {
     suspend fun save(
         bitmap: android.graphics.Bitmap,
         name: String,
+        storageId: String?,
         referenceLabel: String?,
         referenceFilePath: String?,
         similarityScore: Double?,
@@ -26,5 +27,10 @@ interface GoldenStore {
         allMatchScores: Map<String, Double>,
         framesAnalyzed: Int,
         captureAttempt: Int
+    )
+    suspend fun populateHolderForStorage(
+        bitmap: android.graphics.Bitmap,
+        storageId: String,
+        referenceLabel: String
     )
 }

@@ -4,6 +4,7 @@ import java.io.File
 
 data class GoldenItem(
     val name: String,
+    val storageId: String? = null,
     val referenceLabel: String,
     val referenceFilePath: String = "",
     val timestamp: String,

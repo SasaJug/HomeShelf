@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -53,6 +54,7 @@ fun ReferenceScreen(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onCaptureTestPhoto: ((String) -> Unit)? = null,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -64,7 +66,8 @@ fun ReferenceScreen(
         onDelete = vm::onDelete,
         onNavigateToEdit = onNavigateToEdit,
         onNavigateToSettings = onNavigateToSettings,
-        onNavigateToScan = onNavigateToScan
+        onNavigateToScan = onNavigateToScan,
+        onCaptureTestPhoto = onCaptureTestPhoto
     )
 }
 
@@ -76,7 +79,8 @@ private fun ReferenceScreenContent(
     onDelete: (String) -> Unit,
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToScan: () -> Unit
+    onNavigateToScan: () -> Unit,
+    onCaptureTestPhoto: ((String) -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
@@ -144,7 +148,8 @@ private fun ReferenceScreenContent(
                                 item = item,
                                 thumbnail = thumbnails[item.id],
                                 onDelete = { onDelete(item.id) },
-                                onClick = { onNavigateToEdit(item.id) }
+                                onClick = { onNavigateToEdit(item.id) },
+                                onCaptureTestPhoto = onCaptureTestPhoto?.let { { it(item.id) } }
                             )
                             HorizontalDivider()
                         }
@@ -173,7 +178,8 @@ private fun StorageListItem(
     item: StorageItem,
     thumbnail: Bitmap?,
     onDelete: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onCaptureTestPhoto: (() -> Unit)? = null
 ) {
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
     Row(
@@ -214,6 +220,14 @@ private fun StorageListItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+        if (onCaptureTestPhoto != null) {
+            IconButton(onClick = onCaptureTestPhoto) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = "Capture test photo for ${item.name}"
+                )
+            }
         }
         IconButton(onClick = onDelete) {
             Icon(

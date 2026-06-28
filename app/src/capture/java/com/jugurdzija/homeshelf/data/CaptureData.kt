@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 data class CaptureData(
     val name: String? = null,
     val bitmap: Bitmap? = null,
+    val storageId: String? = null,
     val referenceLabel: String? = null,
     val referenceFilePath: String? = null,
     val similarityScore: Double? = null,

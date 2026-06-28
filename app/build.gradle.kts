@@ -13,7 +13,7 @@ android {
     compileSdk = 35
     defaultConfig {
         minSdk = 26
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.jugurdzija.homeshelf.HiltTestRunner"
         buildConfigField("String", "DEFAULT_WEB_CLIENT_ID", "\"${project.findProperty("DEFAULT_WEB_CLIENT_ID")}\"")
 
     }
@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
     implementation(libs.androidx.core.ktx)
 
     implementation(libs.google.mediapipe.vision)
@@ -79,4 +80,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.ai)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.compiler)
 }

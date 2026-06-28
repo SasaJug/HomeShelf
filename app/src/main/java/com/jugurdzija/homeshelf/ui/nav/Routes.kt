@@ -1,7 +1,5 @@
 package com.jugurdzija.homeshelf.ui.nav
 
-import android.net.Uri
-
 object Routes {
     private const val EDIT_BASE = "edit"
 
@@ -11,9 +9,8 @@ object Routes {
     const val SCAN = "scan"
     const val REVIEW = "review/{storageId}"
     const val EDIT = "$EDIT_BASE?storageId={storageId}"
-    const val DETAIL_FILE = "detail/file/{filePath}"
-    const val DETAIL_BITMAP = "detail/bitmap"
     const val SETTINGS = "settings"
+    const val GOLDEN_CAPTURE = "golden_capture/{storageId}"
     const val GOLDEN_SAVE = "golden_save"
     const val GOLDEN_MANAGE = "golden_manage"
     const val GOLDEN_VIEW = "golden_view"
@@ -24,7 +21,8 @@ object Routes {
     fun edit(storageId: String? = null) =
         if (storageId != null) EDIT.replace("{storageId}", storageId) else EDIT_BASE
 
+    fun goldenCapture(storageId: String) = GOLDEN_CAPTURE.replace("{storageId}", storageId)
+
     fun review(storageId: String) = REVIEW.replace("{storageId}", storageId)
 
-    fun detailFile(filePath: String) = DETAIL_FILE.replace("{filePath}", Uri.encode(filePath))
 }

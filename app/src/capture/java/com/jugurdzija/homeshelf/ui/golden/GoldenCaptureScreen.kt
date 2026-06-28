@@ -1,5 +1,6 @@
-package com.jugurdzija.homeshelf.ui.reference
+package com.jugurdzija.homeshelf.ui.golden
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,24 +31,33 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.CameraPreview
+import com.jugurdzija.homeshelf.ui.common.GuideLineOverlay
 import com.jugurdzija.homeshelf.ui.common.LevelIndicatorOverlay
 import com.jugurdzija.homeshelf.ui.common.rememberDeviceOrientation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReferenceCaptureScreen(
+fun GoldenCaptureScreen(
     onBack: () -> Unit,
-    vm: ReferenceViewModel = hiltViewModel()
+    onNavigateToSave: () -> Unit,
+    vm: GoldenCaptureViewModel = hiltViewModel()
 ) {
+    val guideLineState by vm.guideLineState.collectAsState()
+    val guideLines = (guideLineState as? GoldenCaptureViewModel.GuideLineState.Ready)?.guideLines ?: emptyList()
+    val canCapture = guideLineState is GoldenCaptureViewModel.GuideLineState.Ready
     val orientationState = rememberDeviceOrientation()
     val orientation by orientationState
     var isCapturing by remember { mutableStateOf(false) }
     var captureTriggered by remember { mutableStateOf(false) }
 
+    LaunchedEffect(vm.navigateToSave) {
+        vm.navigateToSave.collect { onNavigateToSave() }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Capture Reference") },
+                title = { Text("Capture Test Photo") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -65,7 +77,6 @@ fun ReferenceCaptureScreen(
                     onBitmapCaptured = { bitmap ->
                         if (bitmap != null) {
                             vm.onCaptureBitmap(bitmap)
-                            onBack()
                         } else {
                             isCapturing = false
                             captureTriggered = false
@@ -74,6 +85,10 @@ fun ReferenceCaptureScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
+                if (guideLines.isNotEmpty()) {
+                    GuideLineOverlay(guideLines = guideLines, modifier = Modifier.fillMaxSize())
+                }
+
                 LevelIndicatorOverlay(
                     orientation = orientation,
                     modifier = Modifier
@@ -81,12 +96,23 @@ fun ReferenceCaptureScreen(
                         .padding(16.dp)
                 )
 
+                if (guideLineState is GoldenCaptureViewModel.GuideLineState.Unavailable) {
+                    Text(
+                        "This storage has no guide lines set up yet. Add guide lines before capturing test photos.",
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(16.dp)
+                    )
+                }
+
                 Button(
                     onClick = {
                         isCapturing = true
                         captureTriggered = true
                     },
-                    enabled = !isCapturing,
+                    enabled = !isCapturing && canCapture,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 32.dp)

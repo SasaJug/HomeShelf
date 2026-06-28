@@ -7,6 +7,7 @@ import com.jugurdzija.homeshelf.data.ChangeType
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.ReferenceDataStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.data.GroundTruthCell
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class GoldenSaveViewModel @Inject constructor(
     private val goldenStore: GoldenStore,
-    private val referenceDataStore: ReferenceDataStore
+    private val referenceDataStore: ReferenceDataStore,
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     data class GoldenSaveUiState(
@@ -67,12 +69,14 @@ class GoldenSaveViewModel @Inject constructor(
         _uiState.update { it.copy(annotations = it.annotations + (cellIndex to changeType)) }
 
     fun loadGuideLines() {
-        val refPath = _uiState.value.captureData.referenceFilePath ?: run {
-            _guideLineState.value = GuideLineState.Unavailable
-            return
-        }
+        val storageId = _uiState.value.captureData.storageId
+        val refPath = _uiState.value.captureData.referenceFilePath
         viewModelScope.launch {
-            val lines = referenceDataStore.load(refPath).guideLines
+            val lines = when {
+                storageId != null -> storageRepository.loadLatestData(storageId).guideLines
+                refPath != null -> referenceDataStore.load(refPath).guideLines
+                else -> emptyList()
+            }
             _guideLineState.value = if (lines.size >= 4) GuideLineState.Ready(lines)
             else GuideLineState.Unavailable
         }
@@ -92,6 +96,7 @@ class GoldenSaveViewModel @Inject constructor(
                 goldenStore.save(
                     bitmap = bitmap,
                     name = name,
+                    storageId = state.captureData.storageId,
                     referenceLabel = state.captureData.referenceLabel,
                     referenceFilePath = state.captureData.referenceFilePath,
                     similarityScore = state.captureData.similarityScore,

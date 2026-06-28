@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.ChangeType
 import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.di.DiConstants
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
@@ -55,6 +56,7 @@ data class TestCellResult(
 class TestViewModel @Inject constructor(
     private val goldenStore: GoldenStore,
     private val pipeline: ComparisonPipeline,
+    private val storageRepository: StorageRepository,
     @Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
 ) : ViewModel() {
 
@@ -145,20 +147,14 @@ class TestViewModel @Inject constructor(
     }
 
     private suspend fun processGoldenItem(item: GoldenItem): TestImageResult {
-        val referenceFilePath = item.referenceFilePath
-        if (referenceFilePath.isEmpty() || !File(referenceFilePath).exists()) {
-            return TestImageResult(item.name, item.referenceLabel, false, emptyList())
-        }
+        val storageId = storageRepository.loadAll().firstOrNull { it.name == item.referenceLabel }?.id
+            ?: return TestImageResult(item.name, item.referenceLabel, false, emptyList())
 
         val capturedBitmap = withContext(Dispatchers.IO) {
             BitmapFactory.decodeFile(File(item.dir, "photo.jpg").absolutePath)
         } ?: return TestImageResult(item.name, item.referenceLabel, false, emptyList())
 
-        val referenceBitmap = withContext(Dispatchers.IO) {
-            BitmapFactory.decodeFile(referenceFilePath)
-        } ?: return TestImageResult(item.name, item.referenceLabel, false, emptyList())
-
-        return when (val result = pipeline.run(capturedBitmap, referenceBitmap, referenceFilePath)) {
+        return when (val result = pipeline.run(capturedBitmap, storageId)) {
             is ComparisonResult.Success -> {
                 val groundTruthMap = item.groundTruth.associate { it.cellIndex to it.changeType }
                 val numCols = (result.similarities.keys.maxOfOrNull { it[0] - 'A' } ?: 0) + 1
