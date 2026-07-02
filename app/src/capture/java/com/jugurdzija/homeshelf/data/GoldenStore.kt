@@ -20,17 +20,12 @@ interface GoldenStore {
     )
     suspend fun populateHolder(
         bitmap: android.graphics.Bitmap,
-        referenceLabel: String,
-        referenceFilePath: String,
-        similarityScore: Double,
-        similarityThreshold: Double,
-        allMatchScores: Map<String, Double>,
-        framesAnalyzed: Int,
-        captureAttempt: Int
-    )
-    suspend fun populateHolderForStorage(
-        bitmap: android.graphics.Bitmap,
         storageId: String,
-        referenceLabel: String
+        referenceLabel: String,
+        similarityScore: Double? = null,
+        similarityThreshold: Double? = null,
+        allMatchScores: Map<String, Double>? = null,
+        framesAnalyzed: Int? = null,
+        captureAttempt: Int? = null
     )
 }

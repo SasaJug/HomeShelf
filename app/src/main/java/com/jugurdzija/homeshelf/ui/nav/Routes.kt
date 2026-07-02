@@ -5,7 +5,6 @@ object Routes {
 
     const val REFERENCE = "reference"
     const val REFERENCE_CAPTURE = "reference_capture"
-    const val COMPARE = "compare"
     const val SCAN = "scan"
     const val REVIEW = "review/{storageId}"
     const val EDIT = "$EDIT_BASE?storageId={storageId}"

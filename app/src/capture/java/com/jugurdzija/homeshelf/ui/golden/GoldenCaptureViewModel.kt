@@ -50,7 +50,7 @@ class GoldenCaptureViewModel @Inject constructor(
     fun onCaptureBitmap(bitmap: Bitmap) {
         if (_guideLineState.value !is GuideLineState.Ready) return
         viewModelScope.launch {
-            goldenStore.populateHolderForStorage(bitmap, storageId, referenceLabel)
+            goldenStore.populateHolder(bitmap, storageId, referenceLabel)
             _navigateToSave.emit(Unit)
         }
     }

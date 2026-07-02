@@ -9,8 +9,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.jugurdzija.homeshelf.ui.compare.CompareScreen
-import com.jugurdzija.homeshelf.ui.compare.CompareViewModel
 import com.jugurdzija.homeshelf.ui.edit.EditScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
@@ -64,12 +62,6 @@ fun HomeShelfNavGraph(
                 onDiscarded = { navController.popBackStack() }
             )
         }
-        composable(Routes.COMPARE) {
-            CompareScreen(
-                onBack = { navController.popBackStack() },
-                onNavigateToGoldenSave = { navController.navigate(Routes.GOLDEN_SAVE) }
-            )
-        }
         composable(
             route = Routes.GOLDEN_CAPTURE,
             arguments = listOf(navArgument("storageId") { type = NavType.StringType })
@@ -79,16 +71,9 @@ fun HomeShelfNavGraph(
                 onNavigateToSave = { navController.navigate(Routes.GOLDEN_SAVE) }
             )
         }
-        composable(Routes.GOLDEN_SAVE) { backStackEntry ->
-            val compareEntry = remember(backStackEntry) {
-                runCatching { navController.getBackStackEntry(Routes.COMPARE) }.getOrNull()
-            }
-            val compareVm: CompareViewModel? = compareEntry?.let { hiltViewModel(it) }
+        composable(Routes.GOLDEN_SAVE) {
             GoldenSaveScreen(
-                onBack = {
-                    compareVm?.onScanAgain()
-                    navController.popBackStack(Routes.REFERENCE, inclusive = false)
-                }
+                onBack = { navController.popBackStack(Routes.REFERENCE, inclusive = false) }
             )
         }
         composable(Routes.SETTINGS) {

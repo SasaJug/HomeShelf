@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.data.StorageItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -40,7 +38,6 @@ class ScanViewModel @Inject constructor(
     val navEvent: SharedFlow<ScanNavEvent> = _navEvent
 
     private var storagesWithBitmaps: List<Pair<StorageItem, Bitmap>> = emptyList()
-    private var referenceItems: List<Pair<ReferenceItem, Bitmap>> = emptyList()
     private val inferenceInFlight = AtomicBoolean(false)
     private var cachedGuideLines: Pair<String, List<GuideLine>>? = null
 
@@ -49,9 +46,6 @@ class ScanViewModel @Inject constructor(
             val items = storageRepository.loadAll()
             storagesWithBitmaps = items.mapNotNull { item ->
                 storageRepository.decodeLatestBitmap(item.id)?.let { item to it }
-            }
-            referenceItems = storagesWithBitmaps.map { (item, bitmap) ->
-                ReferenceItem(id = item.id, label = item.name, file = File("")) to bitmap
             }
             _state.value = ScanUiState.Streaming()
         }
@@ -74,14 +68,14 @@ class ScanViewModel @Inject constructor(
         if (!inferenceInFlight.compareAndSet(false, true)) return
         viewModelScope.launch {
             try {
-                if (referenceItems.isEmpty()) {
+                if (storagesWithBitmaps.isEmpty()) {
                     _state.value = ScanUiState.Streaming()
                     return@launch
                 }
-                val matches = embedder.embedAll(bitmap, referenceItems)
+                val matches = embedder.embedAll(bitmap, storagesWithBitmaps)
                 val top = matches.firstOrNull()
                 if (top != null && top.similarity >= CAPTURE_SIMILARITY_THRESHOLD) {
-                    val detected = storagesWithBitmaps.first { it.first.id == top.item.id }.first
+                    val detected = top.item
                     val guideLines = loadGuideLinesCached(detected.id)
                     _state.value = ScanUiState.Streaming(matches, detected, guideLines)
                 } else {

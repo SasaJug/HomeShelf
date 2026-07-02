@@ -22,9 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.ReferenceItem
+import com.jugurdzija.homeshelf.data.StorageItem
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch
-import java.io.File
 
 @Composable
 fun MatchesOverlay(
@@ -53,7 +52,7 @@ fun MatchesOverlay(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = match.item.label,
+                            text = match.item.name,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal,
                             modifier = Modifier.weight(1f)
@@ -80,12 +79,11 @@ fun MatchesOverlayEmptyPreview() {
 @Preview(showBackground = true)
 @Composable
 fun MatchesOverlayLoadedPreview() {
-    val fakeFile = File("/fake/path.jpg")
     MatchesOverlay(
         matches = listOf(
-            ReferenceMatch(ReferenceItem("ref_1", "Reference 1", fakeFile), similarity = 0.94, inferenceMs = 12),
-            ReferenceMatch(ReferenceItem("ref_2", "Reference 2", fakeFile), similarity = 0.72, inferenceMs = 11),
-            ReferenceMatch(ReferenceItem("ref_3", "Reference 3", fakeFile), similarity = 0.45, inferenceMs = 10),
+            ReferenceMatch(StorageItem("ref_1", "Reference 1", 0L, 0L), similarity = 0.94, inferenceMs = 12),
+            ReferenceMatch(StorageItem("ref_2", "Reference 2", 0L, 0L), similarity = 0.72, inferenceMs = 11),
+            ReferenceMatch(StorageItem("ref_3", "Reference 3", 0L, 0L), similarity = 0.45, inferenceMs = 10),
         )
     )
 }
