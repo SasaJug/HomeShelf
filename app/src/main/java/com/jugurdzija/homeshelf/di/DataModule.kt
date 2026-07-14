@@ -6,8 +6,6 @@ import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
 import com.jugurdzija.homeshelf.data.ReferenceDataStore
 import com.jugurdzija.homeshelf.data.ReferenceDataStoreImpl
-import com.jugurdzija.homeshelf.data.ReferenceImageStore
-import com.jugurdzija.homeshelf.data.ReferenceImageStoreImpl
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.data.StorageRepositoryImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
@@ -25,10 +23,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindReferenceImageStore(impl: ReferenceImageStoreImpl): ReferenceImageStore
 
     @Binds
     @Singleton
