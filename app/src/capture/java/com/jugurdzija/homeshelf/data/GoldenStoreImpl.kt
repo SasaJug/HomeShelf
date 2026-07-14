@@ -144,35 +144,23 @@ class GoldenStoreImpl @Inject constructor(
 
     override suspend fun populateHolder(
         bitmap: Bitmap,
+        storageId: String,
         referenceLabel: String,
-        referenceFilePath: String,
-        similarityScore: Double,
-        similarityThreshold: Double,
-        allMatchScores: Map<String, Double>,
-        framesAnalyzed: Int,
-        captureAttempt: Int
+        similarityScore: Double?,
+        similarityThreshold: Double?,
+        allMatchScores: Map<String, Double>?,
+        framesAnalyzed: Int?,
+        captureAttempt: Int?
     ) {
         holder = CaptureData(
             bitmap = bitmap,
+            storageId = storageId,
             referenceLabel = referenceLabel,
-            referenceFilePath = referenceFilePath,
             similarityScore = similarityScore,
             similarityThreshold = similarityThreshold,
             allMatchScores = allMatchScores,
             framesAnalyzed = framesAnalyzed,
             captureAttempt = captureAttempt
-        )
-    }
-
-    override suspend fun populateHolderForStorage(
-        bitmap: Bitmap,
-        storageId: String,
-        referenceLabel: String
-    ) {
-        holder = CaptureData(
-            bitmap = bitmap,
-            storageId = storageId,
-            referenceLabel = referenceLabel
         )
     }
 

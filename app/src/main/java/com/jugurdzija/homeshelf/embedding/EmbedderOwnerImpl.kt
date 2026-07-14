@@ -2,7 +2,7 @@ package com.jugurdzija.homeshelf.embedding
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.ReferenceItem
+import com.jugurdzija.homeshelf.data.StorageItem
 import com.jugurdzija.homeshelf.util.ImageEmbedderHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +41,7 @@ class EmbedderOwnerImpl @Inject constructor(
 
     override suspend fun embedAll(
         candidate: Bitmap,
-        references: List<Pair<ReferenceItem, Bitmap>>,
+        references: List<Pair<StorageItem, Bitmap>>,
         topN: Int
     ): List<ReferenceMatch> = withContext(Dispatchers.Default) {
         references.mapNotNull { (item, refBitmap) ->
@@ -49,7 +49,7 @@ class EmbedderOwnerImpl @Inject constructor(
                 val result = helper.embed(refBitmap, candidate) ?: return@mapNotNull null
                 ReferenceMatch(item = item, similarity = result.similarity, inferenceMs = result.inferenceTime)
             } catch (e: Exception) {
-                _errors.tryEmit("Error embedding ${item.label}: ${e.message}")
+                _errors.tryEmit("Error embedding ${item.name}: ${e.message}")
                 null
             }
         }

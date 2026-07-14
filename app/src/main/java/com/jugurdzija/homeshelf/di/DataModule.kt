@@ -4,14 +4,10 @@ import com.jugurdzija.homeshelf.data.GridCellStore
 import com.jugurdzija.homeshelf.data.GridCellStoreImpl
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
-import com.jugurdzija.homeshelf.data.ReferenceDataStore
-import com.jugurdzija.homeshelf.data.ReferenceDataStoreImpl
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.data.StorageRepositoryImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
-import com.jugurdzija.homeshelf.usecase.ReferencePipeline
-import com.jugurdzija.homeshelf.usecase.ReferencePipelineImpl
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSavePipelineImpl
 import dagger.Binds
@@ -27,14 +23,6 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindGridCellStore(impl: GridCellStoreImpl): GridCellStore
-
-    @Binds
-    @Singleton
-    abstract fun bindReferenceDataStore(impl: ReferenceDataStoreImpl): ReferenceDataStore
-
-    @Binds
-    @Singleton
-    abstract fun bindReferencePipeline(impl: ReferencePipelineImpl): ReferencePipeline
 
     @Binds
     @Singleton
