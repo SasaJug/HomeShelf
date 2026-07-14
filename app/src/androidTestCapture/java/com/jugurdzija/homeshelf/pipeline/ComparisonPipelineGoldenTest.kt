@@ -12,6 +12,7 @@ import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -22,6 +23,10 @@ import java.io.File
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.time.Duration.Companion.milliseconds
+
+// Delay to LLM calls to prevent reaching limit.
+private const val LLM_REQUEST_INTERVAL_MS = 6_500L
 
 @HiltAndroidTest
 class ComparisonPipelineGoldenTest {
@@ -56,7 +61,10 @@ class ComparisonPipelineGoldenTest {
         val goldens = goldenStore.loadAll()
         assumeTrue("No golden items captured yet — capture some via the app first", goldens.isNotEmpty())
 
-        val goldenReports = goldens.map { golden -> scoreGolden(golden) }
+        val goldenReports = goldens.mapIndexed { index, golden ->
+            if (index > 0) delay(LLM_REQUEST_INTERVAL_MS.milliseconds)
+            scoreGolden(golden)
+        }
 
         val allCells = goldenReports.flatMap { it.cells }
         val analyzedCells = allCells.filter { it.changed != null }
