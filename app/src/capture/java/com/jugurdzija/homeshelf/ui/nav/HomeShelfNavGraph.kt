@@ -33,6 +33,9 @@ fun HomeShelfNavGraph(
                 onNavigateToScan = { navController.navigate(Routes.SCAN) },
                 onCaptureTestPhoto = { storageId ->
                     navController.navigate(Routes.goldenCapture(storageId))
+                },
+                onViewHistory = { storageId ->
+                    navController.navigate(Routes.goldenManage(storageId))
                 }
             )
         }
@@ -78,7 +81,10 @@ fun HomeShelfNavGraph(
                 onLogout = onLogout
             )
         }
-        composable(Routes.GOLDEN_MANAGE) {
+        composable(
+            route = Routes.GOLDEN_MANAGE,
+            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+        ) {
             GoldenManageScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToView = { navController.navigate(Routes.GOLDEN_VIEW) }

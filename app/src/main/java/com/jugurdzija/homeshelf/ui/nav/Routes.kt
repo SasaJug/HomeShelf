@@ -10,13 +10,15 @@ object Routes {
     const val SETTINGS = "settings"
     const val GOLDEN_CAPTURE = "golden_capture/{storageId}"
     const val GOLDEN_SAVE = "golden_save"
-    const val GOLDEN_MANAGE = "golden_manage"
+    const val GOLDEN_MANAGE = "golden_manage/{storageId}"
     const val GOLDEN_VIEW = "golden_view"
 
     fun edit(storageId: String? = null) =
         if (storageId != null) EDIT.replace("{storageId}", storageId) else EDIT_BASE
 
     fun goldenCapture(storageId: String) = GOLDEN_CAPTURE.replace("{storageId}", storageId)
+
+    fun goldenManage(storageId: String) = GOLDEN_MANAGE.replace("{storageId}", storageId)
 
     fun review(storageId: String) = REVIEW.replace("{storageId}", storageId)
 

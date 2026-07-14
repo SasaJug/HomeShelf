@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,6 +56,7 @@ fun ReferenceScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
     onCaptureTestPhoto: ((String) -> Unit)? = null,
+    onViewHistory: ((String) -> Unit)? = null,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -67,7 +69,8 @@ fun ReferenceScreen(
         onNavigateToEdit = onNavigateToEdit,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToScan = onNavigateToScan,
-        onCaptureTestPhoto = onCaptureTestPhoto
+        onCaptureTestPhoto = onCaptureTestPhoto,
+        onViewHistory = onViewHistory
     )
 }
 
@@ -80,7 +83,8 @@ private fun ReferenceScreenContent(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
-    onCaptureTestPhoto: ((String) -> Unit)? = null
+    onCaptureTestPhoto: ((String) -> Unit)? = null,
+    onViewHistory: ((String) -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
@@ -149,7 +153,8 @@ private fun ReferenceScreenContent(
                                 thumbnail = thumbnails[item.id],
                                 onDelete = { onDelete(item.id) },
                                 onClick = { onNavigateToEdit(item.id) },
-                                onCaptureTestPhoto = onCaptureTestPhoto?.let { { it(item.id) } }
+                                onCaptureTestPhoto = onCaptureTestPhoto?.let { { it(item.id) } },
+                                onViewHistory = onViewHistory?.let { { it(item.id) } }
                             )
                             HorizontalDivider()
                         }
@@ -179,7 +184,8 @@ private fun StorageListItem(
     thumbnail: Bitmap?,
     onDelete: () -> Unit,
     onClick: () -> Unit,
-    onCaptureTestPhoto: (() -> Unit)? = null
+    onCaptureTestPhoto: (() -> Unit)? = null,
+    onViewHistory: (() -> Unit)? = null
 ) {
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
     Row(
@@ -226,6 +232,14 @@ private fun StorageListItem(
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Capture test photo for ${item.name}"
+                )
+            }
+        }
+        if (onViewHistory != null) {
+            IconButton(onClick = onViewHistory) {
+                Icon(
+                    imageVector = Icons.Default.History,
+                    contentDescription = "View comparison history for ${item.name}"
                 )
             }
         }
