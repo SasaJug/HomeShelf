@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.edit.EditScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureScreen
+import com.jugurdzija.homeshelf.ui.golden.GoldenDetailsScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenSaveScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
@@ -87,13 +88,15 @@ fun HomeShelfNavGraph(
         ) {
             GoldenManageScreen(
                 onBack = { navController.popBackStack() },
-                onNavigateToView = { navController.navigate(Routes.GOLDEN_VIEW) }
+                onNavigateToDetails = { name -> navController.navigate(Routes.goldenDetails(name)) }
             )
         }
-        composable(Routes.GOLDEN_VIEW) {
-            GoldenSaveScreen(
-                onBack = { navController.popBackStack() },
-                readOnly = true
+        composable(
+            route = Routes.GOLDEN_DETAILS,
+            arguments = listOf(navArgument("name") { type = NavType.StringType })
+        ) {
+            GoldenDetailsScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

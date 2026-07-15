@@ -50,7 +50,7 @@ import java.io.File
 @Composable
 fun GoldenManageScreen(
     onBack: () -> Unit,
-    onNavigateToView: () -> Unit,
+    onNavigateToDetails: (String) -> Unit,
     vm: GoldenManageViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -58,7 +58,7 @@ fun GoldenManageScreen(
     LaunchedEffect(vm.events) {
         vm.events.collect { event ->
             when (event) {
-                is GoldenManageViewModel.Event.NavigateToView -> onNavigateToView()
+                is GoldenManageViewModel.Event.NavigateToDetails -> onNavigateToDetails(event.name)
             }
         }
     }

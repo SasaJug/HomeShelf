@@ -53,7 +53,6 @@ import com.jugurdzija.homeshelf.data.GuideLine
 @Composable
 fun GoldenSaveScreen(
     onBack: () -> Unit,
-    readOnly: Boolean = false,
     vm: GoldenSaveViewModel = hiltViewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
@@ -63,7 +62,7 @@ fun GoldenSaveScreen(
     var tappedCellIndex by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
-        if (!readOnly) vm.loadGuideLines()
+        vm.loadGuideLines()
     }
 
     LaunchedEffect(saveState) {
@@ -92,18 +91,16 @@ fun GoldenSaveScreen(
                     }
                 },
                 actions = {
-                    if (!readOnly) {
-                        if (saveState is GoldenSaveViewModel.SaveState.Saving) {
-                            CircularProgressIndicator(
-                                strokeWidth = 2.dp,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .padding(end = 16.dp)
-                            )
-                        } else {
-                            TextButton(onClick = { vm.save() }) {
-                                Text("Save")
-                            }
+                    if (saveState is GoldenSaveViewModel.SaveState.Saving) {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(end = 16.dp)
+                        )
+                    } else {
+                        TextButton(onClick = { vm.save() }) {
+                            Text("Save")
                         }
                     }
                 }
@@ -117,7 +114,7 @@ fun GoldenSaveScreen(
         ) {
             uiState.captureData.bitmap?.let { bmp ->
                 val lines = (guideLineState as? GoldenSaveViewModel.GuideLineState.Ready)?.guideLines
-                if (!readOnly && lines != null) {
+                if (lines != null) {
                     AnnotatableImage(
                         bitmap = bmp,
                         guideLines = lines,
@@ -273,27 +270,3 @@ private fun ChangeTypeDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
-
-private val ChangeType.symbol: String
-    get() = when (this) {
-        ChangeType.NO_CHANGE -> "○"
-        ChangeType.ITEM_ADDED -> "+"
-        ChangeType.ITEM_REMOVED -> "−"
-        ChangeType.ITEM_REPLACED -> "≠"
-    }
-
-private val ChangeType.label: String
-    get() = when (this) {
-        ChangeType.NO_CHANGE -> "No change"
-        ChangeType.ITEM_ADDED -> "Item added"
-        ChangeType.ITEM_REMOVED -> "Item removed"
-        ChangeType.ITEM_REPLACED -> "Item replaced"
-    }
-
-private val ChangeType.chipColor: Color
-    get() = when (this) {
-        ChangeType.NO_CHANGE -> Color(0xFF388E3C)
-        ChangeType.ITEM_ADDED -> Color(0xFF1565C0)
-        ChangeType.ITEM_REMOVED -> Color(0xFFC62828)
-        ChangeType.ITEM_REPLACED -> Color(0xFFE65100)
-    }

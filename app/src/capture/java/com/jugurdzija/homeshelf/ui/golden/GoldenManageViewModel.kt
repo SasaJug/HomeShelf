@@ -26,7 +26,7 @@ class GoldenManageViewModel @Inject constructor(
 ) : ViewModel() {
 
     sealed interface Event {
-        data object NavigateToView : Event
+        data class NavigateToDetails(val name: String) : Event
     }
 
     sealed interface State {
@@ -56,8 +56,7 @@ class GoldenManageViewModel @Inject constructor(
 
     fun onItemClick(name: String) {
         viewModelScope.launch {
-            goldenStore.loadIntoHolder(name)
-            _events.send(Event.NavigateToView)
+            _events.send(Event.NavigateToDetails(name))
         }
     }
 

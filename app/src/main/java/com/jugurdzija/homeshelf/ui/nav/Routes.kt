@@ -1,5 +1,7 @@
 package com.jugurdzija.homeshelf.ui.nav
 
+import java.net.URLEncoder
+
 object Routes {
     private const val EDIT_BASE = "edit"
 
@@ -12,7 +14,7 @@ object Routes {
     const val GOLDEN_CAPTURE = "golden_capture/{storageId}"
     const val GOLDEN_SAVE = "golden_save"
     const val GOLDEN_MANAGE = "golden_manage/{storageId}"
-    const val GOLDEN_VIEW = "golden_view"
+    const val GOLDEN_DETAILS = "golden_details/{name}"
 
     fun edit(storageId: String? = null) =
         if (storageId != null) EDIT.replace("{storageId}", storageId) else EDIT_BASE
@@ -20,6 +22,8 @@ object Routes {
     fun goldenCapture(storageId: String) = GOLDEN_CAPTURE.replace("{storageId}", storageId)
 
     fun goldenManage(storageId: String) = GOLDEN_MANAGE.replace("{storageId}", storageId)
+
+    fun goldenDetails(name: String) = GOLDEN_DETAILS.replace("{name}", URLEncoder.encode(name, "UTF-8"))
 
     fun review(storageId: String) = REVIEW.replace("{storageId}", storageId)
 

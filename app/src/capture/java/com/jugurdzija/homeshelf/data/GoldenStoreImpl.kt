@@ -54,24 +54,24 @@ class GoldenStoreImpl @Inject constructor(
         File(comparisonsDir(), name).deleteRecursively()
     }
 
-    override suspend fun loadIntoHolder(name: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun loadDetails(name: String): CaptureData? = withContext(Dispatchers.IO) {
         val dir = File(comparisonsDir(), name)
         val metaFile = File(dir, GoldenConstants.FILE_META)
         val photoFile = File(dir, GoldenConstants.FILE_PHOTO)
-        if (!metaFile.exists() || !photoFile.exists()) return@withContext false
+        if (!metaFile.exists() || !photoFile.exists()) return@withContext null
 
         val json = try {
             JSONObject(metaFile.readText())
         } catch (e: Exception) {
-            return@withContext false
+            return@withContext null
         }
-        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath) ?: return@withContext false
+        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath) ?: return@withContext null
 
         val allScores = json.optJSONObject(GoldenConstants.KEY_ALL_MATCH_SCORES)?.let { obj ->
             obj.keys().asSequence().associateWith { key -> obj.getDouble(key) }
         }
 
-        holder = CaptureData(
+        CaptureData(
             name = json.optString(GoldenConstants.KEY_NAME, name).takeIf { it.isNotEmpty() },
             bitmap = bitmap,
             storageId = json.optString(GoldenConstants.KEY_STORAGE_ID).takeIf { it.isNotEmpty() },
@@ -84,8 +84,6 @@ class GoldenStoreImpl @Inject constructor(
             captureAttempt = json.optInt(GoldenConstants.KEY_CAPTURE_ATTEMPT),
             groundTruth = parseGroundTruth(json)
         )
-
-        true
     }
 
     override suspend fun save(

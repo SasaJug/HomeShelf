@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 interface GoldenStore {
     suspend fun loadAll(): List<GoldenItem>
     suspend fun delete(name: String): Boolean
-    suspend fun loadIntoHolder(name: String): Boolean
+    suspend fun loadDetails(name: String): CaptureData?
     fun readHolder(): CaptureData
 
     suspend fun save(
