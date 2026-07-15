@@ -7,6 +7,7 @@ internal object GoldenConstants {
 
     const val KEY_NAME = "name"
     const val KEY_TIMESTAMP = "timestamp"
+    const val KEY_STORAGE_ID = "storage_id"
     const val KEY_REFERENCE_LABEL = "reference_label"
     const val KEY_SIMILARITY_SCORE = "similarity_score"
     const val KEY_SIMILARITY_THRESHOLD = "similarity_threshold"

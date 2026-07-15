@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.CellPair
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
@@ -29,7 +29,7 @@ sealed interface ReviewNavEvent {
 class ReviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val pendingCaptureStore: PendingCaptureStore,
-    private val storageStore: StorageStore,
+    private val storageRepository: StorageRepository,
     private val comparisonPipeline: ComparisonPipeline,
     private val storageSavePipeline: StorageSavePipeline,
     private val shelfDiffAnalyzer: ShelfDiffAnalyzer
@@ -51,7 +51,7 @@ class ReviewViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val storageName = storageStore.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
+            val storageName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
             val pending = pendingCaptureStore.load()
             if (pending == null) {
                 _state.value = ReviewUiState.CompareError(storageName, "No captured image found")

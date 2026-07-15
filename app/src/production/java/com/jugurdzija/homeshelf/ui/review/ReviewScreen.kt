@@ -1,5 +1,6 @@
 package com.jugurdzija.homeshelf.ui.review
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,12 +43,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.llm.CellDiffResult
+import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import androidx.core.graphics.createBitmap
 
 private val SimilarityGreen = Color(0xFF4CAF50)
 private val SimilarityYellow = Color(0xFFFFEB3B)
@@ -64,7 +69,6 @@ fun ReviewScreen(
     val saveState by vm.saveState.collectAsState()
     val aiDiffState by vm.aiDiffState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
     LaunchedEffect(vm.navEvent) {
         vm.navEvent.collect { event ->
@@ -83,6 +87,30 @@ fun ReviewScreen(
         }
     }
 
+    ReviewScreenContent(
+        state = state,
+        aiDiffState = aiDiffState,
+        snackbarHostState = snackbarHostState,
+        onDiscard = vm::discard,
+        onAnalyzeWithAi = vm::analyzeWithAi,
+        onEdit = vm::navigateToEdit,
+        onSave = vm::save
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReviewScreenContent(
+    state: ReviewUiState,
+    aiDiffState: AiDiffState,
+    snackbarHostState: SnackbarHostState,
+    onDiscard: () -> Unit,
+    onAnalyzeWithAi: () -> Unit,
+    onEdit: () -> Unit,
+    onSave: () -> Unit
+) {
+    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+
     val topBarTitle = when (val s = state) {
         is ReviewUiState.Done -> s.storageName
         is ReviewUiState.CompareError -> s.storageName
@@ -95,18 +123,18 @@ fun ReviewScreen(
             TopAppBar(
                 title = { Text(topBarTitle) },
                 navigationIcon = {
-                    IconButton(onClick = vm::discard) {
+                    IconButton(onClick = onDiscard) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Discard")
                     }
                 },
                 actions = {
                     if (state is ReviewUiState.Done) {
                         TextButton(
-                            onClick = vm::analyzeWithAi,
+                            onClick = onAnalyzeWithAi,
                             enabled = aiDiffState !is AiDiffState.Loading
                         ) { Text("Analyze with AI") }
-                        TextButton(onClick = vm::navigateToEdit) { Text("Edit") }
-                        TextButton(onClick = vm::save) { Text("Save") }
+                        TextButton(onClick = onEdit) { Text("Edit") }
+                        TextButton(onClick = onSave) { Text("Save") }
                     }
                 }
             )
@@ -269,5 +297,124 @@ private fun AiDiffPanel(
                 }
             }
         }
+    }
+}
+
+private fun previewBitmap(): Bitmap {
+    val bitmap = createBitmap(360, 480)
+    android.graphics.Canvas(bitmap).drawColor(android.graphics.Color.DKGRAY)
+    return bitmap
+}
+
+private val previewGuideLines = listOf(
+    GuideLine(id = 0, isHorizontal = true, position = 0f),
+    GuideLine(id = 1, isHorizontal = true, position = 0.5f),
+    GuideLine(id = 2, isHorizontal = true, position = 1f),
+    GuideLine(id = 3, isHorizontal = false, position = 0f),
+    GuideLine(id = 4, isHorizontal = false, position = 0.5f),
+    GuideLine(id = 5, isHorizontal = false, position = 1f)
+)
+
+private val previewSimilarities = mapOf(
+    "A1" to 0.95f,
+    "A2" to 0.78f,
+    "B1" to 0.42f,
+    "B2" to 0.88f
+)
+
+private val previewDoneState = ReviewUiState.Done(
+    storageName = "Pantry Shelf A",
+    alignedBitmap = previewBitmap(),
+    guideLines = previewGuideLines,
+    similarities = previewSimilarities,
+    referenceCells = emptyList(),
+    newCells = emptyList()
+)
+
+private val previewAiDiffResults = listOf(
+    CellDiffResult(cellId = "A1", changed = false, description = "Cereal boxes unchanged"),
+    CellDiffResult(cellId = "B1", changed = true, description = "Soup cans missing, replaced with pasta")
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewScreenLoadingPreview() {
+    HomeShelfTheme {
+        ReviewScreenContent(
+            state = ReviewUiState.Loading,
+            aiDiffState = AiDiffState.NotRequested,
+            snackbarHostState = remember { SnackbarHostState() },
+            onDiscard = {},
+            onAnalyzeWithAi = {},
+            onEdit = {},
+            onSave = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewScreenDonePreview() {
+    HomeShelfTheme {
+        ReviewScreenContent(
+            state = previewDoneState,
+            aiDiffState = AiDiffState.NotRequested,
+            snackbarHostState = remember { SnackbarHostState() },
+            onDiscard = {},
+            onAnalyzeWithAi = {},
+            onEdit = {},
+            onSave = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewScreenAiLoadingPreview() {
+    HomeShelfTheme {
+        ReviewScreenContent(
+            state = previewDoneState,
+            aiDiffState = AiDiffState.Loading,
+            snackbarHostState = remember { SnackbarHostState() },
+            onDiscard = {},
+            onAnalyzeWithAi = {},
+            onEdit = {},
+            onSave = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewScreenAiDonePreview() {
+    HomeShelfTheme {
+        ReviewScreenContent(
+            state = previewDoneState,
+            aiDiffState = AiDiffState.Done(previewAiDiffResults),
+            snackbarHostState = remember { SnackbarHostState() },
+            onDiscard = {},
+            onAnalyzeWithAi = {},
+            onEdit = {},
+            onSave = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewScreenCompareErrorPreview() {
+    HomeShelfTheme {
+        ReviewScreenContent(
+            state = ReviewUiState.CompareError(
+                storageName = "Pantry Shelf A",
+                message = "Alignment failed — try capturing again"
+            ),
+            aiDiffState = AiDiffState.NotRequested,
+            snackbarHostState = remember { SnackbarHostState() },
+            onDiscard = {},
+            onAnalyzeWithAi = {},
+            onEdit = {},
+            onSave = {}
+        )
     }
 }

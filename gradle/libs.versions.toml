@@ -11,7 +11,7 @@ lifecycle = "2.8.7"
 material-version = "1.12.0"
 
 # Dependency Injection
-hilt = "2.51.1"
+hilt = "2.56.2"
 
 # Networking
 navigation-fragment-ktx = "2.8.6"

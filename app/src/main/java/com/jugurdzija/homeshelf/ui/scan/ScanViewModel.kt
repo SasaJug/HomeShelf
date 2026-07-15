@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.ReferenceItem
 import com.jugurdzija.homeshelf.data.StorageItem
-import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +16,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -28,7 +26,7 @@ sealed interface ScanNavEvent {
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    private val storageStore: StorageStore,
+    private val storageRepository: StorageRepository,
     private val embedder: EmbedderOwner,
     private val pendingCaptureStore: PendingCaptureStore
 ) : ViewModel() {
@@ -40,18 +38,14 @@ class ScanViewModel @Inject constructor(
     val navEvent: SharedFlow<ScanNavEvent> = _navEvent
 
     private var storagesWithBitmaps: List<Pair<StorageItem, Bitmap>> = emptyList()
-    private var referenceItems: List<Pair<ReferenceItem, Bitmap>> = emptyList()
     private val inferenceInFlight = AtomicBoolean(false)
     private var cachedGuideLines: Pair<String, List<GuideLine>>? = null
 
     init {
         viewModelScope.launch {
-            val items = storageStore.loadAll()
+            val items = storageRepository.loadAll()
             storagesWithBitmaps = items.mapNotNull { item ->
-                storageStore.decodeLatestBitmap(item.id)?.let { item to it }
-            }
-            referenceItems = storagesWithBitmaps.map { (item, bitmap) ->
-                ReferenceItem(id = item.id, label = item.name, file = File("")) to bitmap
+                storageRepository.decodeLatestBitmap(item.id)?.let { item to it }
             }
             _state.value = ScanUiState.Streaming()
         }
@@ -74,14 +68,14 @@ class ScanViewModel @Inject constructor(
         if (!inferenceInFlight.compareAndSet(false, true)) return
         viewModelScope.launch {
             try {
-                if (referenceItems.isEmpty()) {
+                if (storagesWithBitmaps.isEmpty()) {
                     _state.value = ScanUiState.Streaming()
                     return@launch
                 }
-                val matches = embedder.embedAll(bitmap, referenceItems)
+                val matches = embedder.embedAll(bitmap, storagesWithBitmaps)
                 val top = matches.firstOrNull()
                 if (top != null && top.similarity >= CAPTURE_SIMILARITY_THRESHOLD) {
-                    val detected = storagesWithBitmaps.first { it.first.id == top.item.id }.first
+                    val detected = top.item
                     val guideLines = loadGuideLinesCached(detected.id)
                     _state.value = ScanUiState.Streaming(matches, detected, guideLines)
                 } else {
@@ -96,7 +90,7 @@ class ScanViewModel @Inject constructor(
     private suspend fun loadGuideLinesCached(storageId: String): List<GuideLine> {
         val cached = cachedGuideLines
         if (cached != null && cached.first == storageId) return cached.second
-        val lines = storageStore.loadLatestData(storageId).guideLines
+        val lines = storageRepository.loadLatestData(storageId).guideLines
         cachedGuideLines = storageId to lines
         return lines
     }

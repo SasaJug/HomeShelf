@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +32,7 @@ sealed interface EditNavEvent {
 class EditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val pendingCaptureStore: PendingCaptureStore,
-    private val storageStore: StorageStore,
+    private val storageRepository: StorageRepository,
     private val storageSavePipeline: StorageSavePipeline
 ) : ViewModel() {
 
@@ -56,18 +56,17 @@ class EditViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val pending = pendingCaptureStore.load()
-            _bitmapState.value = if (pending != null) {
-                pending
-            } else if (storageId != null) {
-                storageStore.decodeLatestBitmap(storageId)
-            } else {
-                null
-            }
+            _bitmapState.value = pending
+                ?: if (storageId != null) {
+                    storageRepository.decodeLatestBitmap(storageId)
+                } else {
+                    null
+                }
         }
         if (storageId != null) {
             viewModelScope.launch {
-                name = storageStore.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-                val loaded = storageStore.loadLatestData(storageId).guideLines
+                name = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
+                val loaded = storageRepository.loadLatestData(storageId).guideLines
                 guideLines.addAll(loaded)
                 nextId = (loaded.maxOfOrNull { it.id } ?: -1) + 1
             }

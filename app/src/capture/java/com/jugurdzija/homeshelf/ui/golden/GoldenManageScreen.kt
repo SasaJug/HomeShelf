@@ -50,7 +50,7 @@ import java.io.File
 @Composable
 fun GoldenManageScreen(
     onBack: () -> Unit,
-    onNavigateToView: () -> Unit,
+    onNavigateToDetails: (String) -> Unit,
     vm: GoldenManageViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -58,7 +58,7 @@ fun GoldenManageScreen(
     LaunchedEffect(vm.events) {
         vm.events.collect { event ->
             when (event) {
-                is GoldenManageViewModel.Event.NavigateToView -> onNavigateToView()
+                is GoldenManageViewModel.Event.NavigateToDetails -> onNavigateToDetails(event.name)
             }
         }
     }
@@ -70,6 +70,11 @@ fun GoldenManageScreen(
         onDelete = vm::onDelete,
         formatTimestamp = vm::formatTimestamp
     )
+}
+
+private fun topBarTitle(state: GoldenManageViewModel.State): String = when (state) {
+    is GoldenManageViewModel.State.Loaded -> "History: ${state.referenceName}"
+    else -> "Comparison History"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +89,7 @@ private fun GoldenManageContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Golden Captures") },
+                title = { Text(topBarTitle(state)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -104,7 +109,7 @@ private fun GoldenManageContent(
                 }
                 is GoldenManageViewModel.State.Empty -> {
                     Text(
-                        "No golden captures yet.",
+                        "No comparison photos yet for this reference.",
                         modifier = Modifier.align(Alignment.Center),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -112,27 +117,14 @@ private fun GoldenManageContent(
                 }
                 is GoldenManageViewModel.State.Loaded -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        s.groups.forEach { (referenceLabel, items) ->
-                            item(key = "header_$referenceLabel") {
-                                Text(
-                                    text = referenceLabel,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                                HorizontalDivider()
-                            }
-                            items(items, key = { it.name }) { item ->
-                                GoldenManageItem(
-                                    item = item,
-                                    formattedTimestamp = formatTimestamp(item.timestamp),
-                                    onClick = { onItemClick(item.name) },
-                                    onDelete = { onDelete(item.name) }
-                                )
-                                HorizontalDivider()
-                            }
+                        items(s.items, key = { it.name }) { item ->
+                            GoldenManageItem(
+                                item = item,
+                                formattedTimestamp = formatTimestamp(item.timestamp),
+                                onClick = { onItemClick(item.name) },
+                                onDelete = { onDelete(item.name) }
+                            )
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -230,17 +222,12 @@ private fun GoldenManageEmptyPreview() {
 @Preview(showBackground = true, name = "Loaded")
 @Composable
 private fun GoldenManageLoadedPreview() {
-    val groups = mapOf(
-        "Front Shelf" to listOf(
-            previewItem("capture_001", "Front Shelf"),
-            previewItem("capture_002", "Front Shelf")
-        ),
-        "Back Shelf" to listOf(
-            previewItem("capture_003", "Back Shelf")
-        )
+    val items = listOf(
+        previewItem("capture_001", "Front Shelf"),
+        previewItem("capture_002", "Front Shelf")
     )
     GoldenManageContent(
-        state = GoldenManageViewModel.State.Loaded(groups),
+        state = GoldenManageViewModel.State.Loaded("Front Shelf", items),
         onBack = {},
         onItemClick = {},
         onDelete = {},

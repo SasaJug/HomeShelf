@@ -14,9 +14,9 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-class StorageStoreImpl @Inject constructor(
+class StorageRepositoryImpl @Inject constructor(
     @Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
-) : StorageStore {
+) : StorageRepository {
 
     private companion object {
         const val DIR_STORAGES = "storages"

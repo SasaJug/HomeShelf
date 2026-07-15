@@ -20,6 +20,8 @@ class GoldenStoreImpl @Inject constructor(
     @param:Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
 ) : GoldenStore {
 
+    private var holder: CaptureData = CaptureData()
+
     private fun comparisonsDir() = File(storageRoot, GoldenConstants.DIR_COMPARISONS)
 
     override suspend fun loadAll(): List<GoldenItem> = withContext(Dispatchers.IO) {
@@ -36,6 +38,7 @@ class GoldenStoreImpl @Inject constructor(
                 val groundTruth = parseGroundTruth(json)
                 GoldenItem(
                     name = subDir.name,
+                    storageId = json.optString(GoldenConstants.KEY_STORAGE_ID).takeIf { it.isNotEmpty() },
                     referenceLabel = json.optString(GoldenConstants.KEY_REFERENCE_LABEL, subDir.name),
                     referenceFilePath = json.optString(GoldenConstants.KEY_REFERENCE_FILE_PATH, ""),
                     timestamp = json.optString(GoldenConstants.KEY_TIMESTAMP, ""),
@@ -51,40 +54,42 @@ class GoldenStoreImpl @Inject constructor(
         File(comparisonsDir(), name).deleteRecursively()
     }
 
-    override suspend fun loadIntoHolder(name: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun loadDetails(name: String): CaptureData? = withContext(Dispatchers.IO) {
         val dir = File(comparisonsDir(), name)
         val metaFile = File(dir, GoldenConstants.FILE_META)
         val photoFile = File(dir, GoldenConstants.FILE_PHOTO)
-        if (!metaFile.exists() || !photoFile.exists()) return@withContext false
+        if (!metaFile.exists() || !photoFile.exists()) return@withContext null
 
         val json = try {
             JSONObject(metaFile.readText())
         } catch (e: Exception) {
-            return@withContext false
+            return@withContext null
         }
-        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath) ?: return@withContext false
+        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath) ?: return@withContext null
 
         val allScores = json.optJSONObject(GoldenConstants.KEY_ALL_MATCH_SCORES)?.let { obj ->
             obj.keys().asSequence().associateWith { key -> obj.getDouble(key) }
         }
 
-        GoldenCaptureHolder.name = json.optString(GoldenConstants.KEY_NAME, name).takeIf { it.isNotEmpty() }
-        GoldenCaptureHolder.bitmap = bitmap
-        GoldenCaptureHolder.referenceLabel = json.optString(GoldenConstants.KEY_REFERENCE_LABEL).takeIf { it.isNotEmpty() }
-        GoldenCaptureHolder.referenceFilePath = json.optString(GoldenConstants.KEY_REFERENCE_FILE_PATH).takeIf { it.isNotEmpty() }
-        GoldenCaptureHolder.similarityScore = json.optDouble(GoldenConstants.KEY_SIMILARITY_SCORE).takeIf { !it.isNaN() }
-        GoldenCaptureHolder.similarityThreshold = json.optDouble(GoldenConstants.KEY_SIMILARITY_THRESHOLD).takeIf { !it.isNaN() }
-        GoldenCaptureHolder.allMatchScores = allScores
-        GoldenCaptureHolder.framesAnalyzed = json.optInt(GoldenConstants.KEY_FRAMES_ANALYZED).takeIf { it != 0 }
-        GoldenCaptureHolder.captureAttempt = json.optInt(GoldenConstants.KEY_CAPTURE_ATTEMPT)
-        GoldenCaptureHolder.groundTruth = parseGroundTruth(json)
-
-        true
+        CaptureData(
+            name = json.optString(GoldenConstants.KEY_NAME, name).takeIf { it.isNotEmpty() },
+            bitmap = bitmap,
+            storageId = json.optString(GoldenConstants.KEY_STORAGE_ID).takeIf { it.isNotEmpty() },
+            referenceLabel = json.optString(GoldenConstants.KEY_REFERENCE_LABEL).takeIf { it.isNotEmpty() },
+            referenceFilePath = json.optString(GoldenConstants.KEY_REFERENCE_FILE_PATH).takeIf { it.isNotEmpty() },
+            similarityScore = json.optDouble(GoldenConstants.KEY_SIMILARITY_SCORE).takeIf { !it.isNaN() },
+            similarityThreshold = json.optDouble(GoldenConstants.KEY_SIMILARITY_THRESHOLD).takeIf { !it.isNaN() },
+            allMatchScores = allScores,
+            framesAnalyzed = json.optInt(GoldenConstants.KEY_FRAMES_ANALYZED).takeIf { it != 0 },
+            captureAttempt = json.optInt(GoldenConstants.KEY_CAPTURE_ATTEMPT),
+            groundTruth = parseGroundTruth(json)
+        )
     }
 
     override suspend fun save(
         bitmap: Bitmap,
         name: String,
+        storageId: String?,
         referenceLabel: String?,
         referenceFilePath: String?,
         similarityScore: Double?,
@@ -115,6 +120,7 @@ class GoldenStoreImpl @Inject constructor(
         val meta = JSONObject().apply {
             put(GoldenConstants.KEY_TIMESTAMP, Instant.now().toString())
             put(GoldenConstants.KEY_NAME, name)
+            put(GoldenConstants.KEY_STORAGE_ID, storageId)
             put(GoldenConstants.KEY_REFERENCE_LABEL, referenceLabel)
             put(GoldenConstants.KEY_REFERENCE_FILE_PATH, referenceFilePath)
             put(GoldenConstants.KEY_SIMILARITY_SCORE, similarityScore)
@@ -132,39 +138,28 @@ class GoldenStoreImpl @Inject constructor(
         File(dir, GoldenConstants.FILE_META).writeText(meta.toString(2))
     }
 
-    override fun readHolder(): CaptureData = CaptureData(
-        name = GoldenCaptureHolder.name,
-        bitmap = GoldenCaptureHolder.bitmap,
-        referenceLabel = GoldenCaptureHolder.referenceLabel,
-        referenceFilePath = GoldenCaptureHolder.referenceFilePath,
-        similarityScore = GoldenCaptureHolder.similarityScore,
-        similarityThreshold = GoldenCaptureHolder.similarityThreshold,
-        allMatchScores = GoldenCaptureHolder.allMatchScores,
-        framesAnalyzed = GoldenCaptureHolder.framesAnalyzed,
-        captureAttempt = GoldenCaptureHolder.captureAttempt,
-        groundTruth = GoldenCaptureHolder.groundTruth
-    )
+    override fun readHolder(): CaptureData = holder
 
     override suspend fun populateHolder(
         bitmap: Bitmap,
+        storageId: String,
         referenceLabel: String,
-        referenceFilePath: String,
-        similarityScore: Double,
-        similarityThreshold: Double,
-        allMatchScores: Map<String, Double>,
-        framesAnalyzed: Int,
-        captureAttempt: Int
+        similarityScore: Double?,
+        similarityThreshold: Double?,
+        allMatchScores: Map<String, Double>?,
+        framesAnalyzed: Int?,
+        captureAttempt: Int?
     ) {
-        GoldenCaptureHolder.name = null
-        GoldenCaptureHolder.bitmap = bitmap
-        GoldenCaptureHolder.referenceLabel = referenceLabel
-        GoldenCaptureHolder.referenceFilePath = referenceFilePath
-        GoldenCaptureHolder.similarityScore = similarityScore
-        GoldenCaptureHolder.similarityThreshold = similarityThreshold
-        GoldenCaptureHolder.allMatchScores = allMatchScores
-        GoldenCaptureHolder.framesAnalyzed = framesAnalyzed
-        GoldenCaptureHolder.captureAttempt = captureAttempt
-        GoldenCaptureHolder.groundTruth = emptyList()
+        holder = CaptureData(
+            bitmap = bitmap,
+            storageId = storageId,
+            referenceLabel = referenceLabel,
+            similarityScore = similarityScore,
+            similarityThreshold = similarityThreshold,
+            allMatchScores = allMatchScores,
+            framesAnalyzed = framesAnalyzed,
+            captureAttempt = captureAttempt
+        )
     }
 
     private fun parseGroundTruth(json: JSONObject): List<GroundTruthCell> {

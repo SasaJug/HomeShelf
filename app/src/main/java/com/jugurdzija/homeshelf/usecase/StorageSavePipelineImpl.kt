@@ -3,7 +3,7 @@ package com.jugurdzija.homeshelf.usecase
 import android.graphics.Bitmap
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.ReferencePhotoData
-import com.jugurdzija.homeshelf.data.StorageStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.GridCellEmbedder
 import com.jugurdzija.homeshelf.homography.GridProcessor
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class StorageSavePipelineImpl @Inject constructor(
-    private val storageStore: StorageStore,
+    private val storageRepository: StorageRepository,
     private val gridProcessor: GridProcessor,
     private val gridCellEmbedder: GridCellEmbedder
 ) : StorageSavePipeline {
@@ -26,9 +26,9 @@ class StorageSavePipelineImpl @Inject constructor(
         canvasHeight: Int
     ): StorageSaveResult {
         return try {
-            val id = storageId ?: storageStore.createNew(name).id
+            val id = storageId ?: storageRepository.createNew(name).id
             val existingDescriptions = if (storageId != null) {
-                storageStore.loadLatestData(id).descriptions
+                storageRepository.loadLatestData(id).descriptions
             } else {
                 emptyMap()
             }
@@ -39,7 +39,7 @@ class StorageSavePipelineImpl @Inject constructor(
             val cells = gridProcessor.extract(bitmap, hPixels, vPixels)
             val embeddings = gridCellEmbedder.embed(cells)
 
-            storageStore.saveLatest(
+            storageRepository.saveLatest(
                 id,
                 bitmap,
                 ReferencePhotoData(

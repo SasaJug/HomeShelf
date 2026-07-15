@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,9 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -51,11 +55,37 @@ fun ReferenceScreen(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onCaptureTestPhoto: ((String) -> Unit)? = null,
+    onViewHistory: ((String) -> Unit)? = null,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
 
+    ReferenceScreenContent(
+        state = state,
+        thumbnails = thumbnails,
+        onDelete = vm::onDelete,
+        onNavigateToEdit = onNavigateToEdit,
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToScan = onNavigateToScan,
+        onCaptureTestPhoto = onCaptureTestPhoto,
+        onViewHistory = onViewHistory
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReferenceScreenContent(
+    state: ReferenceListUiState,
+    thumbnails: Map<String, Bitmap>,
+    onDelete: (String) -> Unit,
+    onNavigateToEdit: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToScan: () -> Unit,
+    onCaptureTestPhoto: ((String) -> Unit)? = null,
+    onViewHistory: ((String) -> Unit)? = null
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -121,8 +151,10 @@ fun ReferenceScreen(
                             StorageListItem(
                                 item = item,
                                 thumbnail = thumbnails[item.id],
-                                onDelete = { vm.onDelete(item.id) },
-                                onClick = { onNavigateToEdit(item.id) }
+                                onDelete = { onDelete(item.id) },
+                                onClick = { onNavigateToEdit(item.id) },
+                                onCaptureTestPhoto = onCaptureTestPhoto?.let { { it(item.id) } },
+                                onViewHistory = onViewHistory?.let { { it(item.id) } }
                             )
                             HorizontalDivider()
                         }
@@ -151,7 +183,9 @@ private fun StorageListItem(
     item: StorageItem,
     thumbnail: Bitmap?,
     onDelete: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onCaptureTestPhoto: (() -> Unit)? = null,
+    onViewHistory: (() -> Unit)? = null
 ) {
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
     Row(
@@ -193,6 +227,22 @@ private fun StorageListItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        if (onCaptureTestPhoto != null) {
+            IconButton(onClick = onCaptureTestPhoto) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = "Capture test photo for ${item.name}"
+                )
+            }
+        }
+        if (onViewHistory != null) {
+            IconButton(onClick = onViewHistory) {
+                Icon(
+                    imageVector = Icons.Default.History,
+                    contentDescription = "View comparison history for ${item.name}"
+                )
+            }
+        }
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = Icons.Default.Delete,
@@ -200,5 +250,74 @@ private fun StorageListItem(
                 tint = MaterialTheme.colorScheme.error
             )
         }
+    }
+}
+
+private val previewItems = listOf(
+    StorageItem(id = "1", name = "Pantry Shelf A", createdAt = 0L, updatedAt = 1_700_000_000_000L),
+    StorageItem(id = "2", name = "Garage Cabinet", createdAt = 0L, updatedAt = 1_700_100_000_000L),
+    StorageItem(id = "3", name = "Bedroom Closet", createdAt = 0L, updatedAt = 1_700_200_000_000L)
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun ReferenceScreenLoadingPreview() {
+    HomeShelfTheme {
+        ReferenceScreenContent(
+            state = ReferenceListUiState.Loading,
+            thumbnails = emptyMap(),
+            onDelete = {},
+            onNavigateToEdit = {},
+            onNavigateToSettings = {},
+            onNavigateToScan = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReferenceScreenEmptyPreview() {
+    HomeShelfTheme {
+        ReferenceScreenContent(
+            state = ReferenceListUiState.Empty,
+            thumbnails = emptyMap(),
+            onDelete = {},
+            onNavigateToEdit = {},
+            onNavigateToSettings = {},
+            onNavigateToScan = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReferenceScreenLoadedPreview() {
+    HomeShelfTheme {
+        ReferenceScreenContent(
+            state = ReferenceListUiState.Loaded(previewItems),
+            thumbnails = emptyMap(),
+            onDelete = {},
+            onNavigateToEdit = {},
+            onNavigateToSettings = {},
+            onNavigateToScan = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReferenceScreenErrorPreview() {
+    HomeShelfTheme {
+        ReferenceScreenContent(
+            state = ReferenceListUiState.Error(
+                message = "Failed to load storages",
+                items = previewItems
+            ),
+            thumbnails = emptyMap(),
+            onDelete = {},
+            onNavigateToEdit = {},
+            onNavigateToSettings = {},
+            onNavigateToScan = {}
+        )
     }
 }

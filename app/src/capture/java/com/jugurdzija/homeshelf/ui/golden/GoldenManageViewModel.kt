@@ -1,9 +1,11 @@
 package com.jugurdzija.homeshelf.ui.golden
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,18 +20,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GoldenManageViewModel @Inject constructor(
-    private val goldenStore: GoldenStore
+    savedStateHandle: SavedStateHandle,
+    private val goldenStore: GoldenStore,
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     sealed interface Event {
-        data object NavigateToView : Event
+        data class NavigateToDetails(val name: String) : Event
     }
 
     sealed interface State {
         data object Loading : State
         data object Empty : State
-        data class Loaded(val groups: Map<String, List<GoldenItem>>) : State
+        data class Loaded(val referenceName: String, val items: List<GoldenItem>) : State
     }
+
+    private val storageId: String = checkNotNull(savedStateHandle["storageId"])
 
     private val _state = MutableStateFlow<State>(State.Loading)
     val state: StateFlow<State> = _state.asStateFlow()
@@ -41,16 +47,16 @@ class GoldenManageViewModel @Inject constructor(
 
     private fun load() {
         viewModelScope.launch {
-            val items = goldenStore.loadAll()
+            val items = goldenStore.loadAll().filter { it.storageId == storageId }
+            val referenceName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
             _state.value = if (items.isEmpty()) State.Empty
-            else State.Loaded(items.groupBy { it.referenceLabel })
+            else State.Loaded(referenceName, items)
         }
     }
 
     fun onItemClick(name: String) {
         viewModelScope.launch {
-            goldenStore.loadIntoHolder(name)
-            _events.send(Event.NavigateToView)
+            _events.send(Event.NavigateToDetails(name))
         }
     }
 

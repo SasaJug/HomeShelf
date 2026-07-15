@@ -6,7 +6,7 @@ import com.jugurdzija.homeshelf.data.CaptureData
 import com.jugurdzija.homeshelf.data.ChangeType
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.ReferenceDataStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.data.GroundTruthCell
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
@@ -21,11 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class GoldenSaveViewModel @Inject constructor(
     private val goldenStore: GoldenStore,
-    private val referenceDataStore: ReferenceDataStore
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     data class GoldenSaveUiState(
-        val name: String = "",
         val captureData: CaptureData = CaptureData(),
         val annotations: Map<Int, ChangeType> = emptyMap()
     )
@@ -43,15 +42,12 @@ class GoldenSaveViewModel @Inject constructor(
         data object Unavailable : GuideLineState
     }
 
-    private val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+    private val name: String = "${goldenStore.readHolder().referenceLabel ?: "unknown"}_${
+        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+    }"
 
     private val _uiState = MutableStateFlow(
-        goldenStore.readHolder().let { data ->
-            GoldenSaveUiState(
-                name = data.name ?: "${data.referenceLabel ?: "unknown"}_$timestamp",
-                captureData = data
-            )
-        }
+        GoldenSaveUiState(captureData = goldenStore.readHolder())
     )
     val uiState: StateFlow<GoldenSaveUiState> = _uiState.asStateFlow()
 
@@ -61,18 +57,16 @@ class GoldenSaveViewModel @Inject constructor(
     private val _guideLineState = MutableStateFlow<GuideLineState>(GuideLineState.Loading)
     val guideLineState: StateFlow<GuideLineState> = _guideLineState.asStateFlow()
 
-    fun setName(value: String) = _uiState.update { it.copy(name = value) }
-
     fun setAnnotation(cellIndex: Int, changeType: ChangeType) =
         _uiState.update { it.copy(annotations = it.annotations + (cellIndex to changeType)) }
 
     fun loadGuideLines() {
-        val refPath = _uiState.value.captureData.referenceFilePath ?: run {
+        val storageId = _uiState.value.captureData.storageId ?: run {
             _guideLineState.value = GuideLineState.Unavailable
             return
         }
         viewModelScope.launch {
-            val lines = referenceDataStore.load(refPath).guideLines
+            val lines = storageRepository.loadLatestData(storageId).guideLines
             _guideLineState.value = if (lines.size >= 4) GuideLineState.Ready(lines)
             else GuideLineState.Unavailable
         }
@@ -85,13 +79,13 @@ class GoldenSaveViewModel @Inject constructor(
             return
         }
         val groundTruth = buildGroundTruth(state.annotations)
-        val name = state.name.trim()
         viewModelScope.launch {
             _saveState.value = SaveState.Saving
             try {
                 goldenStore.save(
                     bitmap = bitmap,
                     name = name,
+                    storageId = state.captureData.storageId,
                     referenceLabel = state.captureData.referenceLabel,
                     referenceFilePath = state.captureData.referenceFilePath,
                     similarityScore = state.captureData.similarityScore,
