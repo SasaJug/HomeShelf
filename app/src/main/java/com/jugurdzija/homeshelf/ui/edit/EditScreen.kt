@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -73,6 +74,7 @@ fun EditScreen(
 ) {
     val bitmap by vm.bitmapState.collectAsState()
     val saveState by vm.saveState.collectAsState()
+    val gridGenerateState by vm.gridGenerateState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(vm.navEvent) {
@@ -89,6 +91,14 @@ fun EditScreen(
         if (result is StorageSaveResult.Error) {
             snackbarHostState.showSnackbar(result.message)
             vm.resetSaveState()
+        }
+    }
+
+    LaunchedEffect(gridGenerateState) {
+        val result = gridGenerateState
+        if (result is GridGenerateResult.Error) {
+            snackbarHostState.showSnackbar(result.message)
+            vm.resetGridGenerateState()
         }
     }
 
@@ -111,6 +121,8 @@ fun EditScreen(
         saveEnabled = bitmap != null && (!vm.isNewStorage || vm.name.isNotBlank()),
         onSave = vm::save,
         onDiscard = vm::discard,
+        onGenerateGridLines = vm::generateGridLines,
+        isGenerating = gridGenerateState is GridGenerateResult.Loading,
         snackbarHostState = snackbarHostState
     )
 }
@@ -129,6 +141,8 @@ private fun EditScreenContent(
     saveEnabled: Boolean,
     onSave: (canvasWidth: Int, canvasHeight: Int) -> Unit,
     onDiscard: () -> Unit,
+    onGenerateGridLines: (canvasWidth: Int, canvasHeight: Int) -> Unit,
+    isGenerating: Boolean,
     snackbarHostState: SnackbarHostState
 ) {
     var selectedId by remember { mutableStateOf(-1) }
@@ -162,6 +176,19 @@ private fun EditScreenContent(
                                 contentDescription = "Delete line",
                                 tint = MaterialTheme.colorScheme.error
                             )
+                        }
+                    }
+                    TextButton(
+                        onClick = { onGenerateGridLines(canvasSize.width, canvasSize.height) },
+                        enabled = bitmap != null && canvasSize != IntSize.Zero && !isGenerating
+                    ) {
+                        if (isGenerating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.height(16.dp).width(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("AI")
                         }
                     }
                     TextButton(onClick = { onAddGuideLine(true) }) { Text("+ H") }
@@ -339,6 +366,8 @@ private fun EditScreenLoadingPreview() {
             saveEnabled = false,
             onSave = { _, _ -> },
             onDiscard = {},
+            onGenerateGridLines = { _, _ -> },
+            isGenerating = false,
             snackbarHostState = remember { SnackbarHostState() }
         )
     }
@@ -360,6 +389,8 @@ private fun EditScreenWithGuideLinesPreview() {
             saveEnabled = true,
             onSave = { _, _ -> },
             onDiscard = {},
+            onGenerateGridLines = { _, _ -> },
+            isGenerating = false,
             snackbarHostState = remember { SnackbarHostState() }
         )
     }
@@ -381,6 +412,8 @@ private fun EditScreenNewStoragePreview() {
             saveEnabled = false,
             onSave = { _, _ -> },
             onDiscard = {},
+            onGenerateGridLines = { _, _ -> },
+            isGenerating = false,
             snackbarHostState = remember { SnackbarHostState() }
         )
     }

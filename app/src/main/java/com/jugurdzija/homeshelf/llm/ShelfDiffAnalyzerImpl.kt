@@ -1,7 +1,6 @@
 package com.jugurdzija.homeshelf.llm
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
@@ -14,11 +13,8 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.max
-import androidx.core.graphics.scale
 
 private const val MODEL_NAME = "gemini-2.5-flash"
 private const val REQUEST_TIMEOUT_MS = 30_000L
@@ -71,25 +67,9 @@ class ShelfDiffAnalyzerImpl @Inject constructor() : ShelfDiffAnalyzer {
         )
         cells.forEach { pair ->
             text("Cell ${pair.cellId} — reference:")
-            image(pair.referenceBitmap.toAnalysisBitmap())
+            image(pair.referenceBitmap.downscaleForModel(MAX_IMAGE_DIMENSION, JPEG_QUALITY))
             text("Cell ${pair.cellId} — new:")
-            image(pair.newBitmap.toAnalysisBitmap())
+            image(pair.newBitmap.downscaleForModel(MAX_IMAGE_DIMENSION, JPEG_QUALITY))
         }
-    }
-
-    private fun Bitmap.toAnalysisBitmap(): Bitmap {
-        val scale = MAX_IMAGE_DIMENSION.toFloat() / max(width, height)
-        val scaled = if (scale < 1f) {
-            this.scale(
-                (width * scale).toInt().coerceAtLeast(1),
-                (height * scale).toInt().coerceAtLeast(1)
-            )
-        } else {
-            this
-        }
-        val output = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output)
-        val bytes = output.toByteArray()
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 }

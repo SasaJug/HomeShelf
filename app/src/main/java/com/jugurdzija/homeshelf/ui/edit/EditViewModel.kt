@@ -12,8 +12,10 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.llm.GridLineGenerator
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.util.mapGeneratedLinesToCanvasGuideLines
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,12 +30,18 @@ sealed interface EditNavEvent {
     data object Discarded : EditNavEvent
 }
 
+sealed interface GridGenerateResult {
+    data object Loading : GridGenerateResult
+    data class Error(val message: String) : GridGenerateResult
+}
+
 @HiltViewModel
 class EditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val pendingCaptureStore: PendingCaptureStore,
     private val storageRepository: StorageRepository,
-    private val storageSavePipeline: StorageSavePipeline
+    private val storageSavePipeline: StorageSavePipeline,
+    private val gridLineGenerator: GridLineGenerator
 ) : ViewModel() {
 
     val storageId: String? = savedStateHandle.get<String>("storageId")?.takeIf { it.isNotEmpty() }
@@ -52,6 +60,9 @@ class EditViewModel @Inject constructor(
 
     private val _navEvent = MutableSharedFlow<EditNavEvent>(extraBufferCapacity = 1)
     val navEvent: SharedFlow<EditNavEvent> = _navEvent
+
+    private val _gridGenerateState = MutableStateFlow<GridGenerateResult?>(null)
+    val gridGenerateState: StateFlow<GridGenerateResult?> = _gridGenerateState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -93,6 +104,32 @@ class EditViewModel @Inject constructor(
 
     fun resetSaveState() {
         _saveState.value = null
+    }
+
+    fun generateGridLines(canvasWidth: Int, canvasHeight: Int) {
+        val bitmap = _bitmapState.value ?: return
+        _gridGenerateState.value = GridGenerateResult.Loading
+        viewModelScope.launch {
+            gridLineGenerator.generate(bitmap)
+                .onSuccess { generated ->
+                    val newLines = mapGeneratedLinesToCanvasGuideLines(
+                        generated, canvasWidth, canvasHeight, bitmap.width, bitmap.height, nextId
+                    )
+                    guideLines.clear()
+                    guideLines.addAll(newLines)
+                    nextId += newLines.size
+                    _gridGenerateState.value = null
+                }
+                .onFailure { e ->
+                    _gridGenerateState.value = GridGenerateResult.Error(
+                        e.message ?: "Couldn't generate the grid"
+                    )
+                }
+        }
+    }
+
+    fun resetGridGenerateState() {
+        _gridGenerateState.value = null
     }
 
     fun discard() {

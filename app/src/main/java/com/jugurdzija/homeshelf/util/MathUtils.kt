@@ -1,6 +1,7 @@
 package com.jugurdzija.homeshelf.util
 
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.llm.GeneratedGuideLine
 import kotlin.math.min
 import kotlin.math.sqrt
 
@@ -51,4 +52,32 @@ fun mapLinesToImageCoords(
         .sorted()
 
     return hPixels to vPixels
+}
+
+fun mapGeneratedLinesToCanvasGuideLines(
+    generated: List<GeneratedGuideLine>,
+    canvasWidth: Int,
+    canvasHeight: Int,
+    bitmapWidth: Int,
+    bitmapHeight: Int,
+    startId: Int
+): List<GuideLine> {
+    val scale = min(canvasWidth.toFloat() / bitmapWidth, canvasHeight.toFloat() / bitmapHeight)
+    val renderedW = bitmapWidth * scale
+    val renderedH = bitmapHeight * scale
+    val offsetX = (canvasWidth - renderedW) / 2f
+    val offsetY = (canvasHeight - renderedH) / 2f
+
+    return generated.mapIndexed { index, line ->
+        val canvasPosition = if (line.isHorizontal) {
+            (offsetY + line.position * renderedH) / canvasHeight
+        } else {
+            (offsetX + line.position * renderedW) / canvasWidth
+        }
+        GuideLine(
+            id = startId + index,
+            isHorizontal = line.isHorizontal,
+            position = canvasPosition.coerceIn(0f, 1f)
+        )
+    }
 }
