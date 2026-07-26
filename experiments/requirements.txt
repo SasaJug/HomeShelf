@@ -1,0 +1,10 @@
+jupyter
+notebook
+pillow
+numpy
+torch
+transformers
+matplotlib
+ultralytics
+google-generativeai
+python-dotenv

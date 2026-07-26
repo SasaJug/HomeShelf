@@ -1,0 +1,84 @@
+{
+  "fridge.jpg": [
+    {
+      "orientation": "h",
+      "position": 0.17171717171717157
+    },
+    {
+      "orientation": "h",
+      "position": 0.7893217893217893
+    },
+    {
+      "orientation": "h",
+      "position": 0.4963924963924962
+    },
+    {
+      "orientation": "v",
+      "position": 0.9074875741542406
+    },
+    {
+      "orientation": "v",
+      "position": 0.1316939233605903
+    }
+  ],
+  "pantry.jpg": [
+    {
+      "orientation": "h",
+      "position": 0.2900432900432898
+    },
+    {
+      "orientation": "h",
+      "position": 0.4473304473304472
+    },
+    {
+      "orientation": "h",
+      "position": 0.5945165945165944
+    },
+    {
+      "orientation": "h",
+      "position": 0.7316017316017316
+    },
+    {
+      "orientation": "v",
+      "position": 0.9127117738228847
+    },
+    {
+      "orientation": "v",
+      "position": 0.03765832932499612
+    }
+  ],
+  "photo.jpg": [
+    {
+      "orientation": "v",
+      "position": 0.22834161723050628
+    },
+    {
+      "orientation": "v",
+      "position": 0.5914234942012719
+    },
+    {
+      "orientation": "h",
+      "position": 0.1125541125541124
+    },
+    {
+      "orientation": "h",
+      "position": 0.29437229437229423
+    },
+    {
+      "orientation": "h",
+      "position": 0.4343434343434342
+    },
+    {
+      "orientation": "h",
+      "position": 0.5887445887445886
+    },
+    {
+      "orientation": "h",
+      "position": 0.7128427128427128
+    },
+    {
+      "orientation": "h",
+      "position": 0.8282828282828282
+    }
+  ]
+}
