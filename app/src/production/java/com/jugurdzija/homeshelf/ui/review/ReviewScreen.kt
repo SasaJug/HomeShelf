@@ -5,14 +5,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -48,12 +43,17 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.jugurdzija.homeshelf.data.BoundingBox
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.data.MarkedItem
 import com.jugurdzija.homeshelf.llm.CellDiffResult
 import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.llm.ItemDiffResult
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
+import com.jugurdzija.homeshelf.util.fromCellLocalFraction
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.core.graphics.createBitmap
 
 private val SimilarityGreen = Color(0xFF4CAF50)
@@ -185,6 +185,22 @@ private fun ReviewScreenContent(
                         canvasSize = canvasSize,
                         modifier = Modifier.fillMaxSize()
                     )
+                    val changeBoxes = remember(aiDiffState, s.guideLines, s.alignedBitmap) {
+                        (aiDiffState as? AiDiffState.Done)?.let {
+                            buildChangeBoxes(
+                                results = it.results,
+                                knownItemsById = it.knownItemsById,
+                                guideLines = s.guideLines,
+                                bitmapWidth = s.alignedBitmap.width,
+                                bitmapHeight = s.alignedBitmap.height
+                            )
+                        }.orEmpty()
+                    }
+                    ItemChangeOverlay(
+                        changeBoxes = changeBoxes,
+                        canvasSize = canvasSize,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     AiDiffPanel(
                         aiDiffState = aiDiffState,
                         modifier = Modifier
@@ -249,13 +265,110 @@ private fun SimilarityOverlay(
     }
 }
 
+private data class ChangeBox(val label: String, val color: Color, val box: BoundingBox)
+
+private fun buildChangeBoxes(
+    results: List<CellDiffResult>,
+    knownItemsById: Map<String, MarkedItem>,
+    guideLines: List<GuideLine>,
+    bitmapWidth: Int,
+    bitmapHeight: Int
+): List<ChangeBox> {
+    val boxes = mutableListOf<ChangeBox>()
+    results.forEach { cellResult ->
+        val cellBounds = cellBoundsAsFraction(
+            guideLines, bitmapWidth, bitmapHeight, bitmapWidth, bitmapHeight, cellResult.cellId
+        )
+        cellResult.items.forEach { item ->
+            if (item.change == ItemChange.UNCHANGED) return@forEach
+            val knownBox = knownItemsById["${cellResult.cellId}:${item.id}"]
+            fun aiBoxAsFullFraction(): BoundingBox? =
+                item.box?.let { box -> cellBounds?.let { fromCellLocalFraction(box, it) } }
+
+            when (item.change) {
+                ItemChange.ADDED -> aiBoxAsFullFraction()?.let {
+                    boxes += ChangeBox(item.name ?: item.id, SimilarityGreen, it)
+                }
+                ItemChange.REPLACED -> {
+                    knownBox?.let { boxes += ChangeBox(it.name, SimilarityRed, it.boundingBox) }
+                    aiBoxAsFullFraction()?.let {
+                        boxes += ChangeBox(item.name ?: item.id, SimilarityGreen, it)
+                    }
+                }
+                ItemChange.REMOVED -> knownBox?.let {
+                    boxes += ChangeBox(it.name, SimilarityRed, it.boundingBox)
+                }
+                ItemChange.PARTIALLY_CONSUMED -> knownBox?.let {
+                    boxes += ChangeBox(it.name, SimilarityYellow, it.boundingBox)
+                }
+                ItemChange.FULLY_CONSUMED -> knownBox?.let {
+                    boxes += ChangeBox(it.name, SimilarityRed, it.boundingBox)
+                }
+                ItemChange.PARTIALLY_FILLED, ItemChange.FULLY_FILLED -> knownBox?.let {
+                    boxes += ChangeBox(it.name, SimilarityGreen, it.boundingBox)
+                }
+                ItemChange.UNKNOWN -> knownBox?.let {
+                    boxes += ChangeBox(it.name, Color.Gray, it.boundingBox)
+                }
+                ItemChange.UNCHANGED -> Unit
+            }
+        }
+    }
+    return boxes
+}
+
+@Composable
+private fun ItemChangeOverlay(
+    changeBoxes: List<ChangeBox>,
+    canvasSize: IntSize,
+    modifier: Modifier = Modifier
+) {
+    if (canvasSize == IntSize.Zero || changeBoxes.isEmpty()) return
+    Box(modifier = modifier) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val stroke = 2.dp.toPx()
+            changeBoxes.forEach { changeBox ->
+                val box = changeBox.box
+                val left = box.x * size.width
+                val top = box.y * size.height
+                val width = box.width * size.width
+                val height = box.height * size.height
+                drawRect(
+                    color = changeBox.color,
+                    topLeft = Offset(left, top),
+                    size = androidx.compose.ui.geometry.Size(width, height),
+                    style = Stroke(width = stroke)
+                )
+            }
+        }
+        changeBoxes.forEach { changeBox ->
+            val box = changeBox.box
+            val xPx = (box.x * canvasSize.width).toInt()
+            val yPx = ((box.y * canvasSize.height) - 20f).toInt().coerceAtLeast(0)
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(xPx, yPx) }
+                    .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = changeBox.label,
+                    color = changeBox.color,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun AiDiffPanel(
     aiDiffState: AiDiffState,
     modifier: Modifier = Modifier
 ) {
     when (aiDiffState) {
-        AiDiffState.NotRequested -> Unit
+        AiDiffState.NotRequested, is AiDiffState.Done -> Unit
         AiDiffState.Loading -> {
             Box(
                 modifier = modifier
@@ -274,58 +387,7 @@ private fun AiDiffPanel(
                 color = MaterialTheme.colorScheme.error
             )
         }
-        is AiDiffState.Done -> {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 220.dp)
-                    .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
-                    .padding(12.dp)
-            ) {
-                aiDiffState.results.forEach { cellResult ->
-                    if (cellResult.items.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = cellResult.cellId,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
-                        }
-                        items(cellResult.items) { result ->
-                            Column(modifier = Modifier.padding(vertical = 2.dp)) {
-                                Text(
-                                    text = "${result.name ?: result.id} — ${result.change.label()}",
-                                    color = result.change.color(),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                                Text(
-                                    text = result.description,
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
-}
-
-private fun ItemChange.label(): String = name.lowercase().replace('_', ' ')
-    .replaceFirstChar { it.uppercase() }
-
-private fun ItemChange.color(): Color = when (this) {
-    ItemChange.UNCHANGED -> SimilarityGreen
-    ItemChange.REMOVED, ItemChange.REPLACED -> SimilarityRed
-    ItemChange.ADDED -> SimilarityGreen
-    ItemChange.PARTIALLY_CONSUMED,
-    ItemChange.FULLY_CONSUMED,
-    ItemChange.PARTIALLY_FILLED,
-    ItemChange.FULLY_FILLED -> SimilarityYellow
-    ItemChange.UNKNOWN -> Color.Gray
 }
 
 private fun previewBitmap(): Bitmap {
@@ -376,9 +438,19 @@ private val previewAiDiffResults = listOf(
                 change = ItemChange.ADDED,
                 description = "New pasta box detected",
                 name = "Pasta",
+                box = BoundingBox(0.2f, 0.3f, 0.4f, 0.3f),
                 isTransparentContainer = false
             )
         )
+    )
+)
+
+private val previewKnownItemsById = mapOf(
+    "B1:1" to MarkedItem(
+        id = "soup-1",
+        name = "Soup",
+        boundingBox = BoundingBox(0.55f, 0.15f, 0.3f, 0.25f),
+        cellName = "B1"
     )
 )
 
@@ -436,7 +508,7 @@ private fun ReviewScreenAiDonePreview() {
     HomeShelfTheme {
         ReviewScreenContent(
             state = previewDoneState,
-            aiDiffState = AiDiffState.Done(previewAiDiffResults),
+            aiDiffState = AiDiffState.Done(previewAiDiffResults, previewKnownItemsById),
             snackbarHostState = remember { SnackbarHostState() },
             onDiscard = {},
             onAnalyzeWithAi = {},
