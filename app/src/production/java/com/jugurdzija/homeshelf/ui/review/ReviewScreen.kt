@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.llm.CellDiffResult
+import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.llm.ItemDiffResult
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
 import androidx.core.graphics.createBitmap
@@ -280,24 +282,50 @@ private fun AiDiffPanel(
                     .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
                     .padding(12.dp)
             ) {
-                items(aiDiffState.results) { result ->
-                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        Text(
-                            text = "${result.cellId} — ${if (result.changed) "Changed" else "No change"}",
-                            color = if (result.changed) SimilarityRed else SimilarityGreen,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Text(
-                            text = result.description,
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                aiDiffState.results.forEach { cellResult ->
+                    if (cellResult.items.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = cellResult.cellId,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                        items(cellResult.items) { result ->
+                            Column(modifier = Modifier.padding(vertical = 2.dp)) {
+                                Text(
+                                    text = "${result.name ?: result.id} — ${result.change.label()}",
+                                    color = result.change.color(),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                                Text(
+                                    text = result.description,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun ItemChange.label(): String = name.lowercase().replace('_', ' ')
+    .replaceFirstChar { it.uppercase() }
+
+private fun ItemChange.color(): Color = when (this) {
+    ItemChange.UNCHANGED -> SimilarityGreen
+    ItemChange.REMOVED, ItemChange.REPLACED -> SimilarityRed
+    ItemChange.ADDED -> SimilarityGreen
+    ItemChange.PARTIALLY_CONSUMED,
+    ItemChange.FULLY_CONSUMED,
+    ItemChange.PARTIALLY_FILLED,
+    ItemChange.FULLY_FILLED -> SimilarityYellow
+    ItemChange.UNKNOWN -> Color.Gray
 }
 
 private fun previewBitmap(): Bitmap {
@@ -328,12 +356,30 @@ private val previewDoneState = ReviewUiState.Done(
     guideLines = previewGuideLines,
     similarities = previewSimilarities,
     referenceCells = emptyList(),
-    newCells = emptyList()
+    newCells = emptyList(),
+    markedItems = emptyList()
 )
 
 private val previewAiDiffResults = listOf(
-    CellDiffResult(cellId = "A1", changed = false, description = "Cereal boxes unchanged"),
-    CellDiffResult(cellId = "B1", changed = true, description = "Soup cans missing, replaced with pasta")
+    CellDiffResult(
+        cellId = "A1",
+        items = listOf(
+            ItemDiffResult(id = "1", change = ItemChange.UNCHANGED, description = "Cereal box unchanged", name = "Cereal")
+        )
+    ),
+    CellDiffResult(
+        cellId = "B1",
+        items = listOf(
+            ItemDiffResult(id = "1", change = ItemChange.REMOVED, description = "Soup cans gone", name = "Soup"),
+            ItemDiffResult(
+                id = "N1",
+                change = ItemChange.ADDED,
+                description = "New pasta box detected",
+                name = "Pasta",
+                isTransparentContainer = false
+            )
+        )
+    )
 )
 
 @Preview(showBackground = true)

@@ -2,6 +2,7 @@ package com.jugurdzija.homeshelf.usecase
 
 import android.graphics.Bitmap
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.data.MarkedItem
 import com.jugurdzija.homeshelf.data.ReferencePhotoData
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.GridCellEmbedder
@@ -23,14 +24,15 @@ class StorageSavePipelineImpl @Inject constructor(
         bitmap: Bitmap,
         guideLines: List<GuideLine>,
         canvasWidth: Int,
-        canvasHeight: Int
+        canvasHeight: Int,
+        resolvedMarkedItems: List<MarkedItem>?
     ): StorageSaveResult {
         return try {
             val id = storageId ?: storageRepository.createNew(name).id
-            val existingDescriptions = if (storageId != null) {
-                storageRepository.loadLatestData(id).descriptions
+            val markedItems = resolvedMarkedItems ?: if (storageId != null) {
+                storageRepository.loadLatestData(id).markedItems
             } else {
-                emptyMap()
+                emptyList()
             }
 
             val (hPixels, vPixels) = mapLinesToImageCoords(
@@ -45,7 +47,7 @@ class StorageSavePipelineImpl @Inject constructor(
                 ReferencePhotoData(
                     guideLines = guideLines,
                     embeddings = embeddings.mapValues { it.value.toList() },
-                    descriptions = existingDescriptions
+                    markedItems = markedItems
                 ),
                 cells
             )

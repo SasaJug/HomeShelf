@@ -10,5 +10,6 @@ interface StorageRepository {
     suspend fun loadLatestData(id: String): ReferencePhotoData
     suspend fun createNew(name: String): StorageItem
     suspend fun saveLatest(id: String, bitmap: Bitmap, data: ReferencePhotoData, cells: List<GridCell>)
+    suspend fun saveMarkedItems(id: String, items: List<MarkedItem>)
     suspend fun delete(id: String)
 }

@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ReferencePhotoData(
     val guideLines: List<GuideLine> = emptyList(),
     val embeddings: Map<String, List<Float>> = emptyMap(),
-    val descriptions: Map<String, CellDescription> = emptyMap()
+    val markedItems: List<MarkedItem> = emptyList()
 )

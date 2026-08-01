@@ -12,6 +12,7 @@ import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenDetailsScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenSaveScreen
+import com.jugurdzija.homeshelf.ui.markitems.MarkItemsScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.scan.ScanScreen
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
@@ -37,6 +38,9 @@ fun HomeShelfNavGraph(
                 },
                 onViewHistory = { storageId ->
                     navController.navigate(Routes.goldenManage(storageId))
+                },
+                onMarkItems = { storageId ->
+                    navController.navigate(Routes.markItems(storageId))
                 }
             )
         }
@@ -98,6 +102,12 @@ fun HomeShelfNavGraph(
             GoldenDetailsScreen(
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(
+            route = Routes.MARK_ITEMS,
+            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+        ) {
+            MarkItemsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

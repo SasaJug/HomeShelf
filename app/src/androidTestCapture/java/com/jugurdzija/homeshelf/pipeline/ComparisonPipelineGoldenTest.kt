@@ -7,6 +7,7 @@ import com.jugurdzija.homeshelf.data.ChangeType
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.di.DiConstants
 import com.jugurdzija.homeshelf.llm.CellPair
+import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
@@ -128,13 +129,13 @@ class ComparisonPipelineGoldenTest {
             val rowIdx = name.substring(1).toInt() - 1
             val cellIndex = rowIdx * numCols + colIdx
             val groundTruth = groundTruthMap[cellIndex] ?: ChangeType.NO_CHANGE
-            val aiCell = aiByCellId?.get(name)
+            val aiItems = aiByCellId?.get(name)?.items
             PipelineCellReport(
                 cellIndex = cellIndex,
                 groundTruth = groundTruth.name,
                 actualChanged = groundTruth != ChangeType.NO_CHANGE,
-                changed = aiCell?.changed,
-                description = aiCell?.description
+                changed = aiItems?.any { it.change != ItemChange.UNCHANGED },
+                description = aiItems?.joinToString("; ") { "${it.name ?: it.id}: ${it.description}" }
             )
         }
         return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, true, cells, error = analyzeError)

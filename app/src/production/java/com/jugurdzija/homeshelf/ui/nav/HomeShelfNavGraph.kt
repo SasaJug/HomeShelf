@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.edit.EditScreen
+import com.jugurdzija.homeshelf.ui.markitems.MarkItemsScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.review.ReviewScreen
 import com.jugurdzija.homeshelf.ui.scan.ScanScreen
@@ -28,7 +29,10 @@ fun HomeShelfNavGraph(
                     navController.navigate(Routes.edit(storageId))
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onNavigateToScan = { navController.navigate(Routes.SCAN) }
+                onNavigateToScan = { navController.navigate(Routes.SCAN) },
+                onMarkItems = { storageId ->
+                    navController.navigate(Routes.markItems(storageId))
+                }
             )
         }
         composable(Routes.SCAN) {
@@ -71,6 +75,12 @@ fun HomeShelfNavGraph(
                 onBack = { navController.popBackStack() },
                 onLogout = onLogout
             )
+        }
+        composable(
+            route = Routes.MARK_ITEMS,
+            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+        ) {
+            MarkItemsScreen(onBack = { navController.popBackStack() })
         }
     }
 }
