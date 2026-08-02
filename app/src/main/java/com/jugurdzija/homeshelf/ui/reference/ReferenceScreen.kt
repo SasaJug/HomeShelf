@@ -44,7 +44,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.ui.common.LifecycleEvents
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -63,6 +65,12 @@ fun ReferenceScreen(
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
+
+    LifecycleEvents { event ->
+        if (event == Lifecycle.Event.ON_RESUME) {
+            vm.reload()
+        }
+    }
 
     ReferenceScreenContent(
         state = state,

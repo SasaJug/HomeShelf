@@ -37,11 +37,26 @@ private const val ITEM_PROMPT =
         "relative to the image dimensions, with the origin at the top-left."
 
 @Serializable
-private data class DetectedItemJson(
+internal data class DetectedItemJson(
     val name: String,
     val box: List<Int>,
     val isTransparentContainer: Boolean
 )
+
+internal fun DetectedItemJson.toDetectedItem(): DetectedItem? {
+    if (box.size != 4) return null
+    val (yMin, xMin, yMax, xMax) = box
+    return DetectedItem(
+        name = name,
+        box = BoundingBox(
+            x = xMin / POSITION_SCALE,
+            y = yMin / POSITION_SCALE,
+            width = (xMax - xMin) / POSITION_SCALE,
+            height = (yMax - yMin) / POSITION_SCALE
+        ),
+        isTransparentContainer = isTransparentContainer
+    )
+}
 
 @Singleton
 class ItemDetectorImpl @Inject constructor() : ItemDetector {
@@ -83,21 +98,6 @@ class ItemDetectorImpl @Inject constructor() : ItemDetector {
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-
-    private fun DetectedItemJson.toDetectedItem(): DetectedItem? {
-        if (box.size != 4) return null
-        val (yMin, xMin, yMax, xMax) = box
-        return DetectedItem(
-            name = name,
-            box = BoundingBox(
-                x = xMin / POSITION_SCALE,
-                y = yMin / POSITION_SCALE,
-                width = (xMax - xMin) / POSITION_SCALE,
-                height = (yMax - yMin) / POSITION_SCALE
-            ),
-            isTransparentContainer = isTransparentContainer
-        )
     }
 
     private fun buildPrompt(bitmap: Bitmap) = content {

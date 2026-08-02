@@ -81,9 +81,11 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.ai)
 
-    androidTestImplementation(libs.junit)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.compiler)
 }

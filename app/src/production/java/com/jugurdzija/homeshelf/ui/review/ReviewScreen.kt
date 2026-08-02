@@ -310,7 +310,7 @@ private fun buildChangeBoxes(
                 ItemChange.UNKNOWN -> knownBox?.let {
                     boxes += ChangeBox(it.name, Color.Gray, it.boundingBox)
                 }
-                ItemChange.UNCHANGED -> Unit
+                else -> Unit
             }
         }
     }
