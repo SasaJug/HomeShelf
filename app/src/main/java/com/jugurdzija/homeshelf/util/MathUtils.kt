@@ -1,5 +1,7 @@
 package com.jugurdzija.homeshelf.util
 
+import android.graphics.RectF
+import com.jugurdzija.homeshelf.data.BoundingBox
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.llm.GeneratedGuideLine
 import kotlin.math.min
@@ -80,4 +82,71 @@ fun mapGeneratedLinesToCanvasGuideLines(
             position = canvasPosition.coerceIn(0f, 1f)
         )
     }
+}
+
+// Finds out which grid cell a point falls into.
+fun resolveCellName(
+    guideLines: List<GuideLine>,
+    canvasWidth: Int,
+    canvasHeight: Int,
+    bitmapWidth: Int,
+    bitmapHeight: Int,
+    centerXFraction: Float,
+    centerYFraction: Float
+): String? {
+    val (hPixels, vPixels) = mapLinesToImageCoords(guideLines, canvasWidth, canvasHeight, bitmapWidth, bitmapHeight)
+    if (hPixels.size < 2 || vPixels.size < 2) return null
+    val xPx = centerXFraction * bitmapWidth
+    val yPx = centerYFraction * bitmapHeight
+    val rowIdx = hPixels.zipWithNext().indexOfFirst { (top, bottom) -> yPx in top..bottom }
+    val colIdx = vPixels.zipWithNext().indexOfFirst { (left, right) -> xPx in left..right }
+    return if (rowIdx < 0 || colIdx < 0) null else "${'A' + colIdx}${rowIdx + 1}"
+}
+
+// This function calculates the rectangle of a grid cell using the provided guidelines and dimensions.
+fun cellBoundsAsFraction(
+    guideLines: List<GuideLine>,
+    canvasWidth: Int,
+    canvasHeight: Int,
+    bitmapWidth: Int,
+    bitmapHeight: Int,
+    cellName: String
+): RectF? {
+    val colIdx = cellName.firstOrNull()?.minus('A') ?: return null
+    val rowIdx = cellName.drop(1).toIntOrNull()?.minus(1) ?: return null
+    if (colIdx < 0 || rowIdx < 0) return null
+    val (hPixels, vPixels) = mapLinesToImageCoords(guideLines, canvasWidth, canvasHeight, bitmapWidth, bitmapHeight)
+    if (rowIdx + 1 >= hPixels.size || colIdx + 1 >= vPixels.size) return null
+    val top = hPixels[rowIdx]
+    val bottom = hPixels[rowIdx + 1]
+    val left = vPixels[colIdx]
+    val right = vPixels[colIdx + 1]
+    return RectF(left / bitmapWidth, top / bitmapHeight, right / bitmapWidth, bottom / bitmapHeight)
+}
+
+// This function converts an item's bounding box from full-photo coordinates into coordinates relative to its cell.
+// It is used to position item's box accurately within a cropped cell image.
+fun toCellLocalFraction(itemBox: BoundingBox, cellBounds: RectF): BoundingBox {
+    val cellWidth = cellBounds.width()
+    val cellHeight = cellBounds.height()
+    if (cellWidth <= 0f || cellHeight <= 0f) return itemBox
+    return BoundingBox(
+        x = (itemBox.x - cellBounds.left) / cellWidth,
+        y = (itemBox.y - cellBounds.top) / cellHeight,
+        width = itemBox.width / cellWidth,
+        height = itemBox.height / cellHeight
+    )
+}
+
+// This function converts an item's bounding box from cell-local coordinates back into full-photo coordinates.
+// It aligns newly detected cell items with the standard coordinate system used by full-photo marked items.
+fun fromCellLocalFraction(cellLocalBox: BoundingBox, cellBounds: RectF): BoundingBox {
+    val cellWidth = cellBounds.width()
+    val cellHeight = cellBounds.height()
+    return BoundingBox(
+        x = cellBounds.left + cellLocalBox.x * cellWidth,
+        y = cellBounds.top + cellLocalBox.y * cellHeight,
+        width = cellLocalBox.width * cellWidth,
+        height = cellLocalBox.height * cellHeight
+    )
 }

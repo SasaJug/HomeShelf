@@ -3,14 +3,20 @@ package com.jugurdzija.homeshelf.ui.review
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jugurdzija.homeshelf.data.MarkedItem
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.CellPair
+import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.llm.KnownItem
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
+import com.jugurdzija.homeshelf.util.fromCellLocalFraction
+import com.jugurdzija.homeshelf.util.toCellLocalFraction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +24,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 sealed interface ReviewNavEvent {
@@ -64,7 +71,8 @@ class ReviewViewModel @Inject constructor(
                     guideLines = result.guideLines,
                     similarities = result.similarities,
                     referenceCells = result.referenceCells,
-                    newCells = result.newCells
+                    newCells = result.newCells,
+                    markedItems = result.markedItems
                 )
                 ComparisonResult.AlignmentFailed -> ReviewUiState.CompareError(storageName, "Alignment failed — try capturing again")
                 ComparisonResult.NoGuideLines -> ReviewUiState.CompareError(storageName, "No guide lines saved for this storage")
@@ -76,14 +84,21 @@ class ReviewViewModel @Inject constructor(
 
     fun save() {
         val done = _state.value as? ReviewUiState.Done ?: return
+        val diffState = _aiDiffState.value as? AiDiffState.Done
         viewModelScope.launch {
+            val bitmapWidth = done.alignedBitmap.width
+            val bitmapHeight = done.alignedBitmap.height
+            val resolvedMarkedItems = diffState?.let {
+                resolveMarkedItems(done, it, bitmapWidth, bitmapHeight)
+            }
             val result = storageSavePipeline.run(
                 storageId,
                 done.storageName,
                 done.alignedBitmap,
                 done.guideLines,
-                done.alignedBitmap.width,
-                done.alignedBitmap.height
+                bitmapWidth,
+                bitmapHeight,
+                resolvedMarkedItems
             )
             when (result) {
                 is StorageSaveResult.Done -> {
@@ -93,6 +108,62 @@ class ReviewViewModel @Inject constructor(
                 is StorageSaveResult.Error -> _saveState.value = result
             }
         }
+    }
+
+    /**
+     * Resolves marked items against the AI diff:
+     *
+     * - **REMOVED:** Dropped (physically gone).
+     * - **REPLACED:** Dropped and re-added with a fresh ID using the model's new name/box.
+     * - **ADDED:** Created with a fresh ID (same as REPLACED).
+     * - **Everything else:** Carried forward as-is (e.g., `FULLY_CONSUMED` empty containers and `UNKNOWN`).
+     */
+    private fun resolveMarkedItems(
+        done: ReviewUiState.Done,
+        diffState: AiDiffState.Done,
+        bitmapWidth: Int,
+        bitmapHeight: Int
+    ): List<MarkedItem> {
+        val removedIds = mutableSetOf<String>()
+        val created = mutableListOf<MarkedItem>()
+        diffState.results.forEach { cellResult ->
+            val cellBounds = cellBoundsAsFraction(
+                done.guideLines, bitmapWidth, bitmapHeight, bitmapWidth, bitmapHeight, cellResult.cellId
+            )
+            cellResult.items.forEach { itemResult ->
+                when (itemResult.change) {
+                    ItemChange.ADDED, ItemChange.REPLACED -> {
+                        val name = itemResult.name
+                        val box = itemResult.box
+                        val isTransparentContainer = itemResult.isTransparentContainer
+                        if (name != null && box != null && isTransparentContainer != null) {
+                            val fullBox = if (cellBounds != null) fromCellLocalFraction(box, cellBounds) else box
+                            created.add(
+                                MarkedItem(
+                                    id = UUID.randomUUID().toString(),
+                                    name = name,
+                                    boundingBox = fullBox,
+                                    cellName = cellResult.cellId,
+                                    isTransparentContainer = isTransparentContainer
+                                )
+                            )
+                            if (itemResult.change == ItemChange.REPLACED) {
+                                diffState.knownItemsById["${cellResult.cellId}:${itemResult.id}"]?.let {
+                                    removedIds.add(it.id)
+                                }
+                            }
+                        }
+                    }
+                    ItemChange.REMOVED -> {
+                        diffState.knownItemsById["${cellResult.cellId}:${itemResult.id}"]?.let {
+                            removedIds.add(it.id)
+                        }
+                    }
+                    else -> Unit
+                }
+            }
+        }
+        return done.markedItems.filterNot { it.id in removedIds } + created
     }
 
     fun resetSaveState() {
@@ -105,13 +176,37 @@ class ReviewViewModel @Inject constructor(
         _aiDiffState.value = AiDiffState.Loading
         viewModelScope.launch {
             val newCellsByName = done.newCells.associateBy { it.name }
+            val itemsByCell = done.markedItems.filter { it.cellName != null }.groupBy { it.cellName!! }
+            val bitmapWidth = done.alignedBitmap.width
+            val bitmapHeight = done.alignedBitmap.height
+            val knownItemsById = mutableMapOf<String, MarkedItem>()
             val pairs = done.referenceCells.mapNotNull { refCell ->
                 val newCell = newCellsByName[refCell.name] ?: return@mapNotNull null
-                CellPair(cellId = refCell.name, referenceBitmap = refCell.bitmap, newBitmap = newCell.bitmap)
+                val cellItems = itemsByCell[refCell.name].orEmpty()
+                val cellBounds = if (cellItems.isNotEmpty()) {
+                    cellBoundsAsFraction(done.guideLines, bitmapWidth, bitmapHeight, bitmapWidth, bitmapHeight, refCell.name)
+                } else {
+                    null
+                }
+                CellPair(
+                    cellId = refCell.name,
+                    referenceBitmap = refCell.bitmap,
+                    newBitmap = newCell.bitmap,
+                    knownItems = cellItems.mapIndexed { index, item ->
+                        val shortId = (index + 1).toString()
+                        knownItemsById["${refCell.name}:$shortId"] = item
+                        KnownItem(
+                            id = shortId,
+                            name = item.name,
+                            isTransparentContainer = item.isTransparentContainer,
+                            box = if (cellBounds != null) toCellLocalFraction(item.boundingBox, cellBounds) else null
+                        )
+                    }
+                )
             }
             val result = shelfDiffAnalyzer.analyze(pairs)
             _aiDiffState.value = result.fold(
-                onSuccess = { AiDiffState.Done(it) },
+                onSuccess = { AiDiffState.Done(it, knownItemsById) },
                 onFailure = { AiDiffState.Error(it.message ?: "AI analysis failed") }
             )
         }

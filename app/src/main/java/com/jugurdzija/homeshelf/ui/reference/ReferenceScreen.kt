@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
@@ -43,7 +44,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.ui.common.LifecycleEvents
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -55,12 +58,19 @@ fun ReferenceScreen(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onMarkItems: (String) -> Unit,
     onCaptureTestPhoto: ((String) -> Unit)? = null,
     onViewHistory: ((String) -> Unit)? = null,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
+
+    LifecycleEvents { event ->
+        if (event == Lifecycle.Event.ON_RESUME) {
+            vm.reload()
+        }
+    }
 
     ReferenceScreenContent(
         state = state,
@@ -69,6 +79,7 @@ fun ReferenceScreen(
         onNavigateToEdit = onNavigateToEdit,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToScan = onNavigateToScan,
+        onMarkItems = onMarkItems,
         onCaptureTestPhoto = onCaptureTestPhoto,
         onViewHistory = onViewHistory
     )
@@ -83,6 +94,7 @@ private fun ReferenceScreenContent(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onMarkItems: (String) -> Unit,
     onCaptureTestPhoto: ((String) -> Unit)? = null,
     onViewHistory: ((String) -> Unit)? = null
 ) {
@@ -153,6 +165,7 @@ private fun ReferenceScreenContent(
                                 thumbnail = thumbnails[item.id],
                                 onDelete = { onDelete(item.id) },
                                 onClick = { onNavigateToEdit(item.id) },
+                                onMarkItems = { onMarkItems(item.id) },
                                 onCaptureTestPhoto = onCaptureTestPhoto?.let { { it(item.id) } },
                                 onViewHistory = onViewHistory?.let { { it(item.id) } }
                             )
@@ -184,6 +197,7 @@ private fun StorageListItem(
     thumbnail: Bitmap?,
     onDelete: () -> Unit,
     onClick: () -> Unit,
+    onMarkItems: () -> Unit,
     onCaptureTestPhoto: (() -> Unit)? = null,
     onViewHistory: (() -> Unit)? = null
 ) {
@@ -243,6 +257,12 @@ private fun StorageListItem(
                 )
             }
         }
+        IconButton(onClick = onMarkItems) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Label,
+                contentDescription = "Mark items in ${item.name}"
+            )
+        }
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = Icons.Default.Delete,
@@ -269,7 +289,8 @@ private fun ReferenceScreenLoadingPreview() {
             onDelete = {},
             onNavigateToEdit = {},
             onNavigateToSettings = {},
-            onNavigateToScan = {}
+            onNavigateToScan = {},
+            onMarkItems = {}
         )
     }
 }
@@ -284,7 +305,8 @@ private fun ReferenceScreenEmptyPreview() {
             onDelete = {},
             onNavigateToEdit = {},
             onNavigateToSettings = {},
-            onNavigateToScan = {}
+            onNavigateToScan = {},
+            onMarkItems = {}
         )
     }
 }
@@ -299,7 +321,8 @@ private fun ReferenceScreenLoadedPreview() {
             onDelete = {},
             onNavigateToEdit = {},
             onNavigateToSettings = {},
-            onNavigateToScan = {}
+            onNavigateToScan = {},
+            onMarkItems = {}
         )
     }
 }
@@ -317,7 +340,8 @@ private fun ReferenceScreenErrorPreview() {
             onDelete = {},
             onNavigateToEdit = {},
             onNavigateToSettings = {},
-            onNavigateToScan = {}
+            onNavigateToScan = {},
+            onMarkItems = {}
         )
     }
 }

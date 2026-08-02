@@ -44,6 +44,6 @@ class ComparisonPipelineImpl @Inject constructor(
             val refVec = refEmbeddings[name]
             if (refVec != null) cosineSimilarity(vec, refVec) else 0f
         }
-        return ComparisonResult.Success(aligned, data.guideLines, similarities, referenceCells, cells)
+        return ComparisonResult.Success(aligned, data.guideLines, similarities, referenceCells, cells, data.markedItems)
     }
 }

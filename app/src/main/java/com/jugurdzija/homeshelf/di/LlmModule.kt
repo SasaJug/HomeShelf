@@ -2,6 +2,8 @@ package com.jugurdzija.homeshelf.di
 
 import com.jugurdzija.homeshelf.llm.GridLineGenerator
 import com.jugurdzija.homeshelf.llm.GridLineGeneratorImpl
+import com.jugurdzija.homeshelf.llm.ItemDetector
+import com.jugurdzija.homeshelf.llm.ItemDetectorImpl
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzerImpl
 import dagger.Binds
@@ -21,4 +23,8 @@ abstract class LlmModule {
     @Binds
     @Singleton
     abstract fun bindGridLineGenerator(impl: GridLineGeneratorImpl): GridLineGenerator
+
+    @Binds
+    @Singleton
+    abstract fun bindItemDetector(impl: ItemDetectorImpl): ItemDetector
 }

@@ -26,7 +26,7 @@ class ReferenceViewModel @Inject constructor(
 
     init { reload() }
 
-    private fun reload() {
+    fun reload() {
         viewModelScope.launch {
             val items = storageRepository.loadAll()
             _state.value = if (items.isEmpty()) ReferenceListUiState.Empty

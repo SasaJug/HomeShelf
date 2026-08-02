@@ -119,6 +119,16 @@ class StorageRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun saveMarkedItems(id: String, items: List<MarkedItem>) = withContext(Dispatchers.IO) {
+        val current = loadLatestData(id)
+        val updated = current.copy(markedItems = items)
+        File(latestDir(id), FILE_DATA).writeText(json.encodeToString(ReferencePhotoData.serializer(), updated))
+        val meta = readMeta(metaFile(id))
+        if (meta != null) {
+            writeMeta(meta.copy(updatedAt = System.currentTimeMillis()))
+        }
+    }
+
     override suspend fun getLatestPhotoFile(id: String): File? = withContext(Dispatchers.IO) {
         val file = File(latestDir(id), FILE_PHOTO)
         if (file.exists()) file else null
