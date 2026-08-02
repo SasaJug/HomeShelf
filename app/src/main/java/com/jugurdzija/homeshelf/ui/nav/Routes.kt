@@ -12,6 +12,8 @@ object Routes {
     const val EDIT = "$EDIT_BASE?storageId={storageId}"
     const val MARK_ITEMS = "mark_items/{storageId}"
     const val SETTINGS = "settings"
+    const val SHOPPING_LIST = "shopping_list"
+    const val SHOPPING_LIST_ITEM = "shopping_list_item/{itemId}"
     const val GOLDEN_CAPTURE = "golden_capture/{storageId}"
     const val GOLDEN_SAVE = "golden_save"
     const val GOLDEN_MANAGE = "golden_manage/{storageId}"
@@ -21,6 +23,8 @@ object Routes {
         if (storageId != null) EDIT.replace("{storageId}", storageId) else EDIT_BASE
 
     fun markItems(storageId: String) = MARK_ITEMS.replace("{storageId}", storageId)
+
+    fun shoppingListItem(itemId: String) = SHOPPING_LIST_ITEM.replace("{itemId}", itemId)
 
     fun goldenCapture(storageId: String) = GOLDEN_CAPTURE.replace("{storageId}", storageId)
 

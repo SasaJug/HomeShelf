@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +59,7 @@ fun ReferenceScreen(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onNavigateToShoppingList: () -> Unit,
     onMarkItems: (String) -> Unit,
     onCaptureTestPhoto: ((String) -> Unit)? = null,
     onViewHistory: ((String) -> Unit)? = null,
@@ -79,6 +81,7 @@ fun ReferenceScreen(
         onNavigateToEdit = onNavigateToEdit,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToScan = onNavigateToScan,
+        onNavigateToShoppingList = onNavigateToShoppingList,
         onMarkItems = onMarkItems,
         onCaptureTestPhoto = onCaptureTestPhoto,
         onViewHistory = onViewHistory
@@ -94,6 +97,7 @@ private fun ReferenceScreenContent(
     onNavigateToEdit: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onNavigateToShoppingList: () -> Unit,
     onMarkItems: (String) -> Unit,
     onCaptureTestPhoto: ((String) -> Unit)? = null,
     onViewHistory: ((String) -> Unit)? = null
@@ -103,6 +107,9 @@ private fun ReferenceScreenContent(
             TopAppBar(
                 title = { Text("Storages") },
                 actions = {
+                    IconButton(onClick = onNavigateToShoppingList) {
+                        Icon(Icons.Default.ShoppingCart, contentDescription = "Shopping List")
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
@@ -290,6 +297,7 @@ private fun ReferenceScreenLoadingPreview() {
             onNavigateToEdit = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToShoppingList = {},
             onMarkItems = {}
         )
     }
@@ -306,6 +314,7 @@ private fun ReferenceScreenEmptyPreview() {
             onNavigateToEdit = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToShoppingList = {},
             onMarkItems = {}
         )
     }
@@ -322,6 +331,7 @@ private fun ReferenceScreenLoadedPreview() {
             onNavigateToEdit = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToShoppingList = {},
             onMarkItems = {}
         )
     }
@@ -341,6 +351,7 @@ private fun ReferenceScreenErrorPreview() {
             onNavigateToEdit = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToShoppingList = {},
             onMarkItems = {}
         )
     }

@@ -89,6 +89,14 @@ fun ReviewScreen(
         }
     }
 
+    LaunchedEffect(vm.shoppingListAdded) {
+        vm.shoppingListAdded.collect { addedCount ->
+            snackbarHostState.showSnackbar(
+                if (addedCount > 0) "Added $addedCount item(s) to shopping list" else "No new items to add"
+            )
+        }
+    }
+
     ReviewScreenContent(
         state = state,
         aiDiffState = aiDiffState,
@@ -96,7 +104,8 @@ fun ReviewScreen(
         onDiscard = vm::discard,
         onAnalyzeWithAi = vm::analyzeWithAi,
         onEdit = vm::navigateToEdit,
-        onSave = vm::save
+        onSave = vm::save,
+        onAddToShoppingList = vm::addConsumedToShoppingList
     )
 }
 
@@ -109,7 +118,8 @@ private fun ReviewScreenContent(
     onDiscard: () -> Unit,
     onAnalyzeWithAi: () -> Unit,
     onEdit: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    onAddToShoppingList: () -> Unit
 ) {
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -135,6 +145,9 @@ private fun ReviewScreenContent(
                             onClick = onAnalyzeWithAi,
                             enabled = aiDiffState !is AiDiffState.Loading
                         ) { Text("Analyze with AI") }
+                        if (aiDiffState is AiDiffState.Done) {
+                            TextButton(onClick = onAddToShoppingList) { Text("Add to List") }
+                        }
                         TextButton(onClick = onEdit) { Text("Edit") }
                         TextButton(onClick = onSave) { Text("Save") }
                     }
@@ -465,7 +478,8 @@ private fun ReviewScreenLoadingPreview() {
             onDiscard = {},
             onAnalyzeWithAi = {},
             onEdit = {},
-            onSave = {}
+            onSave = {},
+            onAddToShoppingList = {}
         )
     }
 }
@@ -481,7 +495,8 @@ private fun ReviewScreenDonePreview() {
             onDiscard = {},
             onAnalyzeWithAi = {},
             onEdit = {},
-            onSave = {}
+            onSave = {},
+            onAddToShoppingList = {}
         )
     }
 }
@@ -497,7 +512,8 @@ private fun ReviewScreenAiLoadingPreview() {
             onDiscard = {},
             onAnalyzeWithAi = {},
             onEdit = {},
-            onSave = {}
+            onSave = {},
+            onAddToShoppingList = {}
         )
     }
 }
@@ -513,7 +529,8 @@ private fun ReviewScreenAiDonePreview() {
             onDiscard = {},
             onAnalyzeWithAi = {},
             onEdit = {},
-            onSave = {}
+            onSave = {},
+            onAddToShoppingList = {}
         )
     }
 }
@@ -532,7 +549,8 @@ private fun ReviewScreenCompareErrorPreview() {
             onDiscard = {},
             onAnalyzeWithAi = {},
             onEdit = {},
-            onSave = {}
+            onSave = {},
+            onAddToShoppingList = {}
         )
     }
 }

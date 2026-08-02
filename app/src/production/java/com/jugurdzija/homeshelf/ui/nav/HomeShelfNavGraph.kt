@@ -13,6 +13,8 @@ import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.review.ReviewScreen
 import com.jugurdzija.homeshelf.ui.scan.ScanScreen
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
+import com.jugurdzija.homeshelf.ui.shoppinglist.ShoppingListItemDetailScreen
+import com.jugurdzija.homeshelf.ui.shoppinglist.ShoppingListScreen
 
 @Composable
 fun HomeShelfNavGraph(
@@ -30,6 +32,7 @@ fun HomeShelfNavGraph(
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 onNavigateToScan = { navController.navigate(Routes.SCAN) },
+                onNavigateToShoppingList = { navController.navigate(Routes.SHOPPING_LIST) },
                 onMarkItems = { storageId ->
                     navController.navigate(Routes.markItems(storageId))
                 }
@@ -81,6 +84,20 @@ fun HomeShelfNavGraph(
             arguments = listOf(navArgument("storageId") { type = NavType.StringType })
         ) {
             MarkItemsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SHOPPING_LIST) {
+            ShoppingListScreen(
+                onBack = { navController.popBackStack() },
+                onItemClick = { itemId ->
+                    navController.navigate(Routes.shoppingListItem(itemId))
+                }
+            )
+        }
+        composable(
+            route = Routes.SHOPPING_LIST_ITEM,
+            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+        ) {
+            ShoppingListItemDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }

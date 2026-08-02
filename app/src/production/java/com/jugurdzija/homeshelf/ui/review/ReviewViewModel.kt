@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.MarkedItem
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
+import com.jugurdzija.homeshelf.data.ShoppingListRepository
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.CellPair
 import com.jugurdzija.homeshelf.llm.ItemChange
@@ -39,7 +40,8 @@ class ReviewViewModel @Inject constructor(
     private val storageRepository: StorageRepository,
     private val comparisonPipeline: ComparisonPipeline,
     private val storageSavePipeline: StorageSavePipeline,
-    private val shelfDiffAnalyzer: ShelfDiffAnalyzer
+    private val shelfDiffAnalyzer: ShelfDiffAnalyzer,
+    private val shoppingListRepository: ShoppingListRepository
 ) : ViewModel() {
 
     val storageId: String = checkNotNull(savedStateHandle["storageId"])
@@ -55,6 +57,9 @@ class ReviewViewModel @Inject constructor(
 
     private val _navEvent = MutableSharedFlow<ReviewNavEvent>(extraBufferCapacity = 1)
     val navEvent: SharedFlow<ReviewNavEvent> = _navEvent
+
+    private val _shoppingListAdded = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+    val shoppingListAdded: SharedFlow<Int> = _shoppingListAdded
 
     init {
         viewModelScope.launch {
@@ -168,6 +173,23 @@ class ReviewViewModel @Inject constructor(
 
     fun resetSaveState() {
         _saveState.value = null
+    }
+
+    fun addConsumedToShoppingList() {
+        val diffState = _aiDiffState.value as? AiDiffState.Done ?: return
+        val candidates = diffState.results.flatMap { cellResult ->
+            cellResult.items.mapNotNull { item ->
+                if (item.change == ItemChange.REMOVED || item.change == ItemChange.FULLY_CONSUMED) {
+                    diffState.knownItemsById["${cellResult.cellId}:${item.id}"]?.let { it.name to storageId }
+                } else {
+                    null
+                }
+            }
+        }
+        viewModelScope.launch {
+            val added = shoppingListRepository.addAutoDetected(candidates)
+            _shoppingListAdded.emit(added.size)
+        }
     }
 
     fun analyzeWithAi() {
