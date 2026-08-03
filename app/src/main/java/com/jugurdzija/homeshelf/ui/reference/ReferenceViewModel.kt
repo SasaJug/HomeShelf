@@ -43,12 +43,4 @@ class ReferenceViewModel @Inject constructor(
             }
         }
     }
-
-    fun onDelete(id: String) {
-        viewModelScope.launch {
-            storageRepository.delete(id)
-            _thumbnails.update { it - id }
-            reload()
-        }
-    }
 }

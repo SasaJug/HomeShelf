@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.CaptureData
 import com.jugurdzija.homeshelf.data.GoldenStore
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.net.URLDecoder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,7 @@ class GoldenDetailsViewModel @Inject constructor(
         data class Loaded(val captureData: CaptureData) : State
     }
 
-    private val name: String = URLDecoder.decode(checkNotNull(savedStateHandle["name"]), "UTF-8")
+    private val name: String = URLDecoder.decode(checkNotNull(savedStateHandle[Routes.ARG_NAME]), "UTF-8")
 
     private val _state = MutableStateFlow<State>(State.Loading)
     val state: StateFlow<State> = _state.asStateFlow()

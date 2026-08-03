@@ -50,7 +50,6 @@ import com.jugurdzija.homeshelf.llm.CellDiffResult
 import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.llm.ItemDiffResult
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
-import com.jugurdzija.homeshelf.usecase.StorageSaveResult
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
 import com.jugurdzija.homeshelf.util.fromCellLocalFraction
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -64,11 +63,9 @@ private val SimilarityRed = Color(0xFFE53935)
 @Composable
 fun ReviewScreen(
     onToReference: () -> Unit,
-    onToEdit: (String) -> Unit,
     vm: ReviewViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
-    val saveState by vm.saveState.collectAsState()
     val aiDiffState by vm.aiDiffState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -76,16 +73,7 @@ fun ReviewScreen(
         vm.navEvent.collect { event ->
             when (event) {
                 ReviewNavEvent.ToReference -> onToReference()
-                is ReviewNavEvent.ToEdit -> onToEdit(event.storageId)
             }
-        }
-    }
-
-    LaunchedEffect(saveState) {
-        val result = saveState
-        if (result is StorageSaveResult.Error) {
-            snackbarHostState.showSnackbar(result.message)
-            vm.resetSaveState()
         }
     }
 
@@ -103,8 +91,6 @@ fun ReviewScreen(
         snackbarHostState = snackbarHostState,
         onDiscard = vm::discard,
         onAnalyzeWithAi = vm::analyzeWithAi,
-        onEdit = vm::navigateToEdit,
-        onSave = vm::save,
         onAddToShoppingList = vm::addConsumedToShoppingList
     )
 }
@@ -117,8 +103,6 @@ private fun ReviewScreenContent(
     snackbarHostState: SnackbarHostState,
     onDiscard: () -> Unit,
     onAnalyzeWithAi: () -> Unit,
-    onEdit: () -> Unit,
-    onSave: () -> Unit,
     onAddToShoppingList: () -> Unit
 ) {
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
@@ -148,8 +132,6 @@ private fun ReviewScreenContent(
                         if (aiDiffState is AiDiffState.Done) {
                             TextButton(onClick = onAddToShoppingList) { Text("Add to List") }
                         }
-                        TextButton(onClick = onEdit) { Text("Edit") }
-                        TextButton(onClick = onSave) { Text("Save") }
                     }
                 }
             )
@@ -477,8 +459,6 @@ private fun ReviewScreenLoadingPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onDiscard = {},
             onAnalyzeWithAi = {},
-            onEdit = {},
-            onSave = {},
             onAddToShoppingList = {}
         )
     }
@@ -494,8 +474,6 @@ private fun ReviewScreenDonePreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onDiscard = {},
             onAnalyzeWithAi = {},
-            onEdit = {},
-            onSave = {},
             onAddToShoppingList = {}
         )
     }
@@ -511,8 +489,6 @@ private fun ReviewScreenAiLoadingPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onDiscard = {},
             onAnalyzeWithAi = {},
-            onEdit = {},
-            onSave = {},
             onAddToShoppingList = {}
         )
     }
@@ -528,8 +504,6 @@ private fun ReviewScreenAiDonePreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onDiscard = {},
             onAnalyzeWithAi = {},
-            onEdit = {},
-            onSave = {},
             onAddToShoppingList = {}
         )
     }
@@ -548,8 +522,6 @@ private fun ReviewScreenCompareErrorPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onDiscard = {},
             onAnalyzeWithAi = {},
-            onEdit = {},
-            onSave = {},
             onAddToShoppingList = {}
         )
     }

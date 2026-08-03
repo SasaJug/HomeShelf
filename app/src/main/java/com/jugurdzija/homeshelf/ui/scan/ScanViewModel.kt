@@ -1,6 +1,7 @@
 package com.jugurdzija.homeshelf.ui.scan
 
 import android.graphics.Bitmap
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GuideLine
@@ -9,6 +10,7 @@ import com.jugurdzija.homeshelf.data.StorageItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +28,13 @@ sealed interface ScanNavEvent {
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val storageRepository: StorageRepository,
     private val embedder: EmbedderOwner,
     private val pendingCaptureStore: PendingCaptureStore
 ) : ViewModel() {
+
+    private val pinnedStorageId: String? = savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
 
     private val _state = MutableStateFlow<ScanUiState>(ScanUiState.Loading)
     val state: StateFlow<ScanUiState> = _state.asStateFlow()
@@ -42,12 +47,21 @@ class ScanViewModel @Inject constructor(
     private var cachedGuideLines: Pair<String, List<GuideLine>>? = null
 
     init {
-        viewModelScope.launch {
-            val items = storageRepository.loadAll()
-            storagesWithBitmaps = items.mapNotNull { item ->
-                storageRepository.decodeLatestBitmap(item.id)?.let { item to it }
+        val pinnedId = pinnedStorageId
+        if (pinnedId != null) {
+            viewModelScope.launch {
+                val item = storageRepository.loadAll().firstOrNull { it.id == pinnedId }
+                val guideLines = loadGuideLinesCached(pinnedId)
+                _state.value = ScanUiState.Streaming(detected = item, guideLines = guideLines)
             }
-            _state.value = ScanUiState.Streaming()
+        } else {
+            viewModelScope.launch {
+                val items = storageRepository.loadAll()
+                storagesWithBitmaps = items.mapNotNull { item ->
+                    storageRepository.decodeLatestBitmap(item.id)?.let { item to it }
+                }
+                _state.value = ScanUiState.Streaming()
+            }
         }
         viewModelScope.launch {
             embedder.errors.collect { msg ->
@@ -63,6 +77,7 @@ class ScanViewModel @Inject constructor(
     }
 
     fun onFrameReceived(bitmap: Bitmap) {
+        if (pinnedStorageId != null) return
         val s = _state.value
         if (s !is ScanUiState.Streaming && s !is ScanUiState.Error) return
         if (!inferenceInFlight.compareAndSet(false, true)) return
@@ -96,13 +111,14 @@ class ScanViewModel @Inject constructor(
     }
 
     fun onCaptureBitmap(bitmap: Bitmap) {
+        val pinnedId = pinnedStorageId
         val detected = (_state.value as? ScanUiState.Streaming)?.detected
         viewModelScope.launch {
             pendingCaptureStore.save(bitmap)
-            if (detected != null) {
-                _navEvent.emit(ScanNavEvent.ToReview(detected.id))
-            } else {
-                _navEvent.emit(ScanNavEvent.ToEdit(null))
+            when {
+                pinnedId != null -> _navEvent.emit(ScanNavEvent.ToEdit(pinnedId))
+                detected != null -> _navEvent.emit(ScanNavEvent.ToReview(detected.id))
+                else -> _navEvent.emit(ScanNavEvent.ToEdit(null))
             }
         }
     }

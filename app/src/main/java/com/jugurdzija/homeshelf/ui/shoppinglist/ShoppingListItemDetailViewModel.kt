@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.ShoppingListRepository
 import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,7 @@ class ShoppingListItemDetailViewModel @Inject constructor(
     private val storageRepository: StorageRepository
 ) : ViewModel() {
 
-    val itemId: String = checkNotNull(savedStateHandle["itemId"])
+    val itemId: String = checkNotNull(savedStateHandle[Routes.ARG_ITEM_ID])
 
     private val _state = MutableStateFlow<ShoppingListItemDetailUiState>(ShoppingListItemDetailUiState.Loading)
     val state: StateFlow<ShoppingListItemDetailUiState> = _state.asStateFlow()

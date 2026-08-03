@@ -13,6 +13,7 @@ import com.jugurdzija.homeshelf.ui.golden.GoldenDetailsScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenManageScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenSaveScreen
 import com.jugurdzija.homeshelf.ui.markitems.MarkItemsScreen
+import com.jugurdzija.homeshelf.ui.reference.ReferenceDetailScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.scan.ScanScreen
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
@@ -30,24 +31,46 @@ fun HomeShelfNavGraph(
     ) {
         composable(Routes.REFERENCE) {
             ReferenceScreen(
+                onNavigateToDetail = { storageId ->
+                    navController.navigate(Routes.referenceDetail(storageId))
+                },
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
+                onNavigateToScan = { navController.navigate(Routes.scan()) },
+                onNavigateToShoppingList = { navController.navigate(Routes.SHOPPING_LIST) }
+            )
+        }
+        composable(
+            route = Routes.REFERENCE_DETAIL,
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
+        ) {
+            ReferenceDetailScreen(
+                onBack = { navController.popBackStack() },
                 onNavigateToEdit = { storageId ->
                     navController.navigate(Routes.edit(storageId))
                 },
-                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onNavigateToScan = { navController.navigate(Routes.SCAN) },
-                onNavigateToShoppingList = { navController.navigate(Routes.SHOPPING_LIST) },
+                onMarkItems = { storageId ->
+                    navController.navigate(Routes.markItems(storageId))
+                },
+                onRescan = { storageId ->
+                    navController.navigate(Routes.scan(storageId))
+                },
+                onDeleted = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
                 onCaptureTestPhoto = { storageId ->
                     navController.navigate(Routes.goldenCapture(storageId))
                 },
                 onViewHistory = { storageId ->
                     navController.navigate(Routes.goldenManage(storageId))
-                },
-                onMarkItems = { storageId ->
-                    navController.navigate(Routes.markItems(storageId))
                 }
             )
         }
-        composable(Routes.SCAN) {
+        composable(
+            route = Routes.SCAN,
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) {
             ScanScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToReview = { storageId ->
@@ -60,7 +83,7 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.EDIT,
-            arguments = listOf(navArgument("storageId") { type = NavType.StringType; nullable = true; defaultValue = null })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType; nullable = true; defaultValue = null })
         ) {
             EditScreen(
                 onSaved = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
@@ -69,7 +92,7 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.GOLDEN_CAPTURE,
-            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
         ) {
             GoldenCaptureScreen(
                 onBack = { navController.popBackStack() },
@@ -91,7 +114,7 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.GOLDEN_MANAGE,
-            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
         ) {
             GoldenManageScreen(
                 onBack = { navController.popBackStack() },
@@ -100,7 +123,7 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.GOLDEN_DETAILS,
-            arguments = listOf(navArgument("name") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_NAME) { type = NavType.StringType })
         ) {
             GoldenDetailsScreen(
                 onBack = { navController.popBackStack() }
@@ -108,7 +131,7 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.MARK_ITEMS,
-            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
         ) {
             MarkItemsScreen(onBack = { navController.popBackStack() })
         }
@@ -122,7 +145,7 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.SHOPPING_LIST_ITEM,
-            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_ITEM_ID) { type = NavType.StringType })
         ) {
             ShoppingListItemDetailScreen(onBack = { navController.popBackStack() })
         }

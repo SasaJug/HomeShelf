@@ -14,6 +14,7 @@ import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.MarkedItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.ItemDetector
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
 import com.jugurdzija.homeshelf.util.resolveCellName
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +37,7 @@ class MarkItemsViewModel @Inject constructor(
     private val itemDetector: ItemDetector
 ) : ViewModel() {
 
-    val storageId: String = checkNotNull(savedStateHandle["storageId"])
+    val storageId: String = checkNotNull(savedStateHandle[Routes.ARG_STORAGE_ID])
 
     var storageName by mutableStateOf("")
         private set

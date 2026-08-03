@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +36,7 @@ class GoldenManageViewModel @Inject constructor(
         data class Loaded(val referenceName: String, val items: List<GoldenItem>) : State
     }
 
-    private val storageId: String = checkNotNull(savedStateHandle["storageId"])
+    private val storageId: String = checkNotNull(savedStateHandle[Routes.ARG_STORAGE_ID])
 
     private val _state = MutableStateFlow<State>(State.Loading)
     val state: StateFlow<State> = _state.asStateFlow()

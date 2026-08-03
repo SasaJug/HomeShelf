@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ class GoldenCaptureViewModel @Inject constructor(
         data object Unavailable : GuideLineState
     }
 
-    val storageId: String = checkNotNull(savedStateHandle["storageId"])
+    val storageId: String = checkNotNull(savedStateHandle[Routes.ARG_STORAGE_ID])
 
     private val _guideLineState = MutableStateFlow<GuideLineState>(GuideLineState.Loading)
     val guideLineState: StateFlow<GuideLineState> = _guideLineState.asStateFlow()
