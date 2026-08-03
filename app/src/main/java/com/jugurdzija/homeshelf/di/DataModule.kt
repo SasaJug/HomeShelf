@@ -4,6 +4,8 @@ import com.jugurdzija.homeshelf.data.GridCellStore
 import com.jugurdzija.homeshelf.data.GridCellStoreImpl
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
+import com.jugurdzija.homeshelf.data.ShoppingListRepository
+import com.jugurdzija.homeshelf.data.ShoppingListRepositoryImpl
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.data.StorageRepositoryImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
@@ -39,4 +41,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindPendingCaptureStore(impl: PendingCaptureStoreImpl): PendingCaptureStore
+
+    @Binds
+    @Singleton
+    abstract fun bindShoppingListRepository(impl: ShoppingListRepositoryImpl): ShoppingListRepository
 }

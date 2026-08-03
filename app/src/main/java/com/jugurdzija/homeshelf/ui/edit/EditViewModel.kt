@@ -13,6 +13,7 @@ import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.GridLineGenerator
+import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
 import com.jugurdzija.homeshelf.util.mapGeneratedLinesToCanvasGuideLines
@@ -44,7 +45,7 @@ class EditViewModel @Inject constructor(
     private val gridLineGenerator: GridLineGenerator
 ) : ViewModel() {
 
-    val storageId: String? = savedStateHandle.get<String>("storageId")?.takeIf { it.isNotEmpty() }
+    val storageId: String? = savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
     val isNewStorage: Boolean = storageId == null
 
     var name by mutableStateOf("")

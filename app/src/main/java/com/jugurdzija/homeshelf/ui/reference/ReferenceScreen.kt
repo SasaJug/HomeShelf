@@ -19,11 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,12 +52,10 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReferenceScreen(
-    onNavigateToEdit: (String) -> Unit,
+    onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
-    onMarkItems: (String) -> Unit,
-    onCaptureTestPhoto: ((String) -> Unit)? = null,
-    onViewHistory: ((String) -> Unit)? = null,
+    onNavigateToShoppingList: () -> Unit,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -75,13 +70,10 @@ fun ReferenceScreen(
     ReferenceScreenContent(
         state = state,
         thumbnails = thumbnails,
-        onDelete = vm::onDelete,
-        onNavigateToEdit = onNavigateToEdit,
+        onNavigateToDetail = onNavigateToDetail,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToScan = onNavigateToScan,
-        onMarkItems = onMarkItems,
-        onCaptureTestPhoto = onCaptureTestPhoto,
-        onViewHistory = onViewHistory
+        onNavigateToShoppingList = onNavigateToShoppingList
     )
 }
 
@@ -90,19 +82,19 @@ fun ReferenceScreen(
 private fun ReferenceScreenContent(
     state: ReferenceListUiState,
     thumbnails: Map<String, Bitmap>,
-    onDelete: (String) -> Unit,
-    onNavigateToEdit: (String) -> Unit,
+    onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
-    onMarkItems: (String) -> Unit,
-    onCaptureTestPhoto: ((String) -> Unit)? = null,
-    onViewHistory: ((String) -> Unit)? = null
+    onNavigateToShoppingList: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Storages") },
                 actions = {
+                    IconButton(onClick = onNavigateToShoppingList) {
+                        Icon(Icons.Default.ShoppingCart, contentDescription = "Shopping List")
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
@@ -163,11 +155,7 @@ private fun ReferenceScreenContent(
                             StorageListItem(
                                 item = item,
                                 thumbnail = thumbnails[item.id],
-                                onDelete = { onDelete(item.id) },
-                                onClick = { onNavigateToEdit(item.id) },
-                                onMarkItems = { onMarkItems(item.id) },
-                                onCaptureTestPhoto = onCaptureTestPhoto?.let { { it(item.id) } },
-                                onViewHistory = onViewHistory?.let { { it(item.id) } }
+                                onClick = { onNavigateToDetail(item.id) }
                             )
                             HorizontalDivider()
                         }
@@ -195,11 +183,7 @@ private fun ReferenceScreenContent(
 private fun StorageListItem(
     item: StorageItem,
     thumbnail: Bitmap?,
-    onDelete: () -> Unit,
-    onClick: () -> Unit,
-    onMarkItems: () -> Unit,
-    onCaptureTestPhoto: (() -> Unit)? = null,
-    onViewHistory: (() -> Unit)? = null
+    onClick: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
     Row(
@@ -241,35 +225,6 @@ private fun StorageListItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        if (onCaptureTestPhoto != null) {
-            IconButton(onClick = onCaptureTestPhoto) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Capture test photo for ${item.name}"
-                )
-            }
-        }
-        if (onViewHistory != null) {
-            IconButton(onClick = onViewHistory) {
-                Icon(
-                    imageVector = Icons.Default.History,
-                    contentDescription = "View comparison history for ${item.name}"
-                )
-            }
-        }
-        IconButton(onClick = onMarkItems) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Label,
-                contentDescription = "Mark items in ${item.name}"
-            )
-        }
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete ${item.name}",
-                tint = MaterialTheme.colorScheme.error
-            )
-        }
     }
 }
 
@@ -286,11 +241,10 @@ private fun ReferenceScreenLoadingPreview() {
         ReferenceScreenContent(
             state = ReferenceListUiState.Loading,
             thumbnails = emptyMap(),
-            onDelete = {},
-            onNavigateToEdit = {},
+            onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
-            onMarkItems = {}
+            onNavigateToShoppingList = {}
         )
     }
 }
@@ -302,11 +256,10 @@ private fun ReferenceScreenEmptyPreview() {
         ReferenceScreenContent(
             state = ReferenceListUiState.Empty,
             thumbnails = emptyMap(),
-            onDelete = {},
-            onNavigateToEdit = {},
+            onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
-            onMarkItems = {}
+            onNavigateToShoppingList = {}
         )
     }
 }
@@ -318,11 +271,10 @@ private fun ReferenceScreenLoadedPreview() {
         ReferenceScreenContent(
             state = ReferenceListUiState.Loaded(previewItems),
             thumbnails = emptyMap(),
-            onDelete = {},
-            onNavigateToEdit = {},
+            onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
-            onMarkItems = {}
+            onNavigateToShoppingList = {}
         )
     }
 }
@@ -337,11 +289,10 @@ private fun ReferenceScreenErrorPreview() {
                 items = previewItems
             ),
             thumbnails = emptyMap(),
-            onDelete = {},
-            onNavigateToEdit = {},
+            onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
-            onMarkItems = {}
+            onNavigateToShoppingList = {}
         )
     }
 }

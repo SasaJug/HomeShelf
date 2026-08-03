@@ -9,10 +9,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.edit.EditScreen
 import com.jugurdzija.homeshelf.ui.markitems.MarkItemsScreen
+import com.jugurdzija.homeshelf.ui.reference.ReferenceDetailScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
 import com.jugurdzija.homeshelf.ui.review.ReviewScreen
 import com.jugurdzija.homeshelf.ui.scan.ScanScreen
 import com.jugurdzija.homeshelf.ui.settings.SettingsScreen
+import com.jugurdzija.homeshelf.ui.shoppinglist.ShoppingListItemDetailScreen
+import com.jugurdzija.homeshelf.ui.shoppinglist.ShoppingListScreen
 
 @Composable
 fun HomeShelfNavGraph(
@@ -25,17 +28,40 @@ fun HomeShelfNavGraph(
     ) {
         composable(Routes.REFERENCE) {
             ReferenceScreen(
+                onNavigateToDetail = { storageId ->
+                    navController.navigate(Routes.referenceDetail(storageId))
+                },
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
+                onNavigateToScan = { navController.navigate(Routes.scan()) },
+                onNavigateToShoppingList = { navController.navigate(Routes.SHOPPING_LIST) }
+            )
+        }
+        composable(
+            route = Routes.REFERENCE_DETAIL,
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
+        ) {
+            ReferenceDetailScreen(
+                onBack = { navController.popBackStack() },
                 onNavigateToEdit = { storageId ->
                     navController.navigate(Routes.edit(storageId))
                 },
-                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onNavigateToScan = { navController.navigate(Routes.SCAN) },
                 onMarkItems = { storageId ->
                     navController.navigate(Routes.markItems(storageId))
-                }
+                },
+                onRescan = { storageId ->
+                    navController.navigate(Routes.scan(storageId))
+                },
+                onDeleted = { navController.popBackStack(Routes.REFERENCE, inclusive = false) }
             )
         }
-        composable(Routes.SCAN) {
+        composable(
+            route = Routes.SCAN,
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) {
             ScanScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToReview = { storageId ->
@@ -48,18 +74,15 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.REVIEW,
-            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
         ) {
             ReviewScreen(
-                onToReference = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
-                onToEdit = { storageId ->
-                    navController.navigate(Routes.edit(storageId))
-                }
+                onToReference = { navController.popBackStack(Routes.REFERENCE, inclusive = false) }
             )
         }
         composable(
             route = Routes.EDIT,
-            arguments = listOf(navArgument("storageId") {
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
@@ -78,9 +101,23 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.MARK_ITEMS,
-            arguments = listOf(navArgument("storageId") { type = NavType.StringType })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
         ) {
             MarkItemsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SHOPPING_LIST) {
+            ShoppingListScreen(
+                onBack = { navController.popBackStack() },
+                onItemClick = { itemId ->
+                    navController.navigate(Routes.shoppingListItem(itemId))
+                }
+            )
+        }
+        composable(
+            route = Routes.SHOPPING_LIST_ITEM,
+            arguments = listOf(navArgument(Routes.ARG_ITEM_ID) { type = NavType.StringType })
+        ) {
+            ShoppingListItemDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }
