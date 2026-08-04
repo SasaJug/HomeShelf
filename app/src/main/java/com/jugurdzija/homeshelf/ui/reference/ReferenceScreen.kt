@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import com.jugurdzija.homeshelf.data.StorageCompleteness
 import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.data.StorageListEntry
+import com.jugurdzija.homeshelf.ui.common.HowItWorksDialog
 import com.jugurdzija.homeshelf.ui.common.LifecycleEvents
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import java.text.SimpleDateFormat
@@ -60,6 +64,7 @@ fun ReferenceScreen(
 ) {
     val state by vm.state.collectAsState()
     val thumbnails by vm.thumbnails.collectAsState()
+    val showIntroDialog by vm.showIntroDialog.collectAsState()
 
     LifecycleEvents { event ->
         if (event == Lifecycle.Event.ON_RESUME) {
@@ -75,6 +80,10 @@ fun ReferenceScreen(
         onNavigateToScan = onNavigateToScan,
         onNavigateToShoppingList = onNavigateToShoppingList
     )
+
+    if (showIntroDialog) {
+        HowItWorksDialog(onDismiss = vm::dismissIntro)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,11 +160,11 @@ private fun ReferenceScreenContent(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 88.dp)
                     ) {
-                        items(items, key = { it.id }) { item ->
+                        items(items, key = { it.item.id }) { entry ->
                             StorageListItem(
-                                item = item,
-                                thumbnail = thumbnails[item.id],
-                                onClick = { onNavigateToDetail(item.id) }
+                                entry = entry,
+                                thumbnail = thumbnails[entry.item.id],
+                                onClick = { onNavigateToDetail(entry.item.id) }
                             )
                             HorizontalDivider()
                         }
@@ -181,10 +190,11 @@ private fun ReferenceScreenContent(
 
 @Composable
 private fun StorageListItem(
-    item: StorageItem,
+    entry: StorageListEntry,
     thumbnail: Bitmap?,
     onClick: () -> Unit
 ) {
+    val item = entry.item
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
     Row(
         modifier = Modifier
@@ -224,14 +234,48 @@ private fun StorageListItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            val warning = completenessWarning(entry.completeness)
+            if (warning != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = warning,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
     }
 }
 
+private fun completenessWarning(completeness: StorageCompleteness): String? = when (completeness) {
+    StorageCompleteness.NO_ITEMS -> "No items marked"
+    StorageCompleteness.NO_GRID -> "No grid set"
+    StorageCompleteness.COMPLETE -> null
+}
+
 private val previewItems = listOf(
-    StorageItem(id = "1", name = "Pantry Shelf A", createdAt = 0L, updatedAt = 1_700_000_000_000L),
-    StorageItem(id = "2", name = "Garage Cabinet", createdAt = 0L, updatedAt = 1_700_100_000_000L),
-    StorageItem(id = "3", name = "Bedroom Closet", createdAt = 0L, updatedAt = 1_700_200_000_000L)
+    StorageListEntry(
+        StorageItem(id = "1", name = "Pantry Shelf A", createdAt = 0L, updatedAt = 1_700_000_000_000L),
+        StorageCompleteness.COMPLETE
+    ),
+    StorageListEntry(
+        StorageItem(id = "2", name = "Garage Cabinet", createdAt = 0L, updatedAt = 1_700_100_000_000L),
+        StorageCompleteness.NO_GRID
+    ),
+    StorageListEntry(
+        StorageItem(id = "3", name = "Bedroom Closet", createdAt = 0L, updatedAt = 1_700_200_000_000L),
+        StorageCompleteness.NO_ITEMS
+    )
 )
 
 @Preview(showBackground = true)

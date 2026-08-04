@@ -444,8 +444,7 @@ private val previewKnownItemsById = mapOf(
     "B1:1" to MarkedItem(
         id = "soup-1",
         name = "Soup",
-        boundingBox = BoundingBox(0.55f, 0.15f, 0.3f, 0.25f),
-        cellName = "B1"
+        boundingBox = BoundingBox(0.55f, 0.15f, 0.3f, 0.25f)
     )
 )
 

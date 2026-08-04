@@ -16,12 +16,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
-
-private const val MODEL_NAME = "gemini-2.5-flash"
-private const val REQUEST_TIMEOUT_MS = 30_000L
-private const val MAX_IMAGE_DIMENSION = 768
-private const val JPEG_QUALITY = 80
-private const val POSITION_SCALE = 1000
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val GRID_PROMPT =
     "Detect the shelf grid of the storage unit in this image - the fridge, pantry, cabinet, " +
@@ -64,7 +59,7 @@ class GridLineGeneratorImpl @Inject constructor() : GridLineGenerator {
 
     override suspend fun generate(bitmap: Bitmap): Result<List<GeneratedGuideLine>> {
         return try {
-            withTimeout(REQUEST_TIMEOUT_MS) {
+            withTimeout(REQUEST_TIMEOUT_MS.milliseconds) {
                 val prompt = withContext(Dispatchers.Default) { buildPrompt(bitmap) }
                 val response = model.generateContent(prompt)
                 val json = response.text ?: return@withTimeout Result.failure(

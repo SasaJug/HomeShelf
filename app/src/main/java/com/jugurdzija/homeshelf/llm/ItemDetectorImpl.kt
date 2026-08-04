@@ -19,12 +19,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
-private const val MODEL_NAME = "gemini-2.5-flash"
-private const val REQUEST_TIMEOUT_MS = 30_000L
-private const val MAX_IMAGE_DIMENSION = 768
-private const val JPEG_QUALITY = 80
-private const val POSITION_SCALE = 1000f
-
 private const val ITEM_PROMPT =
     "Detect individual items stored inside the storage unit in this image - the fridge, " +
         "pantry, cabinet, or shelving unit that holds the items. Only detect items inside " +

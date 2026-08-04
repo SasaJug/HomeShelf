@@ -145,7 +145,7 @@ class MarkItemsViewModelTest {
         val viewModel = createViewModel()
         viewModel.createItem(BoundingBox(0f, 0f, 0.1f, 0.1f))
 
-        viewModel.confirmSelection(canvasWidth = 100, canvasHeight = 100)
+        viewModel.confirmSelection()
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertTrue(viewModel.markedItems.isEmpty())
@@ -159,7 +159,7 @@ class MarkItemsViewModelTest {
         val id = viewModel.markedItems.first().id
         viewModel.updateName(id, "Rice")
 
-        viewModel.confirmSelection(canvasWidth = 100, canvasHeight = 100)
+        viewModel.confirmSelection()
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(1, viewModel.markedItems.size)

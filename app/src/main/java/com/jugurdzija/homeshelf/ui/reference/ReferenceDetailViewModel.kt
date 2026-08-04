@@ -17,7 +17,13 @@ import javax.inject.Inject
 
 sealed interface ReferenceDetailUiState {
     data object Loading : ReferenceDetailUiState
-    data class Loaded(val storageId: String, val storageName: String, val bitmap: Bitmap) : ReferenceDetailUiState
+    data class Loaded(
+        val storageId: String,
+        val storageName: String,
+        val bitmap: Bitmap,
+        val hasGuideLines: Boolean,
+        val hasMarkedItems: Boolean
+    ) : ReferenceDetailUiState
     data class Error(val message: String) : ReferenceDetailUiState
 }
 
@@ -53,7 +59,16 @@ class ReferenceDetailViewModel @Inject constructor(
             _state.value = when {
                 item == null -> ReferenceDetailUiState.Error("Storage not found")
                 bitmap == null -> ReferenceDetailUiState.Error("No reference photo available")
-                else -> ReferenceDetailUiState.Loaded(storageId, item.name, bitmap)
+                else -> {
+                    val data = storageRepository.loadLatestData(storageId)
+                    ReferenceDetailUiState.Loaded(
+                        storageId = storageId,
+                        storageName = item.name,
+                        bitmap = bitmap,
+                        hasGuideLines = data.guideLines.isNotEmpty(),
+                        hasMarkedItems = data.markedItems.isNotEmpty()
+                    )
+                }
             }
         }
     }

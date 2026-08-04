@@ -6,8 +6,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -188,11 +191,11 @@ private fun EditScreenContent(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("AI")
+                            Text("Auto Grid")
                         }
                     }
-                    TextButton(onClick = { onAddGuideLine(true) }) { Text("+ H") }
-                    TextButton(onClick = { onAddGuideLine(false) }) { Text("+ V") }
+                    TextButton(onClick = { onAddGuideLine(true) }) { Text("+H") }
+                    TextButton(onClick = { onAddGuideLine(false) }) { Text("+V") }
                     TextButton(
                         onClick = { onSave(canvasSize.width, canvasSize.height) },
                         enabled = saveEnabled
@@ -298,6 +301,33 @@ private fun EditScreenContent(
                         )
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 )
+
+                if (guideLines.isEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 8.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.55f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.height(16.dp).width(16.dp)
+                        )
+                        Text(
+                            text = "No grid set — the whole photo will be compared as one area",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White
+                        )
+                    }
+                }
             }
         }
     }
@@ -383,6 +413,29 @@ private fun EditScreenWithGuideLinesPreview() {
             name = "Pantry Shelf A",
             onNameChange = {},
             guideLines = previewGuideLines,
+            onAddGuideLine = {},
+            onDeleteGuideLine = {},
+            onUpdateGuideLinePosition = { _, _ -> },
+            saveEnabled = true,
+            onSave = { _, _ -> },
+            onDiscard = {},
+            onGenerateGridLines = { _, _ -> },
+            isGenerating = false,
+            snackbarHostState = remember { SnackbarHostState() }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EditScreenNoGridPreview() {
+    HomeShelfTheme {
+        EditScreenContent(
+            bitmap = createPreviewBitmap(),
+            isNewStorage = false,
+            name = "Pantry Shelf A",
+            onNameChange = {},
+            guideLines = emptyList(),
             onAddGuideLine = {},
             onDeleteGuideLine = {},
             onUpdateGuideLinePosition = { _, _ -> },

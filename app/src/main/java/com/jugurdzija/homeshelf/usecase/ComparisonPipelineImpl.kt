@@ -21,7 +21,6 @@ class ComparisonPipelineImpl @Inject constructor(
 
     override suspend fun run(capturedBitmap: Bitmap, storageId: String): ComparisonResult {
         val data = storageRepository.loadLatestData(storageId)
-        if (data.guideLines.isEmpty()) return ComparisonResult.NoGuideLines
         if (data.embeddings.isEmpty()) return ComparisonResult.NoEmbeddings
 
         val referenceBitmap = storageRepository.decodeLatestBitmap(storageId)
