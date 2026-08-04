@@ -6,9 +6,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -17,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,8 +102,8 @@ fun MarkItemsScreen(
         markedItems = vm.markedItems,
         selectedId = vm.selectedId,
         isDetecting = detectState is DetectState.Loading,
-        onBack = { canvasWidth, canvasHeight ->
-            vm.confirmSelection(canvasWidth, canvasHeight)
+        onBack = {
+            vm.confirmSelection()
             onBack()
         },
         onCreateItem = vm::createItem,
@@ -123,13 +127,13 @@ private fun MarkItemsScreenContent(
     markedItems: List<MarkedItem>,
     selectedId: String?,
     isDetecting: Boolean,
-    onBack: (canvasWidth: Int, canvasHeight: Int) -> Unit,
+    onBack: () -> Unit,
     onCreateItem: (BoundingBox) -> Unit,
     onSelect: (String) -> Unit,
     onUpdateBoundingBox: (String, BoundingBox) -> Unit,
     onUpdateName: (String, String) -> Unit,
     onUpdateTransparent: (String, Boolean) -> Unit,
-    onConfirmSelection: (canvasWidth: Int, canvasHeight: Int) -> Unit,
+    onConfirmSelection: () -> Unit,
     onDeleteItem: (String) -> Unit,
     onRunAiDetection: (canvasWidth: Int, canvasHeight: Int) -> Unit,
     snackbarHostState: SnackbarHostState
@@ -142,7 +146,7 @@ private fun MarkItemsScreenContent(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { onBack(canvasSize.width, canvasSize.height) }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -165,7 +169,8 @@ private fun MarkItemsScreenContent(
                             checked = selectedItem.isTransparentContainer,
                             onCheckedChange = { onUpdateTransparent(selectedItem.id, it) }
                         )
-                        IconButton(onClick = { onConfirmSelection(canvasSize.width, canvasSize.height) }) {
+                        Text("Transparent", style = MaterialTheme.typography.bodySmall)
+                        IconButton(onClick = onConfirmSelection) {
                             Icon(Icons.Default.Check, contentDescription = "Save item")
                         }
                         IconButton(onClick = { onDeleteItem(selectedItem.id) }) {
@@ -186,7 +191,7 @@ private fun MarkItemsScreenContent(
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("AI")
+                                Text("Auto Detect")
                             }
                         }
                     }
@@ -286,7 +291,7 @@ private fun MarkItemsScreenContent(
                                 val wasTap = secondPointerId == null && totalDrag.getDistance() <= TapSlopPx
                                 if (wasTap) {
                                     if (selectedId != null && selectedId != hitId) {
-                                        onConfirmSelection(canvasSize.width, canvasSize.height)
+                                        onConfirmSelection()
                                     }
                                     if (hitId != null) {
                                         if (hitId != selectedId) onSelect(hitId)
@@ -327,6 +332,33 @@ private fun MarkItemsScreenContent(
                                 .offset { IntOffset(rect.left.roundToInt(), (rect.top - 20).roundToInt()) }
                                 .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
                                 .padding(horizontal = 4.dp, vertical = 1.dp)
+                        )
+                    }
+                }
+
+                if (markedItems.isEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 8.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.55f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.height(16.dp).width(16.dp)
+                        )
+                        Text(
+                            text = "No items marked yet — tap the photo to add one",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White
                         )
                     }
                 }
@@ -417,10 +449,10 @@ private fun createPreviewBitmap(): Bitmap {
 }
 
 private val previewItems = listOf(
-    MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0.1f, 0.1f, 0.3f, 0.15f), cellName = "A1"),
+    MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0.1f, 0.1f, 0.3f, 0.15f)),
     MarkedItem(
         id = "2", name = "Sugar", boundingBox = BoundingBox(0.5f, 0.4f, 0.25f, 0.2f),
-        cellName = "B1", isTransparentContainer = true
+        isTransparentContainer = true
     )
 )
 
@@ -435,13 +467,38 @@ private fun MarkItemsScreenLoadedPreview() {
             markedItems = previewItems,
             selectedId = null,
             isDetecting = false,
-            onBack = { _, _ -> },
+            onBack = {},
             onCreateItem = {},
             onSelect = {},
             onUpdateBoundingBox = { _, _ -> },
             onUpdateName = { _, _ -> },
             onUpdateTransparent = { _, _ -> },
-            onConfirmSelection = { _, _ -> },
+            onConfirmSelection = {},
+            onDeleteItem = {},
+            onRunAiDetection = { _, _ -> },
+            snackbarHostState = remember { SnackbarHostState() }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MarkItemsScreenNoItemsPreview() {
+    HomeShelfTheme {
+        MarkItemsScreenContent(
+            storageName = "Pantry Shelf A",
+            bitmap = createPreviewBitmap(),
+            guideLines = emptyList(),
+            markedItems = emptyList(),
+            selectedId = null,
+            isDetecting = false,
+            onBack = {},
+            onCreateItem = {},
+            onSelect = {},
+            onUpdateBoundingBox = { _, _ -> },
+            onUpdateName = { _, _ -> },
+            onUpdateTransparent = { _, _ -> },
+            onConfirmSelection = {},
             onDeleteItem = {},
             onRunAiDetection = { _, _ -> },
             snackbarHostState = remember { SnackbarHostState() }
@@ -460,13 +517,13 @@ private fun MarkItemsScreenSelectedPreview() {
             markedItems = previewItems,
             selectedId = "2",
             isDetecting = false,
-            onBack = { _, _ -> },
+            onBack = {},
             onCreateItem = {},
             onSelect = {},
             onUpdateBoundingBox = { _, _ -> },
             onUpdateName = { _, _ -> },
             onUpdateTransparent = { _, _ -> },
-            onConfirmSelection = { _, _ -> },
+            onConfirmSelection = {},
             onDeleteItem = {},
             onRunAiDetection = { _, _ -> },
             snackbarHostState = remember { SnackbarHostState() }

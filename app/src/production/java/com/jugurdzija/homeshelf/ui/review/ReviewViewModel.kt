@@ -15,6 +15,7 @@ import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
+import com.jugurdzija.homeshelf.util.resolveItemsByCell
 import com.jugurdzija.homeshelf.util.toCellLocalFraction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -72,7 +73,6 @@ class ReviewViewModel @Inject constructor(
                     markedItems = result.markedItems
                 )
                 ComparisonResult.AlignmentFailed -> ReviewUiState.CompareError(storageName, "Alignment failed — try capturing again")
-                ComparisonResult.NoGuideLines -> ReviewUiState.CompareError(storageName, "No guide lines saved for this storage")
                 ComparisonResult.NoEmbeddings -> ReviewUiState.CompareError(storageName, "No reference data saved for this storage")
                 ComparisonResult.NoCells -> ReviewUiState.CompareError(storageName, "Could not extract grid cells")
             }
@@ -102,9 +102,9 @@ class ReviewViewModel @Inject constructor(
         _aiDiffState.value = AiDiffState.Loading
         viewModelScope.launch {
             val newCellsByName = done.newCells.associateBy { it.name }
-            val itemsByCell = done.markedItems.filter { it.cellName != null }.groupBy { it.cellName!! }
             val bitmapWidth = done.alignedBitmap.width
             val bitmapHeight = done.alignedBitmap.height
+            val itemsByCell = resolveItemsByCell(done.markedItems, done.guideLines, bitmapWidth, bitmapHeight)
             val knownItemsById = mutableMapOf<String, MarkedItem>()
             val pairs = done.referenceCells.mapNotNull { refCell ->
                 val newCell = newCellsByName[refCell.name] ?: return@mapNotNull null

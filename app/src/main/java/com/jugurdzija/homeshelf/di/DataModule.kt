@@ -2,6 +2,8 @@ package com.jugurdzija.homeshelf.di
 
 import com.jugurdzija.homeshelf.data.GridCellStore
 import com.jugurdzija.homeshelf.data.GridCellStoreImpl
+import com.jugurdzija.homeshelf.data.OnboardingPreferences
+import com.jugurdzija.homeshelf.data.OnboardingPreferencesImpl
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
 import com.jugurdzija.homeshelf.data.ShoppingListRepository
@@ -45,4 +47,8 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindShoppingListRepository(impl: ShoppingListRepositoryImpl): ShoppingListRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOnboardingPreferences(impl: OnboardingPreferencesImpl): OnboardingPreferences
 }

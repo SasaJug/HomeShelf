@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -116,11 +118,29 @@ private fun ReferenceDetailScreenContent(
                 },
                 actions = {
                     if (state is ReferenceDetailUiState.Loaded) {
-                        IconButton(onClick = { onNavigateToEdit(state.storageId) }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit Guidelines")
+                        BadgedBox(badge = { if (!state.hasGuideLines) Badge() }) {
+                            IconButton(onClick = { onNavigateToEdit(state.storageId) }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = if (state.hasGuideLines) {
+                                        "Edit Guidelines"
+                                    } else {
+                                        "Edit Guidelines (no grid set)"
+                                    }
+                                )
+                            }
                         }
-                        IconButton(onClick = { onMarkItems(state.storageId) }) {
-                            Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Mark Items")
+                        BadgedBox(badge = { if (!state.hasMarkedItems) Badge() }) {
+                            IconButton(onClick = { onMarkItems(state.storageId) }) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.Label,
+                                    contentDescription = if (state.hasMarkedItems) {
+                                        "Mark Items"
+                                    } else {
+                                        "Mark Items (no items marked)"
+                                    }
+                                )
+                            }
                         }
                         Box {
                             IconButton(onClick = { menuExpanded = true }) {
@@ -258,7 +278,9 @@ private fun ReferenceDetailScreenLoadedPreview() {
             state = ReferenceDetailUiState.Loaded(
                 storageId = "1",
                 storageName = "Pantry Shelf A",
-                bitmap = previewBitmap()
+                bitmap = previewBitmap(),
+                hasGuideLines = true,
+                hasMarkedItems = true
             ),
             showDeleteConfirmation = false,
             onBack = {},
@@ -282,7 +304,9 @@ private fun ReferenceDetailScreenDeleteConfirmationPreview() {
             state = ReferenceDetailUiState.Loaded(
                 storageId = "1",
                 storageName = "Pantry Shelf A",
-                bitmap = previewBitmap()
+                bitmap = previewBitmap(),
+                hasGuideLines = true,
+                hasMarkedItems = true
             ),
             showDeleteConfirmation = true,
             onBack = {},

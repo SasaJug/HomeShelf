@@ -22,11 +22,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
 
-private const val MODEL_NAME = "gemini-2.5-flash"
-private const val REQUEST_TIMEOUT_MS = 30_000L
-private const val MAX_IMAGE_DIMENSION = 768
-private const val JPEG_QUALITY = 80
-private const val POSITION_SCALE = 1000f
 private const val NEW_ITEM_ID_PREFIX = "N"
 
 private val FillLevelChanges = setOf(

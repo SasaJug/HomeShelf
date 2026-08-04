@@ -1,8 +1,11 @@
 package com.jugurdzija.homeshelf.util
 
+import com.jugurdzija.homeshelf.data.BoundingBox
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.data.MarkedItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 private fun assertPixelsEqual(expected: List<Float>, actual: List<Float>, delta: Float = 0.01f) {
@@ -144,5 +147,85 @@ class MathUtilsTest {
         )
 
         assertNull(cellName)
+    }
+
+    @Test
+    fun `mapLinesToImageCoords creates photo borders when no lines exist`() {
+        val (hPixels, vPixels) = mapLinesToImageCoords(
+            emptyList(), canvasWidth = 100, canvasHeight = 100, bitmapWidth = 200, bitmapHeight = 300
+        )
+
+        assertPixelsEqual(listOf(0f, 300f), hPixels)
+        assertPixelsEqual(listOf(0f, 200f), vPixels)
+    }
+
+    @Test
+    fun `resolveCellName resolves the whole photo to A1 when no lines exist`() {
+        val cellName = resolveCellName(
+            emptyList(), canvasWidth = 100, canvasHeight = 100, bitmapWidth = 100, bitmapHeight = 100,
+            centerXFraction = 0.5f, centerYFraction = 0.5f
+        )
+
+        assertEquals("A1", cellName)
+    }
+
+    @Test
+    fun `resolveItemsByCell groups items by their live-resolved cell`() {
+        val lines = listOf(
+            GuideLine(id = 1, isHorizontal = true, position = 0.5f),
+            GuideLine(id = 2, isHorizontal = false, position = 0.5f)
+        )
+        val topLeftItem = MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0f, 0f, 0.1f, 0.1f))
+        val bottomRightItem = MarkedItem(id = "2", name = "Sugar", boundingBox = BoundingBox(0.8f, 0.8f, 0.1f, 0.1f))
+
+        val itemsByCell = resolveItemsByCell(
+            listOf(topLeftItem, bottomRightItem), lines, bitmapWidth = 100, bitmapHeight = 100
+        )
+
+        assertEquals(listOf(topLeftItem), itemsByCell["A1"])
+        assertEquals(listOf(bottomRightItem), itemsByCell["B2"])
+    }
+
+    @Test
+    fun `resolveItemsByCell places every item in A1 when no grid was ever drawn`() {
+        val item = MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0.8f, 0.8f, 0.1f, 0.1f))
+
+        val itemsByCell = resolveItemsByCell(listOf(item), emptyList(), bitmapWidth = 100, bitmapHeight = 100)
+
+        assertEquals(listOf(item), itemsByCell["A1"])
+    }
+
+    @Test
+    fun `resolveItemsByCell uses whatever grid currently exists, regardless of when the item was marked`() {
+        val item = MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0.8f, 0.8f, 0.1f, 0.1f))
+
+        val beforeGrid = resolveItemsByCell(listOf(item), emptyList(), bitmapWidth = 100, bitmapHeight = 100)
+        val afterGrid = resolveItemsByCell(
+            listOf(item),
+            listOf(
+                GuideLine(id = 1, isHorizontal = true, position = 0.5f),
+                GuideLine(id = 2, isHorizontal = false, position = 0.5f)
+            ),
+            bitmapWidth = 100, bitmapHeight = 100
+        )
+
+        assertEquals(listOf(item), beforeGrid["A1"])
+        assertEquals(listOf(item), afterGrid["B2"])
+        assertTrue(afterGrid["A1"].isNullOrEmpty())
+    }
+
+    @Test
+    fun `resolveItemsByCell drops items that fall outside every cell`() {
+        val lines = listOf(
+            GuideLine(id = 1, isHorizontal = true, position = 0.4f),
+            GuideLine(id = 2, isHorizontal = true, position = 0.6f),
+            GuideLine(id = 3, isHorizontal = false, position = 0.4f),
+            GuideLine(id = 4, isHorizontal = false, position = 0.6f)
+        )
+        val outsideItem = MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0.85f, 0.85f, 0.1f, 0.1f))
+
+        val itemsByCell = resolveItemsByCell(listOf(outsideItem), lines, bitmapWidth = 100, bitmapHeight = 100)
+
+        assertTrue(itemsByCell.isEmpty())
     }
 }

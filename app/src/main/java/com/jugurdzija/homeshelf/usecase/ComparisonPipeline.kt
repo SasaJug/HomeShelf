@@ -15,7 +15,6 @@ sealed interface ComparisonResult {
         val markedItems: List<MarkedItem>
     ) : ComparisonResult
     data object AlignmentFailed : ComparisonResult
-    data object NoGuideLines : ComparisonResult
     data object NoEmbeddings : ComparisonResult
     data object NoCells : ComparisonResult
 }

@@ -16,7 +16,6 @@ import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.ItemDetector
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
-import com.jugurdzija.homeshelf.util.resolveCellName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -89,18 +88,15 @@ class MarkItemsViewModel @Inject constructor(
         if (idx >= 0) markedItems[idx] = markedItems[idx].copy(isTransparentContainer = isTransparentContainer)
     }
 
-    fun confirmSelection(canvasWidth: Int, canvasHeight: Int) {
+    fun confirmSelection() {
         val id = selectedId ?: return
         val idx = markedItems.indexOfFirst { it.id == id }
         if (idx < 0) {
             selectedId = null
             return
         }
-        val item = markedItems[idx]
-        if (item.name.isBlank()) {
+        if (markedItems[idx].name.isBlank()) {
             markedItems.removeAt(idx)
-        } else {
-            markedItems[idx] = item.copy(cellName = resolveCellNameFor(canvasWidth, canvasHeight, item.boundingBox))
         }
         selectedId = null
         persist()
@@ -110,14 +106,6 @@ class MarkItemsViewModel @Inject constructor(
         markedItems.removeAll { it.id == id }
         if (selectedId == id) selectedId = null
         persist()
-    }
-
-    private fun resolveCellNameFor(canvasWidth: Int, canvasHeight: Int, box: BoundingBox): String? {
-        val bitmap = _bitmapState.value ?: return null
-        return resolveCellName(
-            guideLines, canvasWidth, canvasHeight, bitmap.width, bitmap.height,
-            box.x + box.width / 2f, box.y + box.height / 2f
-        )
     }
 
     fun runAiDetection(canvasWidth: Int, canvasHeight: Int) {
@@ -160,7 +148,6 @@ class MarkItemsViewModel @Inject constructor(
                                 id = UUID.randomUUID().toString(),
                                 name = detectedItem.name,
                                 boundingBox = box,
-                                cellName = resolveCellNameFor(canvasWidth, canvasHeight, box),
                                 isTransparentContainer = detectedItem.isTransparentContainer
                             )
                         )
