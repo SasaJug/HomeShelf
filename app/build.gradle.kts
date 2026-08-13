@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +8,13 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.google.services)
+}
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -26,6 +35,21 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    signingConfigs {
+        create("studentTest") {
+            storeFile = localProperties.getProperty("STUDENT_TEST_KEYSTORE")?.let { file(it) }
+            storePassword = localProperties.getProperty("STUDENT_TEST_KEYSTORE_PASSWORD")
+            keyAlias = localProperties.getProperty("STUDENT_TEST_KEY_ALIAS")
+            keyPassword = localProperties.getProperty("STUDENT_TEST_KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("studentTest")
+        }
     }
 
     packaging {

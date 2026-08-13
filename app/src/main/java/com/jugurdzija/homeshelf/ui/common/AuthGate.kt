@@ -1,6 +1,7 @@
 package com.jugurdzija.homeshelf.ui.common
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,14 +29,28 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.google.firebase.auth.FirebaseAuth
 import com.jugurdzija.homeshelf.R
 
+private const val TAG = "AuthGate"
+
 @Composable
 fun AuthGate(content: @Composable (onLogout: () -> Unit) -> Unit) {
-    var authenticated by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser != null) }
+    val auth = remember { FirebaseAuth.getInstance() }
+    var authenticated by remember { mutableStateOf(auth.currentUser != null) }
     var signInError by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
+    
+    DisposableEffect(auth) {
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val isSignedIn = firebaseAuth.currentUser != null
+            Log.d(TAG, "AuthStateListener fired, isSignedIn=$isSignedIn, uid=${firebaseAuth.currentUser?.uid}")
+            authenticated = isSignedIn
+            if (isSignedIn) signInError = null
+        }
+        auth.addAuthStateListener(listener)
+        onDispose { auth.removeAuthStateListener(listener) }
+    }
 
     val signInLauncher = rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == Activity.RESULT_OK || auth.currentUser != null) {
             authenticated = true
             signInError = null
         } else {
