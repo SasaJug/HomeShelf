@@ -20,6 +20,8 @@ internal object GoldenConstants {
     const val KEY_ANDROID_API = "android_api"
     const val KEY_REFERENCE_FILE_PATH = "reference_file_path"
     const val KEY_GROUND_TRUTH = "ground_truth"
-    const val KEY_CELL_INDEX = "cell_index"
+    const val KEY_ITEM_ID = "item_id"
+    const val KEY_ITEM_NAME = "item_name"
     const val KEY_CHANGE_TYPE = "change_type"
+    const val KEY_CELL_NAME = "cell_name"
 }

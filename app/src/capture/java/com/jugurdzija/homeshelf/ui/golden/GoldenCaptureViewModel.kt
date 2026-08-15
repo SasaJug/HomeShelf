@@ -24,16 +24,16 @@ class GoldenCaptureViewModel @Inject constructor(
     private val goldenStore: GoldenStore
 ) : ViewModel() {
 
-    sealed interface GuideLineState {
-        data object Loading : GuideLineState
-        data class Ready(val guideLines: List<GuideLine>) : GuideLineState
-        data object Unavailable : GuideLineState
+    sealed interface CaptureReadinessState {
+        data object Loading : CaptureReadinessState
+        data class Ready(val guideLines: List<GuideLine>) : CaptureReadinessState
+        data class Unavailable(val reason: String) : CaptureReadinessState
     }
 
     val storageId: String = checkNotNull(savedStateHandle[Routes.ARG_STORAGE_ID])
 
-    private val _guideLineState = MutableStateFlow<GuideLineState>(GuideLineState.Loading)
-    val guideLineState: StateFlow<GuideLineState> = _guideLineState.asStateFlow()
+    private val _guideLineState = MutableStateFlow<CaptureReadinessState>(CaptureReadinessState.Loading)
+    val guideLineState: StateFlow<CaptureReadinessState> = _guideLineState.asStateFlow()
 
     private val _navigateToSave = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val navigateToSave: SharedFlow<Unit> = _navigateToSave
@@ -43,13 +43,26 @@ class GoldenCaptureViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             referenceLabel = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-            val lines = storageRepository.loadLatestData(storageId).guideLines
-            _guideLineState.value = if (lines.size >= 4) GuideLineState.Ready(lines) else GuideLineState.Unavailable
+            val data = storageRepository.loadLatestData(storageId)
+            val hasGuideLines = data.guideLines.size >= 4
+            val hasMarkedItems = data.markedItems.isNotEmpty()
+            _guideLineState.value = when {
+                hasGuideLines && hasMarkedItems -> CaptureReadinessState.Ready(data.guideLines)
+                !hasMarkedItems && !hasGuideLines -> CaptureReadinessState.Unavailable(
+                    "This storage has no grid or marked items yet. Add both before capturing a comparison photo."
+                )
+                !hasMarkedItems -> CaptureReadinessState.Unavailable(
+                    "This storage has no marked items yet. Mark items before capturing a comparison photo."
+                )
+                else -> CaptureReadinessState.Unavailable(
+                    "This storage has no guide lines set up yet. Add guide lines before capturing a comparison photo."
+                )
+            }
         }
     }
 
     fun onCaptureBitmap(bitmap: Bitmap) {
-        if (_guideLineState.value !is GuideLineState.Ready) return
+        if (_guideLineState.value !is CaptureReadinessState.Ready) return
         viewModelScope.launch {
             goldenStore.populateHolder(bitmap, storageId, referenceLabel)
             _navigateToSave.emit(Unit)

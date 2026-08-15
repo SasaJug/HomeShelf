@@ -3,11 +3,9 @@ package com.jugurdzija.homeshelf.pipeline
 import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
-import com.jugurdzija.homeshelf.data.ChangeType
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.di.DiConstants
 import com.jugurdzija.homeshelf.llm.CellPair
-import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
@@ -29,6 +27,8 @@ import kotlin.time.Duration.Companion.milliseconds
 // Delay to LLM calls to prevent reaching limit.
 private const val LLM_REQUEST_INTERVAL_MS = 6_500L
 
+// Just adjusted the tests to compile. It does not work properly at this moment.
+// This will be fixed in the next phase.
 @HiltAndroidTest
 class ComparisonPipelineGoldenTest {
 
@@ -67,30 +67,8 @@ class ComparisonPipelineGoldenTest {
             scoreGolden(golden)
         }
 
-        val allCells = goldenReports.flatMap { it.cells }
-        val analyzedCells = allCells.filter { it.changed != null }
-        val metrics = if (analyzedCells.isEmpty()) null else {
-            val tp = analyzedCells.count { it.actualChanged && it.changed == true }
-            val tn = analyzedCells.count { !it.actualChanged && it.changed == false }
-            val fp = analyzedCells.count { !it.actualChanged && it.changed == true }
-            val fn = analyzedCells.count { it.actualChanged && it.changed == false }
-            val precision = if (tp + fp == 0) null else tp.toDouble() / (tp + fp)
-            val recall = if (tp + fn == 0) null else tp.toDouble() / (tp + fn)
-            val f1 = if (precision == null || recall == null || precision + recall == 0.0) null
-                     else 2.0 * precision * recall / (precision + recall)
-            Metrics(
-                totalCells = analyzedCells.size,
-                tp = tp, tn = tn, fp = fp, fn = fn,
-                accuracy = (tp + tn).toDouble() / analyzedCells.size,
-                precision = precision,
-                recall = recall,
-                f1 = f1
-            )
-        }
         val report = PipelineTestReport(
             timestamp = Instant.now().toString(),
-            totalCells = allCells.size,
-            metrics = metrics,
             goldens = goldenReports
         )
 
@@ -101,15 +79,23 @@ class ComparisonPipelineGoldenTest {
     }
 
     private suspend fun scoreGolden(golden: com.jugurdzija.homeshelf.data.GoldenItem): PipelineGoldenReport {
+        val groundTruth = golden.groundTruth.map {
+            PipelineGroundTruthReport(
+                itemId = it.itemId,
+                name = it.name,
+                changeType = it.changeType.name,
+                cellName = it.cellName
+            )
+        }
         val storageId = golden.storageId
-            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList())
+            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList(), groundTruth)
 
         val capturedBitmap = BitmapFactory.decodeFile(File(golden.dir, "photo.jpg").absolutePath)
-            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList())
+            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList(), groundTruth)
 
         val result = pipeline.run(capturedBitmap, storageId)
         if (result !is ComparisonResult.Success) {
-            return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList())
+            return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList(), groundTruth)
         }
 
         val newCellsByName = result.newCells.associateBy { it.name }
@@ -118,26 +104,20 @@ class ComparisonPipelineGoldenTest {
             CellPair(cellId = refCell.name, referenceBitmap = refCell.bitmap, newBitmap = newCell.bitmap)
         }
         val analyzeResult = shelfDiffAnalyzer.analyze(pairs)
-        val aiByCellId = analyzeResult.getOrNull()?.associateBy { it.cellId }
         val analyzeError = analyzeResult.exceptionOrNull()?.message
-
-        val groundTruthMap = golden.groundTruth.associate { it.cellIndex to it.changeType }
-        val cellNames = result.similarities.keys
-        val numCols = (cellNames.maxOfOrNull { it[0] - 'A' } ?: 0) + 1
-        val cells = cellNames.map { name ->
-            val colIdx = name[0] - 'A'
-            val rowIdx = name.substring(1).toInt() - 1
-            val cellIndex = rowIdx * numCols + colIdx
-            val groundTruth = groundTruthMap[cellIndex] ?: ChangeType.NO_CHANGE
-            val aiItems = aiByCellId?.get(name)?.items
+        val cells = analyzeResult.getOrNull().orEmpty().map { cellDiff ->
             PipelineCellReport(
-                cellIndex = cellIndex,
-                groundTruth = groundTruth.name,
-                actualChanged = groundTruth != ChangeType.NO_CHANGE,
-                changed = aiItems?.any { it.change != ItemChange.UNCHANGED },
-                description = aiItems?.joinToString("; ") { "${it.name ?: it.id}: ${it.description}" }
+                cellId = cellDiff.cellId,
+                aiItems = cellDiff.items.map { item ->
+                    PipelineAiItemReport(
+                        id = item.id,
+                        change = item.change.name,
+                        description = item.description,
+                        name = item.name
+                    )
+                }
             )
         }
-        return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, true, cells, error = analyzeError)
+        return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, true, cells, groundTruth, error = analyzeError)
     }
 }
