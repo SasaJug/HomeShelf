@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.jugurdzija.homeshelf.ui.confirm.ConfirmCaptureScreen
 import com.jugurdzija.homeshelf.ui.edit.EditScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenCaptureScreen
 import com.jugurdzija.homeshelf.ui.golden.GoldenDetailsScreen
@@ -36,6 +37,9 @@ fun HomeShelfNavGraph(
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 onNavigateToScan = { navController.navigate(Routes.scan()) },
+                onNavigateToScanItem = { storageId ->
+                    navController.navigate(Routes.scan(storageId))
+                },
                 onNavigateToShoppingList = { navController.navigate(Routes.SHOPPING_LIST) }
             )
         }
@@ -52,7 +56,7 @@ fun HomeShelfNavGraph(
                     navController.navigate(Routes.markItems(storageId))
                 },
                 onRescan = { storageId ->
-                    navController.navigate(Routes.scan(storageId))
+                    navController.navigate(Routes.scan(storageId, rescan = true))
                 },
                 onDeleted = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
                 onCaptureTestPhoto = { storageId ->
@@ -65,19 +69,50 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.SCAN,
-            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
+            arguments = listOf(
+                navArgument(Routes.ARG_STORAGE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(Routes.ARG_MODE) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) {
             ScanScreen(
                 onBack = { navController.popBackStack() },
                 onNavigateToReview = { storageId ->
                     navController.navigate(Routes.edit(storageId))
                 },
-                onNavigateToEdit = { storageId ->
-                    navController.navigate(Routes.edit(storageId))
+                onNavigateToConfirm = { storageId ->
+                    navController.navigate(Routes.confirmCapture(storageId))
+                }
+            )
+        }
+        composable(
+            route = Routes.CONFIRM_CAPTURE,
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) { backStackEntry ->
+            val storageId = backStackEntry.arguments?.getString(Routes.ARG_STORAGE_ID)
+            ConfirmCaptureScreen(
+                onSaved = { savedId ->
+                    navController.navigate(Routes.referenceDetail(savedId)) {
+                        popUpTo(Routes.REFERENCE) { inclusive = false }
+                    }
+                },
+                onDiscarded = {
+                    if (storageId != null) {
+                        navController.popBackStack(Routes.REFERENCE_DETAIL, inclusive = false)
+                    } else {
+                        navController.popBackStack(Routes.REFERENCE, inclusive = false)
+                    }
                 }
             )
         }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
@@ -59,6 +60,7 @@ fun ReferenceScreen(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onNavigateToScanItem: (String) -> Unit,
     onNavigateToShoppingList: () -> Unit,
     vm: ReferenceViewModel = hiltViewModel()
 ) {
@@ -78,6 +80,7 @@ fun ReferenceScreen(
         onNavigateToDetail = onNavigateToDetail,
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToScan = onNavigateToScan,
+        onNavigateToScanItem = onNavigateToScanItem,
         onNavigateToShoppingList = onNavigateToShoppingList
     )
 
@@ -94,6 +97,7 @@ private fun ReferenceScreenContent(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToScan: () -> Unit,
+    onNavigateToScanItem: (String) -> Unit,
     onNavigateToShoppingList: () -> Unit
 ) {
     Scaffold(
@@ -164,7 +168,8 @@ private fun ReferenceScreenContent(
                             StorageListItem(
                                 entry = entry,
                                 thumbnail = thumbnails[entry.item.id],
-                                onClick = { onNavigateToDetail(entry.item.id) }
+                                onClick = { onNavigateToDetail(entry.item.id) },
+                                onScanItem = { onNavigateToScanItem(entry.item.id) }
                             )
                             HorizontalDivider()
                         }
@@ -192,7 +197,8 @@ private fun ReferenceScreenContent(
 private fun StorageListItem(
     entry: StorageListEntry,
     thumbnail: Bitmap?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onScanItem: () -> Unit
 ) {
     val item = entry.item
     val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
@@ -254,6 +260,12 @@ private fun StorageListItem(
                 }
             }
         }
+        IconButton(onClick = onScanItem) {
+            Icon(
+                imageVector = Icons.Default.CameraAlt,
+                contentDescription = "Scan ${item.name}"
+            )
+        }
     }
 }
 
@@ -288,6 +300,7 @@ private fun ReferenceScreenLoadingPreview() {
             onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToScanItem = {},
             onNavigateToShoppingList = {}
         )
     }
@@ -303,6 +316,7 @@ private fun ReferenceScreenEmptyPreview() {
             onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToScanItem = {},
             onNavigateToShoppingList = {}
         )
     }
@@ -318,6 +332,7 @@ private fun ReferenceScreenLoadedPreview() {
             onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToScanItem = {},
             onNavigateToShoppingList = {}
         )
     }
@@ -336,6 +351,7 @@ private fun ReferenceScreenErrorPreview() {
             onNavigateToDetail = {},
             onNavigateToSettings = {},
             onNavigateToScan = {},
+            onNavigateToScanItem = {},
             onNavigateToShoppingList = {}
         )
     }

@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -240,6 +241,11 @@ private fun AnnotationCanvas(
     val renderBoxes = knownBoxes.map { RenderBox(it.itemId, it.boundingBox, isNew = false) } +
         newBoxes.map { RenderBox(it.localId, it.boundingBox, isNew = true) }
 
+    val currentBitmap by rememberUpdatedState(bitmap)
+    val currentGuideLines by rememberUpdatedState(guideLines)
+    val currentRenderBoxes by rememberUpdatedState(renderBoxes)
+    val currentSelectedId by rememberUpdatedState(selectedId)
+
     Box(modifier = modifier) {
         Image(
             bitmap = bitmap.asImageBitmap(),
@@ -252,12 +258,13 @@ private fun AnnotationCanvas(
             modifier = Modifier
                 .fillMaxSize()
                 .onSizeChanged { canvasSize = it }
-                .pointerInput(bitmap, guideLines, renderBoxes, selectedId) {
+                .pointerInput(Unit) {
                     val hitPaddingPx = HitPaddingDp.dp.toPx()
                     awaitEachGesture {
                         val firstDown = awaitFirstDown(requireUnconsumed = false)
-                        val hitId = hitTest(renderBoxes, firstDown.position, canvasSize, bitmap, hitPaddingPx)
-                        val isOnSelected = hitId != null && hitId == selectedId
+                        val gestureSelectedId = currentSelectedId
+                        val hitId = hitTest(currentRenderBoxes, firstDown.position, canvasSize, currentBitmap, hitPaddingPx)
+                        val isOnSelected = hitId != null && hitId == gestureSelectedId
 
                         var totalDrag = Offset.Zero
                         var secondPointerId: PointerId? = null
@@ -276,18 +283,18 @@ private fun AnnotationCanvas(
                                     totalDrag += delta
                                     if (isOnSelected && totalDrag.getDistance() > TapSlopPx) {
                                         change.consume()
-                                        val fracDelta = canvasDeltaToBitmapFraction(delta, canvasSize, bitmap)
-                                        val current = renderBoxes.firstOrNull { it.id == selectedId }?.boundingBox
+                                        val fracDelta = canvasDeltaToBitmapFraction(delta, canvasSize, currentBitmap)
+                                        val current = currentRenderBoxes.firstOrNull { it.id == gestureSelectedId }?.boundingBox
                                         if (current != null) {
                                             val moved = current.copy(
                                                 x = (current.x + fracDelta.x).coerceIn(0f, 1f - current.width),
                                                 y = (current.y + fracDelta.y).coerceIn(0f, 1f - current.height)
                                             )
-                                            onUpdateBoundingBox(selectedId, moved)
+                                            onUpdateBoundingBox(gestureSelectedId, moved)
                                         }
                                     }
                                 }
-                            } else if (active.size >= 2 && selectedId != null) {
+                            } else if (active.size >= 2 && gestureSelectedId != null) {
                                 if (secondPointerId == null) {
                                     val newPointer = active.firstOrNull { it.id != firstDown.id }
                                     val p1 = active.firstOrNull { it.id == firstDown.id }
@@ -297,7 +304,7 @@ private fun AnnotationCanvas(
                                             abs(p1.position.x - newPointer.position.x),
                                             abs(p1.position.y - newPointer.position.y)
                                         )
-                                        gestureBoxStart = renderBoxes.firstOrNull { it.id == selectedId }?.boundingBox
+                                        gestureBoxStart = currentRenderBoxes.firstOrNull { it.id == gestureSelectedId }?.boundingBox
                                     }
                                 } else {
                                     val p1 = active.firstOrNull { it.id == firstDown.id }
@@ -312,10 +319,10 @@ private fun AnnotationCanvas(
                                             abs(p1.position.y - p2.position.y)
                                         )
                                         val sepDeltaPx = currentSep - startSep
-                                        val fracDelta = canvasDeltaToBitmapFraction(sepDeltaPx, canvasSize, bitmap)
+                                        val fracDelta = canvasDeltaToBitmapFraction(sepDeltaPx, canvasSize, currentBitmap)
                                         val newWidth = (boxStart.width + fracDelta.x).coerceIn(MinBoxSize, 1f - boxStart.x)
                                         val newHeight = (boxStart.height + fracDelta.y).coerceIn(MinBoxSize, 1f - boxStart.y)
-                                        onUpdateBoundingBox(selectedId, boxStart.copy(width = newWidth, height = newHeight))
+                                        onUpdateBoundingBox(gestureSelectedId, boxStart.copy(width = newWidth, height = newHeight))
                                     }
                                 }
                             }
@@ -323,13 +330,13 @@ private fun AnnotationCanvas(
 
                         val wasTap = secondPointerId == null && totalDrag.getDistance() <= TapSlopPx
                         if (wasTap) {
-                            if (selectedId != null && selectedId != hitId) {
+                            if (gestureSelectedId != null && gestureSelectedId != hitId) {
                                 onConfirmSelection()
                             }
                             if (hitId != null) {
-                                if (hitId != selectedId) onSelect(hitId)
+                                if (hitId != gestureSelectedId) onSelect(hitId)
                             } else {
-                                val box = computeDefaultBox(firstDown.position, canvasSize, bitmap, guideLines)
+                                val box = computeDefaultBox(firstDown.position, canvasSize, currentBitmap, currentGuideLines)
                                 onCreate(box)
                             }
                         }

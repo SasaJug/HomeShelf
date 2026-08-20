@@ -1,0 +1,664 @@
+{
+  "timestamp": "2026-08-15T18:53:48.234554Z",
+  "goldens": [
+    {
+      "golden_name": "vitrina_20260815_173758",
+      "reference_label": "vitrina",
+      "captured_at": "2026-08-15T15:39:25.407060Z",
+      "alignment_success": true,
+      "cells": [
+        {
+          "cell_id": "A1",
+          "ai_items": [
+            {
+              "id": "de3e7403-7b6e-4b22-8919-2d5a544a6f61",
+              "change": "REMOVED",
+              "description": "The yellow saucers beneath the stacked cups are no longer present on the shelf.",
+              "box": {
+                "x": 0.13103345,
+                "y": 0.6135169,
+                "width": 0.18323413,
+                "height": 0.03767528
+              }
+            },
+            {
+              "id": "16a83298-be42-472c-ac1f-7ca16675c3fd",
+              "change": "UNCHANGED",
+              "description": "Top floral cup remains stacked on the lower cup.",
+              "box": {
+                "x": 0.20224293,
+                "y": 0.5290246,
+                "width": 0.11723511,
+                "height": 0.04210766
+              }
+            },
+            {
+              "id": "ad33b608-f942-4aa8-8634-fe24ca6839df",
+              "change": "UNCHANGED",
+              "description": "Lower floral cup remains in place, now resting directly on the shelf floor.",
+              "box": {
+                "x": 0.20919019,
+                "y": 0.56669986,
+                "width": 0.11549829,
+                "height": 0.050695408
+              }
+            },
+            {
+              "id": "4bda39db-b8b0-4c7f-8c7d-8f96c40da446",
+              "change": "UNCHANGED",
+              "description": "Floral cup to the right remains on the shelf.",
+              "box": {
+                "x": 0.37158254,
+                "y": 0.5669769,
+                "width": 0.107682616,
+                "height": 0.047925167
+              }
+            },
+            {
+              "id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+              "change": "REMOVED",
+              "description": "The clear glass that was to the left of the pink cup is gone.",
+              "box": {
+                "x": 0.46797583,
+                "y": 0.56919307,
+                "width": 0.10420898,
+                "height": 0.070641145
+              }
+            },
+            {
+              "id": "30ef06fe-b972-44bf-8dc1-8af7a27f480e",
+              "change": "UNCHANGED",
+              "description": "Pink cup remains in position on the shelf.",
+              "box": {
+                "x": 0.5713164,
+                "y": 0.5509095,
+                "width": 0.0955249,
+                "height": 0.07313436
+              }
+            },
+            {
+              "id": "0b1ac9c5-59cf-43d4-893f-cb698641747b",
+              "change": "UNCHANGED",
+              "description": "Printed glass remains in place on the shelf.",
+              "box": {
+                "x": 0.6677097,
+                "y": 0.5597743,
+                "width": 0.09118286,
+                "height": 0.062053397
+              }
+            },
+            {
+              "id": "7d40eca1-1684-407a-af0f-d03f40488acc",
+              "change": "UNCHANGED",
+              "description": "Textured clear glass remains near the back right corner.",
+              "box": {
+                "x": 0.75541896,
+                "y": 0.54952437,
+                "width": 0.08684082,
+                "height": 0.07174924
+              }
+            }
+          ]
+        }
+      ],
+      "ground_truth": [
+        {
+          "item_id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+          "name": "Glass",
+          "change_type": "REMOVED",
+          "cell_name": "A1"
+        },
+        {
+          "item_id": "de3e7403-7b6e-4b22-8919-2d5a544a6f61",
+          "name": "Saucer",
+          "change_type": "REMOVED",
+          "cell_name": "A1"
+        },
+        {
+          "item_id": "4bda39db-b8b0-4c7f-8c7d-8f96c40da446",
+          "name": "Cup",
+          "change_type": "REMOVED",
+          "cell_name": "A1"
+        },
+        {
+          "name": "cup_ new",
+          "change_type": "ADDED",
+          "cell_name": "A1",
+          "box": {
+            "x": 0.33479598,
+            "y": 0.57700217,
+            "width": 0.10698876,
+            "height": 0.061724264
+          }
+        }
+      ]
+    },
+    {
+      "golden_name": "vitrina_20260813_221547",
+      "reference_label": "vitrina",
+      "captured_at": "2026-08-13T20:15:59.447577Z",
+      "alignment_success": true,
+      "cells": [
+        {
+          "cell_id": "A1",
+          "ai_items": [
+            {
+              "id": "de3e7403-7b6e-4b22-8919-2d5a544a6f61",
+              "change": "UNCHANGED",
+              "description": "Yellow saucers stacked on the lower left shelf remain in the same position.",
+              "box": {
+                "x": 0.13103345,
+                "y": 0.6135169,
+                "width": 0.18323413,
+                "height": 0.03767528
+              }
+            },
+            {
+              "id": "16a83298-be42-472c-ac1f-7ca16675c3fd",
+              "change": "UNCHANGED",
+              "description": "Top floral cup on the left stack remains in position.",
+              "box": {
+                "x": 0.168375,
+                "y": 0.55949724,
+                "width": 0.11462988,
+                "height": 0.03268884
+              }
+            },
+            {
+              "id": "ad33b608-f942-4aa8-8634-fe24ca6839df",
+              "change": "UNCHANGED",
+              "description": "Lower floral cup in the stack remains in position.",
+              "box": {
+                "x": 0.17966431,
+                "y": 0.5888618,
+                "width": 0.10681421,
+                "height": 0.027979434
+              }
+            },
+            {
+              "id": "4bda39db-b8b0-4c7f-8c7d-8f96c40da446",
+              "change": "UNCHANGED",
+              "description": "White mug next to the cup stack remains unchanged.",
+              "box": {
+                "x": 0.28039965,
+                "y": 0.58581454,
+                "width": 0.09899853,
+                "height": 0.05014136
+              }
+            },
+            {
+              "id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+              "change": "REMOVED",
+              "description": "Clear glass cup to the left of the pink mug is no longer present on the shelf.",
+              "box": {
+                "x": 0.46797583,
+                "y": 0.56919307,
+                "width": 0.10420898,
+                "height": 0.070641145
+              }
+            },
+            {
+              "id": "30ef06fe-b972-44bf-8dc1-8af7a27f480e",
+              "change": "UNCHANGED",
+              "description": "Pink cup remains in the same position.",
+              "box": {
+                "x": 0.56610596,
+                "y": 0.56863904,
+                "width": 0.10334058,
+                "height": 0.070641145
+              }
+            },
+            {
+              "id": "0b1ac9c5-59cf-43d4-893f-cb698641747b",
+              "change": "UNCHANGED",
+              "description": "Printed glass cup behind\/beside the pink cup remains unchanged.",
+              "box": {
+                "x": 0.6624993,
+                "y": 0.57417953,
+                "width": 0.09465649,
+                "height": 0.06371554
+              }
+            },
+            {
+              "id": "7d40eca1-1684-407a-af0f-d03f40488acc",
+              "change": "UNCHANGED",
+              "description": "Glass on the far right back remains unchanged.",
+              "box": {
+                "x": 0.71373534,
+                "y": 0.56614584,
+                "width": 0.10160376,
+                "height": 0.06426959
+              }
+            }
+          ]
+        }
+      ],
+      "ground_truth": [
+        {
+          "item_id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+          "name": "Glass",
+          "change_type": "REMOVED",
+          "cell_name": "A1"
+        }
+      ]
+    },
+    {
+      "golden_name": "Workshop _20260624_204821",
+      "reference_label": "Workshop ",
+      "captured_at": "2026-08-01T15:29:29.473506Z",
+      "alignment_success": true,
+      "cells": [
+        {
+          "cell_id": "A1",
+          "ai_items": [
+            {
+              "id": "73e114be-2bd0-4264-b266-e67c0f2e3889",
+              "change": "UNCHANGED",
+              "description": "The aerosol bottle is still in place on the left.",
+              "box": {
+                "x": 0.27478394,
+                "y": 0.19315308,
+                "width": 0.04692871,
+                "height": 0.11363773
+              }
+            },
+            {
+              "id": "3e90c677-fecc-4009-b9e6-9439d2d7e897",
+              "change": "UNCHANGED",
+              "description": "The black bottle remains unchanged.",
+              "box": {
+                "x": 0.32171264,
+                "y": 0.23546499,
+                "width": 0.03687256,
+                "height": 0.07132581
+              }
+            },
+            {
+              "id": "c3abb370-a288-4187-a4fc-ed0a2a8333f4",
+              "change": "UNCHANGED",
+              "description": "The blue cleaning bottle remains in place.",
+              "box": {
+                "x": 0.3391433,
+                "y": 0.20161545,
+                "width": 0.049610354,
+                "height": 0.10517535
+              }
+            },
+            {
+              "id": "dcfd6d61-c93d-40ca-adc2-f04dff1811c3",
+              "change": "UNCHANGED",
+              "description": "The spray bottle with purple\/yellow label remains in place.",
+              "box": {
+                "x": 0.37601587,
+                "y": 0.20161545,
+                "width": 0.0462583,
+                "height": 0.10517535
+              }
+            },
+            {
+              "id": "4bea7e5d-ffbc-4eac-b107-960a3b616f72",
+              "change": "UNCHANGED",
+              "description": "The spray bottle with red nozzle remains unchanged.",
+              "box": {
+                "x": 0.41959253,
+                "y": 0.20161545,
+                "width": 0.04290625,
+                "height": 0.10517535
+              }
+            },
+            {
+              "id": "67e6814a-621f-4d6f-b4b2-285e975ee690",
+              "change": "UNCHANGED",
+              "description": "The tall white bottle in the background remains in place.",
+              "box": {
+                "x": 0.45311302,
+                "y": 0.19453469,
+                "width": 0.023464356,
+                "height": 0.11225611
+              }
+            },
+            {
+              "id": "8bd7ce57-e83d-444c-9006-3d65f8764397",
+              "change": "UNCHANGED",
+              "description": "The small clear bottle with yellow cap remains unchanged.",
+              "box": {
+                "x": 0.4698733,
+                "y": 0.22976583,
+                "width": 0.030168459,
+                "height": 0.07702497
+              }
+            },
+            {
+              "id": "92603f06-1567-408b-bf77-ed6e76326cb8",
+              "change": "UNCHANGED",
+              "description": "The white bottle behind remains unchanged.",
+              "box": {
+                "x": 0.4966897,
+                "y": 0.20852353,
+                "width": 0.023464356,
+                "height": 0.09826728
+              }
+            },
+            {
+              "id": "f846fe09-c641-453e-a648-f235cfc09972",
+              "change": "UNCHANGED",
+              "description": "The Bang spray bottle remains in place on the right.",
+              "box": {
+                "x": 0.52015406,
+                "y": 0.19453469,
+                "width": 0.050280765,
+                "height": 0.11225611
+              }
+            }
+          ]
+        },
+        {
+          "cell_id": "A2",
+          "ai_items": [
+            {
+              "id": "60a7d8b3-d533-427b-a3c7-831836705991",
+              "change": "UNCHANGED",
+              "description": "The clear storage bin remains in place.",
+              "box": {
+                "x": 0.28215843,
+                "y": 0.37800965,
+                "width": 0.15754639,
+                "height": 0.07064113
+              }
+            },
+            {
+              "id": "d2b44ca1-e765-44f3-b2f8-a29043997328",
+              "change": "UNCHANGED",
+              "description": "The glue bottle remains in place next to the bin.",
+              "box": {
+                "x": 0.44305688,
+                "y": 0.39213789,
+                "width": 0.016760254,
+                "height": 0.0565129
+              }
+            },
+            {
+              "id": "ce11c99c-e7ff-4777-bcdc-4e7276d0a8f4",
+              "change": "UNCHANGED",
+              "description": "The Sprandi shoe box remains in place on the right.",
+              "box": {
+                "x": 0.46652123,
+                "y": 0.39213789,
+                "width": 0.09050538,
+                "height": 0.0565129
+              }
+            }
+          ]
+        },
+        {
+          "cell_id": "A3",
+          "ai_items": [
+            {
+              "id": "N1",
+              "change": "ADDED",
+              "description": "Newly added blue box on the left.",
+              "box": {
+                "x": 0.28986818,
+                "y": 0.51938486,
+                "width": 0.023464356,
+                "height": 0.028815767
+              }
+            },
+            {
+              "id": "2f632886-960d-45cf-a93f-20db6713f733",
+              "change": "REMOVED",
+              "description": "The red spray bottle on the far left has been removed.",
+              "box": {
+                "x": 0.28215843,
+                "y": 0.5051286,
+                "width": 0.030168459,
+                "height": 0.07765091
+              }
+            },
+            {
+              "id": "e050a7ec-e25f-4560-be6b-221e0e199e17",
+              "change": "UNCHANGED",
+              "description": "The cardboard tube package remains in place.",
+              "box": {
+                "x": 0.31567895,
+                "y": 0.5051286,
+                "width": 0.023464356,
+                "height": 0.07765091
+              }
+            },
+            {
+              "id": "682c6ba0-5ba6-40f2-a1a9-9e411bef3eac",
+              "change": "UNCHANGED",
+              "description": "The lint roller remains unchanged.",
+              "box": {
+                "x": 0.34249535,
+                "y": 0.49800053,
+                "width": 0.026816405,
+                "height": 0.084779024
+              }
+            },
+            {
+              "id": "69ff4867-0065-4587-8abb-ca20ee90367d",
+              "change": "UNCHANGED",
+              "description": "The small red boxes remain in place.",
+              "box": {
+                "x": 0.40618432,
+                "y": 0.52620965,
+                "width": 0.07709717,
+                "height": 0.0565699
+              }
+            },
+            {
+              "id": "a2b1ece1-55d5-4ab8-bb10-084a5790de02",
+              "change": "UNCHANGED",
+              "description": "The paper rolls remain unchanged.",
+              "box": {
+                "x": 0.4899856,
+                "y": 0.51923317,
+                "width": 0.03352051,
+                "height": 0.06354635
+              }
+            },
+            {
+              "id": "de6a7a65-e2ec-42ef-abc0-34a0c0ce828d",
+              "change": "UNCHANGED",
+              "description": "The green patterned roll on the far right remains unchanged.",
+              "box": {
+                "x": 0.5402664,
+                "y": 0.5121051,
+                "width": 0.03352051,
+                "height": 0.07067446
+              }
+            }
+          ]
+        }
+      ],
+      "ground_truth": [
+        {
+          "name": "Spray can",
+          "change_type": "UNCHANGED",
+          "cell_name": "A3"
+        }
+      ]
+    },
+    {
+      "golden_name": "pantry_20260627_143831",
+      "reference_label": "pantry",
+      "captured_at": "2026-08-01T15:19:14.573288Z",
+      "alignment_success": true,
+      "cells": [
+        {
+          "cell_id": "A1",
+          "ai_items": [
+            {
+              "id": "N1",
+              "change": "ADDED",
+              "description": "A new brown box inserted underneath the yellow box.",
+              "name": "Brown cardboard boxূপে,",
+              "box": {
+                "x": 0.64744264,
+                "y": 0.35226452,
+                "width": 0.22782397,
+                "height": 0.0248971
+              }
+            },
+            {
+              "id": "4c47ae4d-551e-4509-af7f-395adfe1d952",
+              "change": "UNCHANGED",
+              "description": "Flour container is still present at the same spot with same fill level.",
+              "box": {
+                "x": 0.07300708,
+                "y": 0.3198983,
+                "width": 0.10371753,
+                "height": 0.12431952
+              }
+            },
+            {
+              "id": "f6839a61-3cf4-492c-8875-d6e1413af50c",
+              "change": "UNCHANGED",
+              "description": "Pasta container is still present at the same spot.",
+              "box": {
+                "x": 0.181157,
+                "y": 0.32437977,
+                "width": 0.08864746,
+                "height": 0.119838044
+              }
+            },
+            {
+              "id": "9726856f-df21-4121-afee-3a2f0f900423",
+              "change": "UNCHANGED",
+              "description": "Powder container is still present at the same spot.",
+              "box": {
+                "x": 0.26980445,
+                "y": 0.32653752,
+                "width": 0.08421509,
+                "height": 0.11768029
+              }
+            },
+            {
+              "id": "96e2472a-db8b-4988-bd46-3c55910b3925",
+              "change": "UNCHANGED",
+              "description": "Cereal box is still present.",
+              "box": {
+                "x": 0.3451548,
+                "y": 0.33765823,
+                "width": 0.062053222,
+                "height": 0.10655959
+              }
+            },
+            {
+              "id": "6e5e39a3-ab7c-4890-86a0-d98f880fbdf1",
+              "change": "UNCHANGED",
+              "description": "Tall yellow box is still present.",
+              "box": {
+                "x": 0.39391088,
+                "y": 0.35541815,
+                "width": 0.048756104,
+                "height": 0.08879966
+              }
+            },
+            {
+              "id": "80ebdbaa-af39-4ebd-9323-87946a874468",
+              "change": "UNCHANGED",
+              "description": "Small green box is still present.",
+              "box": {
+                "x": 0.49585548,
+                "y": 0.38645655,
+                "width": 0.062053222,
+                "height": 0.035519864
+              }
+            },
+            {
+              "id": "f18d7299-ca45-47aa-8071-6e881c336d91",
+              "change": "UNCHANGED",
+              "description": "Small blue box is still present.",
+              "box": {
+                "x": 0.43380225,
+                "y": 0.4219764,
+                "width": 0.062053222,
+                "height": 0.02224141
+              }
+            },
+            {
+              "id": "f1111e64-9247-4722-8fcf-b8d82b7755d9",
+              "change": "UNCHANGED",
+              "description": "Round container is still present.",
+              "box": {
+                "x": 0.50028783,
+                "y": 0.4219764,
+                "width": 0.057620846,
+                "height": 0.02224141
+              }
+            },
+            {
+              "id": "8e6eb65d-e2d2-497e-8fb0-f3262fce5fbb",
+              "change": "UNCHANGED",
+              "description": "Green box is still present.",
+              "box": {
+                "x": 0.5579087,
+                "y": 0.38878027,
+                "width": 0.075350344,
+                "height": 0.033196133
+              }
+            },
+            {
+              "id": "fed07c85-e601-4e55-ae95-9c909229880f",
+              "change": "UNCHANGED",
+              "description": "Red Puma shoe box is still present.",
+              "box": {
+                "x": 0.6376914,
+                "y": 0.37765956,
+                "width": 0.26150998,
+                "height": 0.06655825
+              }
+            },
+            {
+              "id": "4c9f1455-b67a-4962-9ef6-d4c427513768",
+              "change": "UNCHANGED",
+              "description": "Yellow box is still present.",
+              "box": {
+                "x": 0.6563074,
+                "y": 0.322388,
+                "width": 0.21895923,
+                "height": 0.04481478
+              }
+            },
+            {
+              "id": "16c90dc5-d9db-431b-a2b8-1b3cec4d455a",
+              "change": "UNCHANGED",
+              "description": "Small brown box is still present.",
+              "box": {
+                "x": 0.5579087,
+                "y": 0.4219764,
+                "width": 0.075350344,
+                "height": 0.02224141
+              }
+            }
+          ]
+        }
+      ],
+      "ground_truth": [
+        {
+          "name": "Nutella jar",
+          "change_type": "UNCHANGED",
+          "cell_name": "A3"
+        }
+      ]
+    },
+    {
+      "golden_name": "Hotel minibar_20260714_134947",
+      "reference_label": "Hotel minibar",
+      "captured_at": "2026-08-01T15:12:55.105707Z",
+      "alignment_success": true,
+      "error": "UnknownException: Something unexpected happened. <- CancellationException: Timed out waiting for 30000 ms",
+      "cells": [],
+      "ground_truth": [
+        {
+          "name": "Water bottle",
+          "change_type": "UNCHANGED",
+          "cell_name": "A2"
+        }
+      ]
+    }
+  ]
+}

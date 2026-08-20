@@ -6,5 +6,6 @@ data class GroundTruthItem(
     val itemId: String? = null,
     val name: String,
     val changeType: ItemChange,
-    val cellName: String? = null
+    val cellName: String? = null,
+     val box: BoundingBox? = null
 )

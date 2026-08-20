@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-08-15T15:39:25.407060Z",
+  "name": "vitrina_20260815_173758",
+  "storage_id": "ed595fb8-e929-4f09-9606-b0046a49bef5",
+  "reference_label": "vitrina",
+  "all_match_scores": {},
+  "image_width": 1080,
+  "image_height": 1955,
+  "device_model": "samsung SM-S921B",
+  "android_api": 36,
+  "ground_truth": [
+    {
+      "item_id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+      "item_name": "Glass",
+      "change_type": "REMOVED"
+    },
+    {
+      "item_id": "de3e7403-7b6e-4b22-8919-2d5a544a6f61",
+      "item_name": "Saucer",
+      "change_type": "REMOVED"
+    },
+    {
+      "item_id": "4bda39db-b8b0-4c7f-8c7d-8f96c40da446",
+      "item_name": "Cup",
+      "change_type": "REMOVED"
+    },
+    {
+      "item_name": "cup_ new",
+      "change_type": "ADDED",
+      "cell_name": "A1",
+      "box": {
+        "x": 0.33479598,
+        "y": 0.57700217,
+        "width": 0.10698876,
+        "height": 0.061724264
+      }
+    }
+  ]
+}

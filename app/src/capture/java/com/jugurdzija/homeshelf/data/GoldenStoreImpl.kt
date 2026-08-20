@@ -117,6 +117,14 @@ class GoldenStoreImpl @Inject constructor(
                 put(GoldenConstants.KEY_ITEM_NAME, item.name)
                 put(GoldenConstants.KEY_CHANGE_TYPE, item.changeType.name)
                 put(GoldenConstants.KEY_CELL_NAME, item.cellName)
+                item.box?.let { box ->
+                    put(GoldenConstants.KEY_BOX, JSONObject().apply {
+                        put(GoldenConstants.KEY_BOX_X, box.x)
+                        put(GoldenConstants.KEY_BOX_Y, box.y)
+                        put(GoldenConstants.KEY_BOX_WIDTH, box.width)
+                        put(GoldenConstants.KEY_BOX_HEIGHT, box.height)
+                    })
+                }
             })
         }
 
@@ -174,11 +182,20 @@ class GoldenStoreImpl @Inject constructor(
             } catch (e: Exception) {
                 ItemChange.UNCHANGED
             }
+            val box = obj.optJSONObject(GoldenConstants.KEY_BOX)?.let {
+                BoundingBox(
+                    x = it.getDouble(GoldenConstants.KEY_BOX_X).toFloat(),
+                    y = it.getDouble(GoldenConstants.KEY_BOX_Y).toFloat(),
+                    width = it.getDouble(GoldenConstants.KEY_BOX_WIDTH).toFloat(),
+                    height = it.getDouble(GoldenConstants.KEY_BOX_HEIGHT).toFloat()
+                )
+            }
             GroundTruthItem(
                 itemId = obj.optString(GoldenConstants.KEY_ITEM_ID).takeIf { it.isNotEmpty() && it != "null" },
                 name = obj.optString(GoldenConstants.KEY_ITEM_NAME, ""),
                 changeType = changeType,
-                cellName = obj.optString(GoldenConstants.KEY_CELL_NAME).takeIf { it.isNotEmpty() && it != "null" }
+                cellName = obj.optString(GoldenConstants.KEY_CELL_NAME).takeIf { it.isNotEmpty() && it != "null" },
+                box = box
             )
         }
     }

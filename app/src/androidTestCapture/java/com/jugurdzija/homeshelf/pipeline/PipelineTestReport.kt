@@ -1,5 +1,6 @@
 package com.jugurdzija.homeshelf.pipeline
 
+import com.jugurdzija.homeshelf.data.BoundingBox
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -7,7 +8,8 @@ data class PipelineAiItemReport(
     val id: String,
     val change: String,
     val description: String,
-    val name: String?
+    val name: String?,
+    val box: BoundingBox?
 )
 
 data class PipelineCellReport(
@@ -19,7 +21,8 @@ data class PipelineGroundTruthReport(
     val itemId: String?,
     val name: String,
     val changeType: String,
-    val cellName: String?
+    val cellName: String?,
+    val box: BoundingBox?
 )
 
 data class PipelineGoldenReport(
@@ -36,6 +39,13 @@ data class PipelineTestReport(
     val timestamp: String,
     val goldens: List<PipelineGoldenReport>
 )
+
+private fun BoundingBox.toJson(): JSONObject = JSONObject().apply {
+    put("x", x)
+    put("y", y)
+    put("width", width)
+    put("height", height)
+}
 
 fun PipelineTestReport.toJson(): JSONObject = JSONObject().apply {
     put("timestamp", timestamp)
@@ -58,6 +68,7 @@ fun PipelineTestReport.toJson(): JSONObject = JSONObject().apply {
                                         put("change", aiItem.change)
                                         put("description", aiItem.description)
                                         put("name", aiItem.name)
+                                        aiItem.box?.let { put("box", it.toJson()) }
                                     })
                                 }
                             })
@@ -71,6 +82,7 @@ fun PipelineTestReport.toJson(): JSONObject = JSONObject().apply {
                             put("name", gt.name)
                             put("change_type", gt.changeType)
                             put("cell_name", gt.cellName)
+                            gt.box?.let { put("box", it.toJson()) }
                         })
                     }
                 })

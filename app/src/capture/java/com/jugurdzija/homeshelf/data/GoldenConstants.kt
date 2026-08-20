@@ -24,4 +24,9 @@ internal object GoldenConstants {
     const val KEY_ITEM_NAME = "item_name"
     const val KEY_CHANGE_TYPE = "change_type"
     const val KEY_CELL_NAME = "cell_name"
+    const val KEY_BOX = "box"
+    const val KEY_BOX_X = "x"
+    const val KEY_BOX_Y = "y"
+    const val KEY_BOX_WIDTH = "width"
+    const val KEY_BOX_HEIGHT = "height"
 }

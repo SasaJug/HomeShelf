@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 sealed interface ScanNavEvent {
     data class ToReview(val storageId: String) : ScanNavEvent
-    data class ToEdit(val storageId: String?) : ScanNavEvent
+    data class ToConfirm(val storageId: String?) : ScanNavEvent
 }
 
 @HiltViewModel
@@ -35,6 +35,7 @@ class ScanViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val pinnedStorageId: String? = savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
+    private val isRescan: Boolean = savedStateHandle.get<String>(Routes.ARG_MODE) == Routes.MODE_RESCAN
 
     private val _state = MutableStateFlow<ScanUiState>(ScanUiState.Loading)
     val state: StateFlow<ScanUiState> = _state.asStateFlow()
@@ -116,9 +117,10 @@ class ScanViewModel @Inject constructor(
         viewModelScope.launch {
             pendingCaptureStore.save(bitmap)
             when {
-                pinnedId != null -> _navEvent.emit(ScanNavEvent.ToEdit(pinnedId))
+                pinnedId != null && isRescan -> _navEvent.emit(ScanNavEvent.ToConfirm(pinnedId))
+                pinnedId != null -> _navEvent.emit(ScanNavEvent.ToReview(pinnedId))
                 detected != null -> _navEvent.emit(ScanNavEvent.ToReview(detected.id))
-                else -> _navEvent.emit(ScanNavEvent.ToEdit(null))
+                else -> _navEvent.emit(ScanNavEvent.ToConfirm(null))
             }
         }
     }

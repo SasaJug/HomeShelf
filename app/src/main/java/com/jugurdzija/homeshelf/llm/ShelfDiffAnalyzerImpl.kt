@@ -69,8 +69,10 @@ private const val PROMPT_INTRO =
         "item that isn't one. Only use PARTIALLY_CONSUMED or PARTIALLY_FILLED when the fill level " +
         "difference is large enough to be obvious at a glance — small or ambiguous variations that " +
         "could just be lighting/angle differences should be reported as UNCHANGED instead.\n" +
-        "For an ADDED or REPLACED item, also report: name (short, human-readable name of the " +
-        "item now occupying that spot) and isTransparentContainer.\n" +
+        "For an ADDED or REPLACED item, also report: name and isTransparentContainer. name is " +
+        "the item's plain-language name, 2-4 words (e.g. \"Sweetener container\"), picking a " +
+        "single name even if more than one description would fit — do not combine alternatives, " +
+        "and do not include ids, quotes, or punctuation such as braces or brackets in it.\n" +
         "Respond with one entry per cell, each containing the full list of item results for " +
         "that cell."
 
@@ -196,36 +198,56 @@ private fun List<Int>.toBoundingBox(): BoundingBox? {
 }
 
 private fun CellDiffJson.toCellDiffResult(knownItems: List<KnownItem>): CellDiffResult {
-    val unmatched = knownItems.toMutableList()
+    val (addedJson, existingJson) = items.partition { it.change == ItemChange.ADDED }
+
     var newItemCount = 0
-    val results = items.mapNotNull { itemJson ->
+    val addedResults = addedJson.mapNotNull { itemJson ->
         val box = itemJson.box.toBoundingBox() ?: return@mapNotNull null
-        if (itemJson.change == ItemChange.ADDED) {
-            newItemCount++
-            return@mapNotNull itemJson.toItemDiffResult(
-                id = "$NEW_ITEM_ID_PREFIX$newItemCount",
-                box = box,
-                isContainer = itemJson.isTransparentContainer == true
-            )
-        }
-        val match = unmatched.bestMatchFor(box) ?: return@mapNotNull null
-        unmatched.remove(match)
-        itemJson.toItemDiffResult(id = match.id, box = box, isContainer = match.isTransparentContainer)
+        newItemCount++
+        itemJson.toItemDiffResult(
+            id = "$NEW_ITEM_ID_PREFIX$newItemCount",
+            box = box,
+            isContainer = itemJson.isTransparentContainer == true
+        )
     }
-    return CellDiffResult(cellId = cellId, items = results)
+
+    val existingWithBox = existingJson.mapNotNull { itemJson -> itemJson.box.toBoundingBox()?.let { itemJson to it } }
+    val matchedResults = existingWithBox.matchToKnownItems(knownItems)
+
+    return CellDiffResult(cellId = cellId, items = addedResults + matchedResults)
 }
 
-// Since the model no longer echoes a known item's id, each reported region is matched back to
-// the known item whose box overlaps it most (falling back to nearest center when boxes don't
-// overlap at all, e.g. a container that shrank to empty).
-private fun List<KnownItem>.bestMatchFor(box: BoundingBox): KnownItem? {
-    val candidates = mapNotNull { item -> item.box?.let { item to it } }
-    if (candidates.isEmpty()) return null
-    val byOverlap = candidates.maxByOrNull { (_, itemBox) -> itemBox.iou(box) }
-    return if (byOverlap != null && byOverlap.second.iou(box) > 0f) {
-        byOverlap.first
-    } else {
-        candidates.minByOrNull { (_, itemBox) -> itemBox.centerDistanceTo(box) }?.first
+// Each reported region has to be matched back to a known item by box position.
+// This resolves every region in the cell against every
+// known item at once (best overlap first, each used at most once).
+private fun List<Pair<ItemDiffJson, BoundingBox>>.matchToKnownItems(knownItems: List<KnownItem>): List<ItemDiffResult> {
+    val boxedKnownItems = knownItems.filter { it.box != null }
+    val byOverlap = indices.flatMap { reportedIdx ->
+        boxedKnownItems.map { known -> Triple(reportedIdx, known, known.box!!.iou(this[reportedIdx].second)) }
+    }.sortedByDescending { it.third }
+
+    val matches = mutableMapOf<Int, KnownItem>()
+    val usedKnownIds = mutableSetOf<String>()
+    for ((reportedIdx, known, score) in byOverlap) {
+        if (score <= 0f) break
+        if (reportedIdx in matches || known.id in usedKnownIds) continue
+        matches[reportedIdx] = known
+        usedKnownIds += known.id
+    }
+
+    indices.filter { it !in matches }.forEach { reportedIdx ->
+        val nearest = boxedKnownItems
+            .filter { it.id !in usedKnownIds }
+            .minByOrNull { it.box!!.centerDistanceTo(this[reportedIdx].second) }
+            ?: return@forEach
+        matches[reportedIdx] = nearest
+        usedKnownIds += nearest.id
+    }
+
+    return indices.mapNotNull { reportedIdx ->
+        val known = matches[reportedIdx] ?: return@mapNotNull null
+        val (itemJson, box) = this[reportedIdx]
+        itemJson.toItemDiffResult(id = known.id, box = box, isContainer = known.isTransparentContainer)
     }
 }
 
@@ -251,8 +273,16 @@ private fun ItemDiffJson.toItemDiffResult(id: String, box: BoundingBox, isContai
         id = id,
         change = resolvedChange,
         description = description,
-        name = name,
+        name = name.sanitizedItemName(),
         box = box,
         isTransparentContainer = isTransparentContainer
     )
+}
+
+private const val MAX_ITEM_NAME_LENGTH = 60
+
+private fun String?.sanitizedItemName(): String? {
+    val trimmed = this?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+    val looksMalformed = trimmed.length > MAX_ITEM_NAME_LENGTH || trimmed.any { it in "{}[]" }
+    return if (looksMalformed) null else trimmed
 }

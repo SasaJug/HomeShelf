@@ -151,7 +151,7 @@ private fun ReferenceDetailScreenContent(
                                 onDismissRequest = { menuExpanded = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Rescan") },
+                                    text = { Text("Replace Photo") },
                                     leadingIcon = { Icon(Icons.Default.Autorenew, contentDescription = null) },
                                     onClick = {
                                         menuExpanded = false

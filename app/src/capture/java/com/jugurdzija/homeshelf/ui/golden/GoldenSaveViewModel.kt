@@ -199,7 +199,13 @@ class GoldenSaveViewModel @Inject constructor(
             val centerY = box.boundingBox.y + box.boundingBox.height / 2f
 
             val cellName = resolveCellName(state.guideLines, 1, 1, 1, 1, centerX, centerY)
-            GroundTruthItem(itemId = null, name = box.name, changeType = ItemChange.ADDED, cellName = cellName)
+            GroundTruthItem(
+                itemId = null,
+                name = box.name,
+                changeType = ItemChange.ADDED,
+                cellName = cellName,
+                box = box.boundingBox
+            )
         }
         return removedEntries + fillStateEntries + newEntries
     }
