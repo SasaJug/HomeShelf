@@ -49,7 +49,7 @@ import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 fun ScanScreen(
     onBack: () -> Unit,
     onNavigateToReview: (String) -> Unit,
-    onNavigateToEdit: (String?) -> Unit,
+    onNavigateToConfirm: (String?) -> Unit,
     vm: ScanViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
@@ -62,7 +62,7 @@ fun ScanScreen(
             isCapturing = false
             when (event) {
                 is ScanNavEvent.ToReview -> onNavigateToReview(event.storageId)
-                is ScanNavEvent.ToEdit -> onNavigateToEdit(event.storageId)
+                is ScanNavEvent.ToConfirm -> onNavigateToConfirm(event.storageId)
             }
         }
     }

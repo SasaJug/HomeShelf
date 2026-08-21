@@ -13,5 +13,5 @@ data class CaptureData(
     val allMatchScores: Map<String, Double>? = null,
     val framesAnalyzed: Int? = null,
     val captureAttempt: Int? = null,
-    val groundTruth: List<GroundTruthCell> = emptyList()
+    val groundTruth: List<GroundTruthItem> = emptyList()
 )

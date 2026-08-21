@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-08-13T20:15:59.447577Z",
+  "name": "vitrina_20260813_221547",
+  "storage_id": "ed595fb8-e929-4f09-9606-b0046a49bef5",
+  "reference_label": "vitrina",
+  "all_match_scores": {},
+  "image_width": 1080,
+  "image_height": 1955,
+  "device_model": "samsung SM-S921B",
+  "android_api": 36,
+  "ground_truth": [
+    {
+      "item_id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+      "item_name": "Glass",
+      "change_type": "REMOVED"
+    }
+  ]
+}

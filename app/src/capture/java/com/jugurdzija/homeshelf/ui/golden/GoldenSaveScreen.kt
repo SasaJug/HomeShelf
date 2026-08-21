@@ -1,27 +1,30 @@
 package com.jugurdzija.homeshelf.ui.golden
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,22 +35,43 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.jugurdzija.homeshelf.data.ChangeType
+import com.jugurdzija.homeshelf.data.BoundingBox
 import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
+import com.jugurdzija.homeshelf.util.resolveCellName
+import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.roundToInt
+
+private val KnownBoxColor = Color(0xFF29B6F6)
+private val NewBoxColor = Color(0xFF66BB6A)
+private val SelectedBoxColor = Color(0xFFE53935)
+private const val TapSlopPx = 12f
+private const val HitPaddingDp = 20
+private const val MinBoxSize = 0.03f
+private const val DefaultBoxFractionOfShortSide = 0.08f
+
+private data class RenderBox(val id: String, val boundingBox: BoundingBox, val isNew: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,50 +81,84 @@ fun GoldenSaveScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val saveState by vm.saveState.collectAsState()
-    val guideLineState by vm.guideLineState.collectAsState()
-
-    var tappedCellIndex by remember { mutableStateOf<Int?>(null) }
-
-    LaunchedEffect(Unit) {
-        vm.loadGuideLines()
-    }
 
     LaunchedEffect(saveState) {
         if (saveState is GoldenSaveViewModel.SaveState.Saved) onBack()
     }
 
-    tappedCellIndex?.let { index ->
-        ChangeTypeDialog(
-            cellIndex = index,
-            current = uiState.annotations[index] ?: ChangeType.NO_CHANGE,
-            onSelect = { changeType ->
-                vm.setAnnotation(index, changeType)
-                tappedCellIndex = null
-            },
-            onDismiss = { tappedCellIndex = null }
-        )
-    }
+    val selectedKnown = uiState.knownBoxes.firstOrNull { it.itemId == uiState.selectedId }
+    val selectedNew = uiState.newBoxes.firstOrNull { it.localId == uiState.selectedId }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {},
+                title = {
+                    when {
+                        selectedNew != null -> OutlinedTextField(
+                            value = selectedNew.name,
+                            onValueChange = { vm.updateNewBoxName(selectedNew.localId, it) },
+                            placeholder = { Text("Item name") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        selectedKnown != null -> Text(selectedKnown.name)
+                        else -> Text("")
+                    }
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        vm.confirmSelection()
+                        onBack()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    if (saveState is GoldenSaveViewModel.SaveState.Saving) {
-                        CircularProgressIndicator(
-                            strokeWidth = 2.dp,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(end = 16.dp)
-                        )
-                    } else {
-                        TextButton(onClick = { vm.save() }) {
-                            Text("Save")
+                    when {
+                        selectedKnown != null -> {
+                            if (selectedKnown.isTransparentContainer) {
+                                FillStates.forEach { state ->
+                                    FillStateChip(
+                                        state = state,
+                                        selected = selectedKnown.fillState == state,
+                                        onClick = { vm.setFillState(selectedKnown.itemId, state) }
+                                    )
+                                }
+                            }
+                            IconButton(onClick = vm::confirmSelection) {
+                                Icon(Icons.Default.Check, contentDescription = "Done")
+                            }
+                            IconButton(onClick = vm::deleteSelected) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Mark removed",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        selectedNew != null -> {
+                            IconButton(onClick = vm::confirmSelection) {
+                                Icon(Icons.Default.Check, contentDescription = "Done")
+                            }
+                            IconButton(onClick = vm::deleteSelected) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Discard",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        else -> {
+                            if (saveState is GoldenSaveViewModel.SaveState.Saving) {
+                                CircularProgressIndicator(
+                                    strokeWidth = 2.dp,
+                                    modifier = Modifier
+                                        .height(24.dp)
+                                        .padding(end = 16.dp)
+                                )
+                            } else {
+                                TextButton(onClick = vm::save) { Text("Save") }
+                            }
                         }
                     }
                 }
@@ -112,33 +170,22 @@ fun GoldenSaveScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            uiState.captureData.bitmap?.let { bmp ->
-                val lines = (guideLineState as? GoldenSaveViewModel.GuideLineState.Ready)?.guideLines
-                if (lines != null) {
-                    AnnotatableImage(
-                        bitmap = bmp,
-                        guideLines = lines,
-                        annotations = uiState.annotations,
-                        onCellTapped = { tappedCellIndex = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(bmp.width.toFloat() / bmp.height.toFloat())
-                            .align(Alignment.Center)
-                    )
-                } else {
-                    Image(
-                        bitmap = bmp.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(bmp.width.toFloat() / bmp.height.toFloat())
-                            .align(Alignment.Center)
-                    )
-                }
-            }
-
-            if (guideLineState is GoldenSaveViewModel.GuideLineState.Loading) {
+            val bitmap = uiState.captureData.bitmap
+            if (bitmap == null) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                AnnotationCanvas(
+                    bitmap = bitmap,
+                    guideLines = uiState.guideLines,
+                    knownBoxes = uiState.knownBoxes,
+                    newBoxes = uiState.newBoxes,
+                    selectedId = uiState.selectedId,
+                    onSelect = vm::select,
+                    onCreate = vm::createNewBox,
+                    onUpdateBoundingBox = vm::updateBoundingBox,
+                    onConfirmSelection = vm::confirmSelection,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
             if (saveState is GoldenSaveViewModel.SaveState.Error) {
@@ -161,112 +208,251 @@ fun GoldenSaveScreen(
 }
 
 @Composable
-private fun AnnotatableImage(
-    bitmap: android.graphics.Bitmap,
-    guideLines: List<GuideLine>,
-    annotations: Map<Int, ChangeType>,
-    onCellTapped: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val hLines = remember(guideLines) { guideLines.filter { it.isHorizontal }.sortedBy { it.position } }
-    val vLines = remember(guideLines) { guideLines.filter { !it.isHorizontal }.sortedBy { it.position } }
-    var boxSize by remember { mutableStateOf(IntSize.Zero) }
-
+private fun FillStateChip(state: ItemChange, selected: Boolean, onClick: () -> Unit) {
     Box(
-        modifier = modifier
-            .onSizeChanged { boxSize = it }
-            .pointerInput(hLines, vLines, boxSize) {
-                if (boxSize == IntSize.Zero || hLines.size < 2 || vLines.size < 2) return@pointerInput
-                detectTapGestures { offset ->
-                    val fracX = offset.x / boxSize.width
-                    val fracY = offset.y / boxSize.height
-                    val rowIdx = hLines.indexOfFirst { it.position > fracY } - 1
-                    val colIdx = vLines.indexOfFirst { it.position > fracX } - 1
-                    val numCols = vLines.size - 1
-                    if (rowIdx >= 0 && colIdx >= 0 && colIdx < numCols) {
-                        onCellTapped(rowIdx * numCols + colIdx)
-                    }
-                }
-            }
+        modifier = Modifier
+            .padding(horizontal = 2.dp)
+            .clickable(onClick = onClick)
+            .background(
+                if (selected) state.chipColor else state.chipColor.copy(alpha = 0.35f),
+                CircleShape
+            )
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            bitmap = bitmap.asImageBitmap(),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = 2.dp.toPx()
-            guideLines.forEach { line ->
-                if (line.isHorizontal) {
-                    val y = line.position * size.height
-                    drawLine(Color.Yellow, Offset(0f, y), Offset(size.width, y), stroke)
-                } else {
-                    val x = line.position * size.width
-                    drawLine(Color.Yellow, Offset(x, 0f), Offset(x, size.height), stroke)
-                }
-            }
-        }
-
-        if (boxSize != IntSize.Zero && hLines.size >= 2 && vLines.size >= 2) {
-            val numCols = vLines.size - 1
-            val numRows = hLines.size - 1
-            for (rowIdx in 0 until numRows) {
-                for (colIdx in 0 until numCols) {
-                    val index = rowIdx * numCols + colIdx
-                    val cx = (vLines[colIdx].position + vLines[colIdx + 1].position) / 2f
-                    val cy = (hLines[rowIdx].position + hLines[rowIdx + 1].position) / 2f
-                    val xPx = (cx * boxSize.width).toInt()
-                    val yPx = (cy * boxSize.height).toInt()
-                    val changeType = annotations[index] ?: ChangeType.NO_CHANGE
-                    Box(
-                        modifier = Modifier
-                            .offset { IntOffset(xPx, yPx) }
-                            .background(changeType.chipColor.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 5.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = changeType.symbol,
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
+        Text(state.symbol, color = Color.White, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-private fun ChangeTypeDialog(
-    cellIndex: Int,
-    current: ChangeType,
-    onSelect: (ChangeType) -> Unit,
-    onDismiss: () -> Unit
+private fun AnnotationCanvas(
+    bitmap: Bitmap,
+    guideLines: List<GuideLine>,
+    knownBoxes: List<KnownAnnotationBox>,
+    newBoxes: List<NewAnnotationBox>,
+    selectedId: String?,
+    onSelect: (String) -> Unit,
+    onCreate: (BoundingBox) -> Unit,
+    onUpdateBoundingBox: (String, BoundingBox) -> Unit,
+    onConfirmSelection: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Cell $cellIndex — What changed?") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                ChangeType.entries.forEach { type ->
-                    TextButton(
-                        onClick = { onSelect(type) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "${type.symbol}  ${type.label}",
-                            fontWeight = if (type == current) FontWeight.Bold else FontWeight.Normal,
-                            color = if (type == current) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurface
-                        )
+    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+    val renderBoxes = knownBoxes.map { RenderBox(it.itemId, it.boundingBox, isNew = false) } +
+        newBoxes.map { RenderBox(it.localId, it.boundingBox, isNew = true) }
+
+    val currentBitmap by rememberUpdatedState(bitmap)
+    val currentGuideLines by rememberUpdatedState(guideLines)
+    val currentRenderBoxes by rememberUpdatedState(renderBoxes)
+    val currentSelectedId by rememberUpdatedState(selectedId)
+
+    Box(modifier = modifier) {
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .onSizeChanged { canvasSize = it }
+                .pointerInput(Unit) {
+                    val hitPaddingPx = HitPaddingDp.dp.toPx()
+                    awaitEachGesture {
+                        val firstDown = awaitFirstDown(requireUnconsumed = false)
+                        val gestureSelectedId = currentSelectedId
+                        val hitId = hitTest(currentRenderBoxes, firstDown.position, canvasSize, currentBitmap, hitPaddingPx)
+                        val isOnSelected = hitId != null && hitId == gestureSelectedId
+
+                        var totalDrag = Offset.Zero
+                        var secondPointerId: PointerId? = null
+                        var resizeStartSeparation: Offset? = null
+                        var gestureBoxStart: BoundingBox? = null
+
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val active = event.changes.filter { it.pressed }
+                            if (active.isEmpty()) break
+
+                            if (active.size == 1 && secondPointerId == null) {
+                                val change = active.firstOrNull { it.id == firstDown.id }
+                                if (change != null) {
+                                    val delta = change.positionChange()
+                                    totalDrag += delta
+                                    if (isOnSelected && totalDrag.getDistance() > TapSlopPx) {
+                                        change.consume()
+                                        val fracDelta = canvasDeltaToBitmapFraction(delta, canvasSize, currentBitmap)
+                                        val current = currentRenderBoxes.firstOrNull { it.id == gestureSelectedId }?.boundingBox
+                                        if (current != null) {
+                                            val moved = current.copy(
+                                                x = (current.x + fracDelta.x).coerceIn(0f, 1f - current.width),
+                                                y = (current.y + fracDelta.y).coerceIn(0f, 1f - current.height)
+                                            )
+                                            onUpdateBoundingBox(gestureSelectedId, moved)
+                                        }
+                                    }
+                                }
+                            } else if (active.size >= 2 && gestureSelectedId != null) {
+                                if (secondPointerId == null) {
+                                    val newPointer = active.firstOrNull { it.id != firstDown.id }
+                                    val p1 = active.firstOrNull { it.id == firstDown.id }
+                                    if (newPointer != null && p1 != null) {
+                                        secondPointerId = newPointer.id
+                                        resizeStartSeparation = Offset(
+                                            abs(p1.position.x - newPointer.position.x),
+                                            abs(p1.position.y - newPointer.position.y)
+                                        )
+                                        gestureBoxStart = currentRenderBoxes.firstOrNull { it.id == gestureSelectedId }?.boundingBox
+                                    }
+                                } else {
+                                    val p1 = active.firstOrNull { it.id == firstDown.id }
+                                    val p2 = active.firstOrNull { it.id == secondPointerId }
+                                    val startSep = resizeStartSeparation
+                                    val boxStart = gestureBoxStart
+                                    if (p1 != null && p2 != null && startSep != null && boxStart != null) {
+                                        p1.consume()
+                                        p2.consume()
+                                        val currentSep = Offset(
+                                            abs(p1.position.x - p2.position.x),
+                                            abs(p1.position.y - p2.position.y)
+                                        )
+                                        val sepDeltaPx = currentSep - startSep
+                                        val fracDelta = canvasDeltaToBitmapFraction(sepDeltaPx, canvasSize, currentBitmap)
+                                        val newWidth = (boxStart.width + fracDelta.x).coerceIn(MinBoxSize, 1f - boxStart.x)
+                                        val newHeight = (boxStart.height + fracDelta.y).coerceIn(MinBoxSize, 1f - boxStart.y)
+                                        onUpdateBoundingBox(gestureSelectedId, boxStart.copy(width = newWidth, height = newHeight))
+                                    }
+                                }
+                            }
+                        }
+
+                        val wasTap = secondPointerId == null && totalDrag.getDistance() <= TapSlopPx
+                        if (wasTap) {
+                            if (gestureSelectedId != null && gestureSelectedId != hitId) {
+                                onConfirmSelection()
+                            }
+                            if (hitId != null) {
+                                if (hitId != gestureSelectedId) onSelect(hitId)
+                            } else {
+                                val box = computeDefaultBox(firstDown.position, canvasSize, currentBitmap, currentGuideLines)
+                                onCreate(box)
+                            }
+                        }
                     }
                 }
+        ) {
+            val strokeWidth = 2.dp.toPx()
+            guideLines.forEach { line ->
+                if (line.isHorizontal) {
+                    val y = line.position * size.height
+                    drawLine(Color.Yellow.copy(alpha = 0.35f), Offset(0f, y), Offset(size.width, y), strokeWidth)
+                } else {
+                    val x = line.position * size.width
+                    drawLine(Color.Yellow.copy(alpha = 0.35f), Offset(x, 0f), Offset(x, size.height), strokeWidth)
+                }
             }
-        },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+            renderBoxes.forEach { box ->
+                val rect = bitmapFractionToCanvasRect(box.boundingBox, canvasSize, bitmap)
+                val color = when {
+                    box.id == selectedId -> SelectedBoxColor
+                    box.isNew -> NewBoxColor
+                    else -> KnownBoxColor
+                }
+                drawRect(color, topLeft = rect.topLeft, size = rect.size, style = Stroke(width = strokeWidth))
+            }
+        }
+
+        if (canvasSize != IntSize.Zero) {
+            (knownBoxes.map { it.itemId to it.name } + newBoxes.map { it.localId to it.name.ifBlank { "…" } })
+                .forEach { (id, label) ->
+                    val box = renderBoxes.firstOrNull { it.id == id } ?: return@forEach
+                    val rect = bitmapFractionToCanvasRect(box.boundingBox, canvasSize, bitmap)
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier
+                            .offset { IntOffset(rect.left.roundToInt(), (rect.top - 20f).roundToInt()) }
+                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 4.dp, vertical = 1.dp)
+                    )
+                }
+        }
+    }
+}
+
+private fun hitTest(
+    boxes: List<RenderBox>,
+    position: Offset,
+    canvasSize: IntSize,
+    bitmap: Bitmap,
+    paddingPx: Float
+): String? {
+    if (canvasSize == IntSize.Zero) return null
+    return boxes.lastOrNull { box ->
+        val rect = bitmapFractionToCanvasRect(box.boundingBox, canvasSize, bitmap)
+        val expanded = Rect(
+            rect.left - paddingPx, rect.top - paddingPx,
+            rect.right + paddingPx, rect.bottom + paddingPx
+        )
+        expanded.contains(position)
+    }?.id
+}
+
+private fun computeDefaultBox(
+    tapPosition: Offset,
+    canvasSize: IntSize,
+    bitmap: Bitmap,
+    guideLines: List<GuideLine>
+): BoundingBox {
+    val center = canvasToBitmapFraction(tapPosition, canvasSize, bitmap)
+    val cellName = resolveCellName(
+        guideLines, canvasSize.width, canvasSize.height, bitmap.width, bitmap.height, center.x, center.y
     )
+    val cellBounds = cellName?.let {
+        cellBoundsAsFraction(guideLines, canvasSize.width, canvasSize.height, bitmap.width, bitmap.height, it)
+    }
+    val shortSidePx = min(bitmap.width, bitmap.height) * DefaultBoxFractionOfShortSide
+    val (w, h) = if (cellBounds != null) {
+        (cellBounds.width() * 0.5f) to (cellBounds.height() * 0.5f)
+    } else {
+        (shortSidePx / bitmap.width) to (shortSidePx / bitmap.height)
+    }
+    val width = w.coerceIn(MinBoxSize, 1f)
+    val height = h.coerceIn(MinBoxSize, 1f)
+    val x = (center.x - width / 2f).coerceIn(0f, 1f - width)
+    val y = (center.y - height / 2f).coerceIn(0f, 1f - height)
+    return BoundingBox(x, y, width, height)
+}
+
+private fun canvasToBitmapFraction(offset: Offset, canvasSize: IntSize, bitmap: Bitmap): Offset {
+    val scale = min(canvasSize.width.toFloat() / bitmap.width, canvasSize.height.toFloat() / bitmap.height)
+    val renderedW = bitmap.width * scale
+    val renderedH = bitmap.height * scale
+    val offsetX = (canvasSize.width - renderedW) / 2f
+    val offsetY = (canvasSize.height - renderedH) / 2f
+    return Offset(
+        ((offset.x - offsetX) / renderedW).coerceIn(0f, 1f),
+        ((offset.y - offsetY) / renderedH).coerceIn(0f, 1f)
+    )
+}
+
+private fun canvasDeltaToBitmapFraction(delta: Offset, canvasSize: IntSize, bitmap: Bitmap): Offset {
+    val scale = min(canvasSize.width.toFloat() / bitmap.width, canvasSize.height.toFloat() / bitmap.height)
+    val renderedW = bitmap.width * scale
+    val renderedH = bitmap.height * scale
+    return Offset(delta.x / renderedW, delta.y / renderedH)
+}
+
+private fun bitmapFractionToCanvasRect(box: BoundingBox, canvasSize: IntSize, bitmap: Bitmap): Rect {
+    val scale = min(canvasSize.width.toFloat() / bitmap.width, canvasSize.height.toFloat() / bitmap.height)
+    val renderedW = bitmap.width * scale
+    val renderedH = bitmap.height * scale
+    val offsetX = (canvasSize.width - renderedW) / 2f
+    val offsetY = (canvasSize.height - renderedH) / 2f
+    val left = offsetX + box.x * renderedW
+    val top = offsetY + box.y * renderedH
+    return Rect(left, top, left + box.width * renderedW, top + box.height * renderedH)
 }

@@ -9,5 +9,5 @@ data class GoldenItem(
     val referenceFilePath: String = "",
     val timestamp: String,
     val dir: File,
-    val groundTruth: List<GroundTruthCell> = emptyList()
+    val groundTruth: List<GroundTruthItem> = emptyList()
 )

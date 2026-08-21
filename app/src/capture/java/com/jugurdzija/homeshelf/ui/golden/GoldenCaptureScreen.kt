@@ -43,8 +43,8 @@ fun GoldenCaptureScreen(
     vm: GoldenCaptureViewModel = hiltViewModel()
 ) {
     val guideLineState by vm.guideLineState.collectAsState()
-    val guideLines = (guideLineState as? GoldenCaptureViewModel.GuideLineState.Ready)?.guideLines ?: emptyList()
-    val canCapture = guideLineState is GoldenCaptureViewModel.GuideLineState.Ready
+    val guideLines = (guideLineState as? GoldenCaptureViewModel.CaptureReadinessState.Ready)?.guideLines ?: emptyList()
+    val canCapture = guideLineState is GoldenCaptureViewModel.CaptureReadinessState.Ready
     val orientationState = rememberDeviceOrientation()
     val orientation by orientationState
     var isCapturing by remember { mutableStateOf(false) }
@@ -96,9 +96,10 @@ fun GoldenCaptureScreen(
                         .padding(16.dp)
                 )
 
-                if (guideLineState is GoldenCaptureViewModel.GuideLineState.Unavailable) {
+                val unavailable = guideLineState as? GoldenCaptureViewModel.CaptureReadinessState.Unavailable
+                if (unavailable != null) {
                     Text(
-                        "This storage has no guide lines set up yet. Add guide lines before capturing test photos.",
+                        unavailable.reason,
                         color = Color.White,
                         modifier = Modifier
                             .align(Alignment.Center)

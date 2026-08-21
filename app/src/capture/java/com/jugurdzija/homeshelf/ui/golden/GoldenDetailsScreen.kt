@@ -123,30 +123,39 @@ private fun GoldenDetailsContent(captureData: CaptureData) {
         if (captureData.groundTruth.isNotEmpty()) {
             Spacer(Modifier.height(4.dp))
             Text("Ground Truth", style = MaterialTheme.typography.titleSmall)
-            captureData.groundTruth.sortedBy { it.cellIndex }.forEach { cell ->
+            captureData.groundTruth.forEach { entry ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        "Cell ${cell.cellIndex}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column {
+                        Text(
+                            entry.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        entry.cellName?.let { cellName ->
+                            Text(
+                                "Cell $cellName",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(
                             modifier = Modifier
-                                .background(cell.changeType.chipColor.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+                                .background(entry.changeType.chipColor.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                cell.changeType.symbol,
+                                entry.changeType.symbol,
                                 color = Color.White,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold
                             )
                         }
-                        Text(cell.changeType.label, style = MaterialTheme.typography.bodyMedium)
+                        Text(entry.changeType.label, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }

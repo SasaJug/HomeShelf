@@ -1,14 +1,28 @@
 package com.jugurdzija.homeshelf.pipeline
 
+import com.jugurdzija.homeshelf.data.BoundingBox
 import org.json.JSONArray
 import org.json.JSONObject
 
+data class PipelineAiItemReport(
+    val id: String,
+    val change: String,
+    val description: String,
+    val name: String?,
+    val box: BoundingBox?
+)
+
 data class PipelineCellReport(
-    val cellIndex: Int,
-    val groundTruth: String,
-    val actualChanged: Boolean,
-    val changed: Boolean? = null,
-    val description: String? = null
+    val cellId: String,
+    val aiItems: List<PipelineAiItemReport>
+)
+
+data class PipelineGroundTruthReport(
+    val itemId: String?,
+    val name: String,
+    val changeType: String,
+    val cellName: String?,
+    val box: BoundingBox?
 )
 
 data class PipelineGoldenReport(
@@ -17,50 +31,24 @@ data class PipelineGoldenReport(
     val capturedAt: String,
     val alignmentSuccess: Boolean,
     val cells: List<PipelineCellReport>,
+    val groundTruth: List<PipelineGroundTruthReport>,
     val error: String? = null
-)
-
-data class Metrics(
-    val totalCells: Int,
-    val tp: Int,
-    val tn: Int,
-    val fp: Int,
-    val fn: Int,
-    val accuracy: Double?,
-    val precision: Double?,
-    val recall: Double?,
-    val f1: Double?
 )
 
 data class PipelineTestReport(
     val timestamp: String,
-    val totalCells: Int,
-    val metrics: Metrics?,
     val goldens: List<PipelineGoldenReport>
 )
 
+private fun BoundingBox.toJson(): JSONObject = JSONObject().apply {
+    put("x", x)
+    put("y", y)
+    put("width", width)
+    put("height", height)
+}
+
 fun PipelineTestReport.toJson(): JSONObject = JSONObject().apply {
     put("timestamp", timestamp)
-    put("total_cells", totalCells)
-    put("metrics", metrics?.let { m ->
-        JSONObject().apply {
-            put("total_cells", m.totalCells)
-            put("accuracy", m.accuracy)
-            put("precision", m.precision)
-            put("recall", m.recall)
-            put("f1", m.f1)
-            put("confusion_matrix", JSONObject().apply {
-                put("predicted_changed_true", JSONObject().apply {
-                    put("actual_true", m.tp)
-                    put("actual_false", m.fp)
-                })
-                put("predicted_changed_false", JSONObject().apply {
-                    put("actual_true", m.fn)
-                    put("actual_false", m.tn)
-                })
-            })
-        }
-    })
     put("goldens", JSONArray().apply {
         goldens.forEach { golden ->
             put(JSONObject().apply {
@@ -72,11 +60,29 @@ fun PipelineTestReport.toJson(): JSONObject = JSONObject().apply {
                 put("cells", JSONArray().apply {
                     golden.cells.forEach { cell ->
                         put(JSONObject().apply {
-                            put("cell_index", cell.cellIndex)
-                            put("ground_truth", cell.groundTruth)
-                            put("actual_changed", cell.actualChanged)
-                            put("changed", cell.changed)
-                            put("description", cell.description)
+                            put("cell_id", cell.cellId)
+                            put("ai_items", JSONArray().apply {
+                                cell.aiItems.forEach { aiItem ->
+                                    put(JSONObject().apply {
+                                        put("id", aiItem.id)
+                                        put("change", aiItem.change)
+                                        put("description", aiItem.description)
+                                        put("name", aiItem.name)
+                                        aiItem.box?.let { put("box", it.toJson()) }
+                                    })
+                                }
+                            })
+                        })
+                    }
+                })
+                put("ground_truth", JSONArray().apply {
+                    golden.groundTruth.forEach { gt ->
+                        put(JSONObject().apply {
+                            put("item_id", gt.itemId)
+                            put("name", gt.name)
+                            put("change_type", gt.changeType)
+                            put("cell_name", gt.cellName)
+                            gt.box?.let { put("box", it.toJson()) }
                         })
                     }
                 })

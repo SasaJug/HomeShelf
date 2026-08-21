@@ -11,6 +11,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.time.Instant
 import com.jugurdzija.homeshelf.di.DiConstants
+import com.jugurdzija.homeshelf.llm.ItemChange
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -97,7 +98,7 @@ class GoldenStoreImpl @Inject constructor(
         allMatchScores: Map<String, Double>?,
         framesAnalyzed: Int?,
         captureAttempt: Int?,
-        groundTruth: List<GroundTruthCell>
+        groundTruth: List<GroundTruthItem>
     ) = withContext(Dispatchers.IO) {
         val dir = File(comparisonsDir(), name)
         dir.mkdirs()
@@ -110,10 +111,20 @@ class GoldenStoreImpl @Inject constructor(
         allMatchScores?.forEach { (label, score) -> allScoresJson.put(label, score) }
 
         val groundTruthArr = JSONArray()
-        groundTruth.forEach { cell ->
+        groundTruth.forEach { item ->
             groundTruthArr.put(JSONObject().apply {
-                put(GoldenConstants.KEY_CELL_INDEX, cell.cellIndex)
-                put(GoldenConstants.KEY_CHANGE_TYPE, cell.changeType.name)
+                put(GoldenConstants.KEY_ITEM_ID, item.itemId)
+                put(GoldenConstants.KEY_ITEM_NAME, item.name)
+                put(GoldenConstants.KEY_CHANGE_TYPE, item.changeType.name)
+                put(GoldenConstants.KEY_CELL_NAME, item.cellName)
+                item.box?.let { box ->
+                    put(GoldenConstants.KEY_BOX, JSONObject().apply {
+                        put(GoldenConstants.KEY_BOX_X, box.x)
+                        put(GoldenConstants.KEY_BOX_Y, box.y)
+                        put(GoldenConstants.KEY_BOX_WIDTH, box.width)
+                        put(GoldenConstants.KEY_BOX_HEIGHT, box.height)
+                    })
+                }
             })
         }
 
@@ -162,18 +173,29 @@ class GoldenStoreImpl @Inject constructor(
         )
     }
 
-    private fun parseGroundTruth(json: JSONObject): List<GroundTruthCell> {
+    private fun parseGroundTruth(json: JSONObject): List<GroundTruthItem> {
         val arr = json.optJSONArray(GoldenConstants.KEY_GROUND_TRUTH) ?: return emptyList()
         return (0 until arr.length()).mapNotNull { i ->
             val obj = arr.optJSONObject(i) ?: return@mapNotNull null
             val changeType = try {
-                ChangeType.valueOf(obj.getString(GoldenConstants.KEY_CHANGE_TYPE))
+                ItemChange.valueOf(obj.getString(GoldenConstants.KEY_CHANGE_TYPE))
             } catch (e: Exception) {
-                ChangeType.NO_CHANGE
+                ItemChange.UNCHANGED
             }
-            GroundTruthCell(
-                cellIndex = obj.getInt(GoldenConstants.KEY_CELL_INDEX),
-                changeType = changeType
+            val box = obj.optJSONObject(GoldenConstants.KEY_BOX)?.let {
+                BoundingBox(
+                    x = it.getDouble(GoldenConstants.KEY_BOX_X).toFloat(),
+                    y = it.getDouble(GoldenConstants.KEY_BOX_Y).toFloat(),
+                    width = it.getDouble(GoldenConstants.KEY_BOX_WIDTH).toFloat(),
+                    height = it.getDouble(GoldenConstants.KEY_BOX_HEIGHT).toFloat()
+                )
+            }
+            GroundTruthItem(
+                itemId = obj.optString(GoldenConstants.KEY_ITEM_ID).takeIf { it.isNotEmpty() && it != "null" },
+                name = obj.optString(GoldenConstants.KEY_ITEM_NAME, ""),
+                changeType = changeType,
+                cellName = obj.optString(GoldenConstants.KEY_CELL_NAME).takeIf { it.isNotEmpty() && it != "null" },
+                box = box
             )
         }
     }

@@ -8,7 +8,7 @@
   :root { color-scheme: light dark; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    max-width: 480px;
+    max-width: 720px;
     margin: 8vh auto 0;
     padding: 0 24px 48px;
     text-align: center;
@@ -55,11 +55,20 @@
     color: #333;
   }
   :root[data-theme="dark"] ol, ol { color: inherit; }
+  ol li { margin-bottom: 8px; }
+  .step-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: -4px;
+    margin-right: 6px;
+    fill: #2e7d32;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
   <h1>HomeShelf</h1>
-  <p>Tap below to download the test build.</p>
+  <p>HomeShelf is an Android app. Open this page on your Android device and tap below to download the APK.</p>
   <a class="btn" href="./homeshelf.apk">Download HomeShelf</a>
   <p class="meta">~214 MB — Wi-Fi recommended</p>
 
@@ -71,13 +80,45 @@
     and only happens once.
   </div>
 
+  <div class="note">
+    <strong>Don't want to use your real email?</strong>
+    Sign in with this test account instead:<br>
+    Email: testuser@example.com<br>
+    Password: Test_1234567
+  </div>
+
+  <h2>After you're done testing</h2>
+  <p>
+    Please take a few minutes to fill out the survey — your feedback
+    helps shape the app.
+  </p>
+  <a class="btn secondary" href="https://docs.google.com/forms/d/e/1FAIpQLSc54qoZQ8l9pL2UqL-qY9Rt1wmGyPNVc29M-reb1JIpLpcUCQ/viewform?usp=header" target="_blank" rel="noopener">
+    Open Survey
+  </a>
+
   <h2>How HomeShelf works</h2>
   <ol>
-    <li>Capture a reference photo of the storage (shelf, cabinet, fridge, etc).</li>
-    <li>Optionally draw a grid to help align future scans — add a line with +H or +V, select it, drag to position, or delete it. Save the final grid.</li>
-    <li>Mark the items on the shelf — tap the photo to create an item, then drag, rename, or pinch to resize. Save when done.</li>
-    <li>Grid and items can also be generated automatically — tap the auto button, then review and edit as needed.</li>
-    <li>Later, scanning the same storage aligns and compares it against the reference photo.</li>
+    <li>
+      Capture a reference photo of the storage (shelf, cabinet, fridge, etc).
+    </li>
+    <li>
+      <svg class="step-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25 V21 h3.75 L17.81 9.94 l-3.75 -3.75 L3 17.25 Z M20.71 7.04 c0.39 -0.39 0.39 -1.02 0 -1.41 l-2.34 -2.34 c-0.39 -0.39 -1.02 -0.39 -1.41 0 l-1.83 1.83 l3.75 3.75 l1.83 -1.83 Z"/></svg>
+      Optionally draw a grid — the lines should trace the storage's outer
+      borders and mark off its individual shelves. This grid is what later
+      lets HomeShelf align a new photo to the reference one and slice both
+      into matching cells for comparison. Add a line with +H or +V, select
+      it, drag to position, or delete it. Save the final grid.
+    </li>
+    <li>
+      <svg class="step-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.63 5.84 C17.27 5.33 16.67 5 16 5 L5 5.01 C3.9 5.01 3 5.9 3 7 v10 c0 1.1 0.9 1.99 2 1.99 L16 19 c0.67 0 1.27 -0.33 1.63 -0.84 L22 12 l-4.37 -6.16 Z"/></svg>
+      Mark the items on the shelf — tap the photo to create an item, then drag, rename, or pinch to resize. Save when done.
+    </li>
+    <li>
+      Grid and items can also be generated automatically — tap the auto button, then review and edit as needed.
+    </li>
+    <li>
+      Later, scanning the same storage aligns and compares it against the reference photo, using the grid to slice both photos into matching cells.
+    </li>
     <li>
       On the review screen, color coding tells you what changed: per-cell similarity
       badges are green (&ge;90%), yellow (&ge;70%), or red (below). After AI analysis,
@@ -85,14 +126,6 @@
       consumed, gray = unknown.
     </li>
   </ol>
-
-  <h2>Before you start testing</h2>
-  <p>
-    See the preliminary report for background on the app and what to focus
-    on while testing.
-  </p>
-  <a class="btn secondary" href="https://docs.google.com/document/d/1m-j3OCbXY8k8eqSLxpWZnnzsllCSw9_6zPKLWR_wrlA/edit?usp=sharing" target="_blank" rel="noopener">
-    Open Preliminary Report
-  </a>
+  <p>For more details on the app and what to focus on while testing, see the <a href="https://docs.google.com/document/d/12WLjEDGj7CL3LUU6h_i7L8vWGSIBuvi01BNQoIAUJmE/edit?usp=sharing" target="_blank" rel="noopener">draft report</a>.</p>
 </body>
 </html>

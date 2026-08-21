@@ -5,3 +5,8 @@ __pycache__/
 .ipynb_checkpoints/
 *.env
 01_vlm_roi/mobileclip_blt.ts
+
+# Unused device data
+device_data/grids/
+device_data/pending/
+device_data/shopping_list.json

@@ -19,7 +19,7 @@ interface GoldenStore {
         allMatchScores: Map<String, Double>?,
         framesAnalyzed: Int?,
         captureAttempt: Int?,
-        groundTruth: List<GroundTruthCell>
+        groundTruth: List<GroundTruthItem>
     )
     suspend fun populateHolder(
         bitmap: Bitmap,

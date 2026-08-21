@@ -1,16 +1,23 @@
 package com.jugurdzija.homeshelf.pipeline
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.RectF
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
-import com.jugurdzija.homeshelf.data.ChangeType
+import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
+import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.di.DiConstants
 import com.jugurdzija.homeshelf.llm.CellPair
-import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.llm.KnownItem
 import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonResult
+import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
+import com.jugurdzija.homeshelf.util.fromCellLocalFraction
+import com.jugurdzija.homeshelf.util.resolveItemsByCell
+import com.jugurdzija.homeshelf.util.toCellLocalFraction
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.delay
@@ -21,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.opencv.android.OpenCVLoader
 import java.io.File
+import java.io.FileOutputStream
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
@@ -41,6 +49,8 @@ class ComparisonPipelineGoldenTest {
 
     @Inject lateinit var shelfDiffAnalyzer: ShelfDiffAnalyzer
 
+    @Inject lateinit var storageRepository: StorageRepository
+
     @Inject
     @Named(DiConstants.NAMED_STORAGE_ROOT)
     lateinit var storageRoot: File
@@ -59,38 +69,21 @@ class ComparisonPipelineGoldenTest {
 
     @Test
     fun goldenSet_pipelineReport() = runBlocking {
-        val goldens = goldenStore.loadAll()
-        assumeTrue("No golden items captured yet — capture some via the app first", goldens.isNotEmpty())
+        val candidates = goldenStore.loadAll().filterNot { it.isLegacyFormat() }
+        val goldens = buildList {
+            for (golden in candidates) {
+                if (golden.hasMarkedItems()) add(golden)
+            }
+        }
+        assumeTrue("No golden items with marked items in the current format — capture some via the app first", goldens.isNotEmpty())
 
         val goldenReports = goldens.mapIndexed { index, golden ->
             if (index > 0) delay(LLM_REQUEST_INTERVAL_MS.milliseconds)
             scoreGolden(golden)
         }
 
-        val allCells = goldenReports.flatMap { it.cells }
-        val analyzedCells = allCells.filter { it.changed != null }
-        val metrics = if (analyzedCells.isEmpty()) null else {
-            val tp = analyzedCells.count { it.actualChanged && it.changed == true }
-            val tn = analyzedCells.count { !it.actualChanged && it.changed == false }
-            val fp = analyzedCells.count { !it.actualChanged && it.changed == true }
-            val fn = analyzedCells.count { it.actualChanged && it.changed == false }
-            val precision = if (tp + fp == 0) null else tp.toDouble() / (tp + fp)
-            val recall = if (tp + fn == 0) null else tp.toDouble() / (tp + fn)
-            val f1 = if (precision == null || recall == null || precision + recall == 0.0) null
-                     else 2.0 * precision * recall / (precision + recall)
-            Metrics(
-                totalCells = analyzedCells.size,
-                tp = tp, tn = tn, fp = fp, fn = fn,
-                accuracy = (tp + tn).toDouble() / analyzedCells.size,
-                precision = precision,
-                recall = recall,
-                f1 = f1
-            )
-        }
         val report = PipelineTestReport(
             timestamp = Instant.now().toString(),
-            totalCells = allCells.size,
-            metrics = metrics,
             goldens = goldenReports
         )
 
@@ -100,44 +93,96 @@ class ComparisonPipelineGoldenTest {
         File(dir, "pipeline_test_latest.json").writeText(json)
     }
 
-    private suspend fun scoreGolden(golden: com.jugurdzija.homeshelf.data.GoldenItem): PipelineGoldenReport {
+    private fun GoldenItem.isLegacyFormat(): Boolean =
+        groundTruth.isNotEmpty() && groundTruth.all { it.name.isBlank() }
+
+    private suspend fun GoldenItem.hasMarkedItems(): Boolean {
+        val id = storageId ?: return false
+        return storageRepository.loadLatestData(id).markedItems.isNotEmpty()
+    }
+
+    private fun Throwable.describeForReport(): String =
+        generateSequence(this) { it.cause }
+            .toList()
+            .joinToString(" <- ") { "${it::class.simpleName}: ${it.message}" }
+
+    private suspend fun scoreGolden(golden: GoldenItem): PipelineGoldenReport {
         val storageId = golden.storageId
-            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList())
+            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList(), golden.toGroundTruthReports())
 
         val capturedBitmap = BitmapFactory.decodeFile(File(golden.dir, "photo.jpg").absolutePath)
-            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList())
+            ?: return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList(), golden.toGroundTruthReports())
 
         val result = pipeline.run(capturedBitmap, storageId)
         if (result !is ComparisonResult.Success) {
-            return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList())
+            return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, false, emptyList(), golden.toGroundTruthReports())
         }
+
+        saveAlignedBitmap(golden.name, result.alignedBitmap)
+
+        val bitmapWidth = result.alignedBitmap.width
+        val bitmapHeight = result.alignedBitmap.height
+        val itemsByCell = resolveItemsByCell(result.markedItems, result.guideLines, bitmapWidth, bitmapHeight)
+        val cellNameByItemId = itemsByCell.flatMap { (cellName, items) -> items.map { it.id to cellName } }.toMap()
 
         val newCellsByName = result.newCells.associateBy { it.name }
+        val cellBoundsByName = mutableMapOf<String, RectF>()
         val pairs = result.referenceCells.mapNotNull { refCell ->
             val newCell = newCellsByName[refCell.name] ?: return@mapNotNull null
-            CellPair(cellId = refCell.name, referenceBitmap = refCell.bitmap, newBitmap = newCell.bitmap)
-        }
-        val analyzeResult = shelfDiffAnalyzer.analyze(pairs)
-        val aiByCellId = analyzeResult.getOrNull()?.associateBy { it.cellId }
-        val analyzeError = analyzeResult.exceptionOrNull()?.message
-
-        val groundTruthMap = golden.groundTruth.associate { it.cellIndex to it.changeType }
-        val cellNames = result.similarities.keys
-        val numCols = (cellNames.maxOfOrNull { it[0] - 'A' } ?: 0) + 1
-        val cells = cellNames.map { name ->
-            val colIdx = name[0] - 'A'
-            val rowIdx = name.substring(1).toInt() - 1
-            val cellIndex = rowIdx * numCols + colIdx
-            val groundTruth = groundTruthMap[cellIndex] ?: ChangeType.NO_CHANGE
-            val aiItems = aiByCellId?.get(name)?.items
-            PipelineCellReport(
-                cellIndex = cellIndex,
-                groundTruth = groundTruth.name,
-                actualChanged = groundTruth != ChangeType.NO_CHANGE,
-                changed = aiItems?.any { it.change != ItemChange.UNCHANGED },
-                description = aiItems?.joinToString("; ") { "${it.name ?: it.id}: ${it.description}" }
+            val cellItems = itemsByCell[refCell.name].orEmpty()
+            val cellBounds = cellBoundsAsFraction(result.guideLines, bitmapWidth, bitmapHeight, bitmapWidth, bitmapHeight, refCell.name)
+                ?.also { cellBoundsByName[refCell.name] = it }
+            CellPair(
+                cellId = refCell.name,
+                referenceBitmap = refCell.bitmap,
+                newBitmap = newCell.bitmap,
+                knownItems = cellItems.map { item ->
+                    KnownItem(
+                        id = item.id,
+                        name = item.name,
+                        isTransparentContainer = item.isTransparentContainer,
+                        box = cellBounds?.let { toCellLocalFraction(item.boundingBox, it) }
+                    )
+                }
             )
         }
-        return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, true, cells, error = analyzeError)
+        val analyzeResult = shelfDiffAnalyzer.analyze(pairs)
+        val analyzeError = analyzeResult.exceptionOrNull()?.let { it.describeForReport() }
+        val cells = analyzeResult.getOrNull().orEmpty().map { cellDiff ->
+            val cellBounds = cellBoundsByName[cellDiff.cellId]
+            PipelineCellReport(
+                cellId = cellDiff.cellId,
+                aiItems = cellDiff.items.map { item ->
+                    PipelineAiItemReport(
+                        id = item.id,
+                        change = item.change.name,
+                        description = item.description,
+                        name = item.name,
+                        box = item.box?.let { box -> cellBounds?.let { fromCellLocalFraction(box, it) } }
+                    )
+                }
+            )
+        }
+        val groundTruth = golden.toGroundTruthReports { itemId -> cellNameByItemId[itemId] }
+        return PipelineGoldenReport(golden.name, golden.referenceLabel, golden.timestamp, true, cells, groundTruth, error = analyzeError)
+    }
+
+    private fun saveAlignedBitmap(goldenName: String, bitmap: Bitmap) {
+        val dir = File(storageRoot, "test_results/aligned").apply { mkdirs() }
+        FileOutputStream(File(dir, "$goldenName.jpg")).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+        }
+    }
+
+    private fun GoldenItem.toGroundTruthReports(
+        resolveCellName: (String) -> String? = { null }
+    ): List<PipelineGroundTruthReport> = groundTruth.map {
+        PipelineGroundTruthReport(
+            itemId = it.itemId,
+            name = it.name,
+            changeType = it.changeType.name,
+            cellName = it.cellName ?: it.itemId?.let(resolveCellName),
+            box = it.box
+        )
     }
 }
