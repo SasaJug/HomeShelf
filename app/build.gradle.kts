@@ -25,6 +25,18 @@ android {
         testInstrumentationRunner = "com.jugurdzija.homeshelf.HiltTestRunner"
         buildConfigField("String", "DEFAULT_WEB_CLIENT_ID", "\"${project.findProperty("DEFAULT_WEB_CLIENT_ID")}\"")
 
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments += "-DBUILD_WHISPER=ON"
+                arguments += "-DGGML_OPENMP=OFF"
+                arguments += "-DCMAKE_C_FLAGS=-O3"
+                arguments += "-DCMAKE_CXX_FLAGS=-O3"
+            }
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -54,6 +66,16 @@ android {
 
     packaging {
         resources.excludes += setOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
+    androidResources {
+        noCompress += "bin"
     }
 
     flavorDimensions += "variant"
