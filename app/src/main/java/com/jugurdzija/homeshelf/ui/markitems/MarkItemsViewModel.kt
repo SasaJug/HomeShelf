@@ -14,10 +14,15 @@ import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.MarkedItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.ItemDetector
+import com.jugurdzija.homeshelf.stt.AudioRecorder
+import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
+import com.jugurdzija.homeshelf.stt.VoiceInputState
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -33,7 +38,9 @@ sealed interface DetectState {
 class MarkItemsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val storageRepository: StorageRepository,
-    private val itemDetector: ItemDetector
+    private val itemDetector: ItemDetector,
+    private val audioRecorder: AudioRecorder,
+    private val speechToTextEngine: SpeechToTextEngine
 ) : ViewModel() {
 
     val storageId: String = checkNotNull(savedStateHandle[Routes.ARG_STORAGE_ID])
@@ -52,6 +59,12 @@ class MarkItemsViewModel @Inject constructor(
 
     private val _detectState = MutableStateFlow<DetectState?>(null)
     val detectState: StateFlow<DetectState?> = _detectState.asStateFlow()
+
+    private val _voiceInputState = MutableStateFlow(VoiceInputState.IDLE)
+    val voiceInputState: StateFlow<VoiceInputState> = _voiceInputState.asStateFlow()
+
+    private val _voiceError = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val voiceError: SharedFlow<String> = _voiceError
 
     init {
         viewModelScope.launch {
@@ -163,6 +176,33 @@ class MarkItemsViewModel @Inject constructor(
 
     fun resetDetectState() {
         _detectState.value = null
+    }
+
+    fun startVoiceInput() {
+        if (_voiceInputState.value != VoiceInputState.IDLE || selectedId == null) return
+        _voiceInputState.value = VoiceInputState.RECORDING
+        audioRecorder.start()
+    }
+
+    fun stopVoiceInput() {
+        val id = selectedId
+        if (_voiceInputState.value != VoiceInputState.RECORDING || id == null) return
+        _voiceInputState.value = VoiceInputState.PROCESSING
+        viewModelScope.launch {
+            val samples = audioRecorder.stop()
+            speechToTextEngine.transcribe(samples)
+                .onSuccess { text ->
+                    if (text.isBlank()) {
+                        _voiceError.tryEmit("Didn't understand that — try again")
+                    } else {
+                        updateName(id, text)
+                    }
+                }
+                .onFailure { e ->
+                    _voiceError.tryEmit(e.message ?: "Voice input failed")
+                }
+            _voiceInputState.value = VoiceInputState.IDLE
+        }
     }
 
     private fun persist() {

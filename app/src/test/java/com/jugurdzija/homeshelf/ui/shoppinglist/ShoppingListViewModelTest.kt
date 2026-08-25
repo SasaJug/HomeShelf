@@ -2,6 +2,8 @@ package com.jugurdzija.homeshelf.ui.shoppinglist
 
 import com.jugurdzija.homeshelf.data.ShoppingListItem
 import com.jugurdzija.homeshelf.data.ShoppingListRepository
+import com.jugurdzija.homeshelf.stt.AudioRecorder
+import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -39,7 +41,7 @@ class ShoppingListViewModelTest {
     }
 
     private fun createViewModel(): ShoppingListViewModel {
-        val viewModel = ShoppingListViewModel(shoppingListRepository)
+        val viewModel = ShoppingListViewModel(shoppingListRepository, mockk<AudioRecorder>(), mockk<SpeechToTextEngine>())
         testDispatcher.scheduler.advanceUntilIdle()
         return viewModel
     }
@@ -66,7 +68,8 @@ class ShoppingListViewModelTest {
         val viewModel = createViewModel()
         coEvery { shoppingListRepository.add("Eggs", null) } returns ShoppingListItem(id = "1", name = "Eggs", createdAt = 0L)
 
-        viewModel.onAdd("  Eggs  ")
+        viewModel.onNewItemNameChange("  Eggs  ")
+        viewModel.onAdd()
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify { shoppingListRepository.add("Eggs", null) }
@@ -76,7 +79,8 @@ class ShoppingListViewModelTest {
     fun `onAdd ignores blank input`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
-        viewModel.onAdd("   ")
+        viewModel.onNewItemNameChange("   ")
+        viewModel.onAdd()
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify(exactly = 0) { shoppingListRepository.add(any(), any()) }

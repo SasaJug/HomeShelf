@@ -61,6 +61,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.data.BoundingBox
 import com.jugurdzija.homeshelf.data.GuideLine
 import com.jugurdzija.homeshelf.data.MarkedItem
+import com.jugurdzija.homeshelf.stt.VoiceInputState
+import com.jugurdzija.homeshelf.ui.common.VoiceInputIcon
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
 import com.jugurdzija.homeshelf.util.resolveCellName
@@ -85,6 +87,7 @@ fun MarkItemsScreen(
 ) {
     val bitmap by vm.bitmapState.collectAsState()
     val detectState by vm.detectState.collectAsState()
+    val voiceInputState by vm.voiceInputState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(detectState) {
@@ -95,6 +98,10 @@ fun MarkItemsScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        vm.voiceError.collect { message -> snackbarHostState.showSnackbar(message) }
+    }
+
     MarkItemsScreenContent(
         storageName = vm.storageName,
         bitmap = bitmap,
@@ -102,6 +109,7 @@ fun MarkItemsScreen(
         markedItems = vm.markedItems,
         selectedId = vm.selectedId,
         isDetecting = detectState is DetectState.Loading,
+        voiceInputState = voiceInputState,
         onBack = {
             vm.confirmSelection()
             onBack()
@@ -114,6 +122,8 @@ fun MarkItemsScreen(
         onConfirmSelection = vm::confirmSelection,
         onDeleteItem = vm::deleteItem,
         onRunAiDetection = vm::runAiDetection,
+        onStartVoiceInput = vm::startVoiceInput,
+        onStopVoiceInput = vm::stopVoiceInput,
         snackbarHostState = snackbarHostState
     )
 }
@@ -127,6 +137,7 @@ private fun MarkItemsScreenContent(
     markedItems: List<MarkedItem>,
     selectedId: String?,
     isDetecting: Boolean,
+    voiceInputState: VoiceInputState,
     onBack: () -> Unit,
     onCreateItem: (BoundingBox) -> Unit,
     onSelect: (String) -> Unit,
@@ -136,6 +147,8 @@ private fun MarkItemsScreenContent(
     onConfirmSelection: () -> Unit,
     onDeleteItem: (String) -> Unit,
     onRunAiDetection: (canvasWidth: Int, canvasHeight: Int) -> Unit,
+    onStartVoiceInput: () -> Unit,
+    onStopVoiceInput: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
@@ -155,9 +168,15 @@ private fun MarkItemsScreenContent(
                         OutlinedTextField(
                             value = selectedItem.name,
                             onValueChange = { onUpdateName(selectedItem.id, it) },
-                            placeholder = { Text("Item name") },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                VoiceInputIcon(
+                                    state = voiceInputState,
+                                    onStart = onStartVoiceInput,
+                                    onStop = onStopVoiceInput
+                                )
+                            }
                         )
                     } else {
                         Text(storageName)
@@ -467,6 +486,7 @@ private fun MarkItemsScreenLoadedPreview() {
             markedItems = previewItems,
             selectedId = null,
             isDetecting = false,
+            voiceInputState = VoiceInputState.IDLE,
             onBack = {},
             onCreateItem = {},
             onSelect = {},
@@ -476,6 +496,8 @@ private fun MarkItemsScreenLoadedPreview() {
             onConfirmSelection = {},
             onDeleteItem = {},
             onRunAiDetection = { _, _ -> },
+            onStartVoiceInput = {},
+            onStopVoiceInput = {},
             snackbarHostState = remember { SnackbarHostState() }
         )
     }
@@ -492,6 +514,7 @@ private fun MarkItemsScreenNoItemsPreview() {
             markedItems = emptyList(),
             selectedId = null,
             isDetecting = false,
+            voiceInputState = VoiceInputState.IDLE,
             onBack = {},
             onCreateItem = {},
             onSelect = {},
@@ -501,6 +524,8 @@ private fun MarkItemsScreenNoItemsPreview() {
             onConfirmSelection = {},
             onDeleteItem = {},
             onRunAiDetection = { _, _ -> },
+            onStartVoiceInput = {},
+            onStopVoiceInput = {},
             snackbarHostState = remember { SnackbarHostState() }
         )
     }
@@ -517,6 +542,7 @@ private fun MarkItemsScreenSelectedPreview() {
             markedItems = previewItems,
             selectedId = "2",
             isDetecting = false,
+            voiceInputState = VoiceInputState.IDLE,
             onBack = {},
             onCreateItem = {},
             onSelect = {},
@@ -526,6 +552,8 @@ private fun MarkItemsScreenSelectedPreview() {
             onConfirmSelection = {},
             onDeleteItem = {},
             onRunAiDetection = { _, _ -> },
+            onStartVoiceInput = {},
+            onStopVoiceInput = {},
             snackbarHostState = remember { SnackbarHostState() }
         )
     }
