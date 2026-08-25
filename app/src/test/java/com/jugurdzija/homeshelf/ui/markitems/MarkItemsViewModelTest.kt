@@ -10,6 +10,8 @@ import com.jugurdzija.homeshelf.data.StorageItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.DetectedItem
 import com.jugurdzija.homeshelf.llm.ItemDetector
+import com.jugurdzija.homeshelf.stt.AudioRecorder
+import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -62,7 +64,9 @@ class MarkItemsViewModelTest {
 
     private fun createViewModel(): MarkItemsViewModel {
         val savedStateHandle = SavedStateHandle(mapOf(Routes.ARG_STORAGE_ID to STORAGE_ID))
-        val viewModel = MarkItemsViewModel(savedStateHandle, storageRepository, itemDetector)
+        val viewModel = MarkItemsViewModel(
+            savedStateHandle, storageRepository, itemDetector, mockk<AudioRecorder>(), mockk<SpeechToTextEngine>()
+        )
         testDispatcher.scheduler.advanceUntilIdle()
         return viewModel
     }

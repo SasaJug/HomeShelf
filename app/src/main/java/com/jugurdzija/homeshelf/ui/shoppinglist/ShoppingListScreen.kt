@@ -24,14 +24,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,7 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import com.jugurdzija.homeshelf.data.ShoppingListItem
+import com.jugurdzija.homeshelf.stt.VoiceInputState
 import com.jugurdzija.homeshelf.ui.common.LifecycleEvents
+import com.jugurdzija.homeshelf.ui.common.VoiceInputIcon
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +53,9 @@ fun ShoppingListScreen(
     vm: ShoppingListViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
+    val newItemName by vm.newItemName.collectAsState()
+    val voiceInputState by vm.voiceInputState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LifecycleEvents { event ->
         if (event == Lifecycle.Event.ON_RESUME) {
@@ -57,12 +63,22 @@ fun ShoppingListScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        vm.voiceError.collect { message -> snackbarHostState.showSnackbar(message) }
+    }
+
     ShoppingListScreenContent(
         state = state,
+        newItemName = newItemName,
+        voiceInputState = voiceInputState,
+        snackbarHostState = snackbarHostState,
         onBack = onBack,
         onItemClick = onItemClick,
+        onNewItemNameChange = vm::onNewItemNameChange,
         onAdd = vm::onAdd,
-        onRemove = vm::onRemove
+        onRemove = vm::onRemove,
+        onStartVoiceInput = vm::startVoiceInput,
+        onStopVoiceInput = vm::stopVoiceInput
     )
 }
 
@@ -70,14 +86,19 @@ fun ShoppingListScreen(
 @Composable
 private fun ShoppingListScreenContent(
     state: ShoppingListUiState,
+    newItemName: String,
+    voiceInputState: VoiceInputState,
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onItemClick: (String) -> Unit,
-    onAdd: (String) -> Unit,
-    onRemove: (String) -> Unit
+    onNewItemNameChange: (String) -> Unit,
+    onAdd: () -> Unit,
+    onRemove: (String) -> Unit,
+    onStartVoiceInput: () -> Unit,
+    onStopVoiceInput: () -> Unit
 ) {
-    var newItemName by remember { mutableStateOf("") }
-
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Shopping List") },
@@ -151,15 +172,19 @@ private fun ShoppingListScreenContent(
             ) {
                 OutlinedTextField(
                     value = newItemName,
-                    onValueChange = { newItemName = it },
+                    onValueChange = onNewItemNameChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("Add item") },
-                    singleLine = true
+                    singleLine = true,
+                    trailingIcon = {
+                        VoiceInputIcon(
+                            state = voiceInputState,
+                            onStart = onStartVoiceInput,
+                            onStop = onStopVoiceInput
+                        )
+                    }
                 )
-                IconButton(onClick = {
-                    onAdd(newItemName)
-                    newItemName = ""
-                }) {
+                IconButton(onClick = onAdd) {
                     Icon(Icons.Default.Add, contentDescription = "Add item")
                 }
             }
@@ -209,10 +234,16 @@ private fun ShoppingListScreenLoadingPreview() {
     HomeShelfTheme {
         ShoppingListScreenContent(
             state = ShoppingListUiState.Loading,
+            newItemName = "",
+            voiceInputState = VoiceInputState.IDLE,
+            snackbarHostState = remember { SnackbarHostState() },
             onBack = {},
             onItemClick = {},
+            onNewItemNameChange = {},
             onAdd = {},
-            onRemove = {}
+            onRemove = {},
+            onStartVoiceInput = {},
+            onStopVoiceInput = {}
         )
     }
 }
@@ -223,10 +254,16 @@ private fun ShoppingListScreenEmptyPreview() {
     HomeShelfTheme {
         ShoppingListScreenContent(
             state = ShoppingListUiState.Empty,
+            newItemName = "",
+            voiceInputState = VoiceInputState.IDLE,
+            snackbarHostState = remember { SnackbarHostState() },
             onBack = {},
             onItemClick = {},
+            onNewItemNameChange = {},
             onAdd = {},
-            onRemove = {}
+            onRemove = {},
+            onStartVoiceInput = {},
+            onStopVoiceInput = {}
         )
     }
 }
@@ -237,10 +274,16 @@ private fun ShoppingListScreenLoadedPreview() {
     HomeShelfTheme {
         ShoppingListScreenContent(
             state = ShoppingListUiState.Loaded(previewItems),
+            newItemName = "",
+            voiceInputState = VoiceInputState.IDLE,
+            snackbarHostState = remember { SnackbarHostState() },
             onBack = {},
             onItemClick = {},
+            onNewItemNameChange = {},
             onAdd = {},
-            onRemove = {}
+            onRemove = {},
+            onStartVoiceInput = {},
+            onStopVoiceInput = {}
         )
     }
 }
@@ -254,10 +297,16 @@ private fun ShoppingListScreenErrorPreview() {
                 message = "Failed to load shopping list",
                 items = previewItems
             ),
+            newItemName = "",
+            voiceInputState = VoiceInputState.IDLE,
+            snackbarHostState = remember { SnackbarHostState() },
             onBack = {},
             onItemClick = {},
+            onNewItemNameChange = {},
             onAdd = {},
-            onRemove = {}
+            onRemove = {},
+            onStartVoiceInput = {},
+            onStopVoiceInput = {}
         )
     }
 }
