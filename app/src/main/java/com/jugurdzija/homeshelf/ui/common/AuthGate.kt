@@ -33,6 +33,11 @@ private const val TAG = "AuthGate"
 
 @Composable
 fun AuthGate(content: @Composable (onLogout: () -> Unit) -> Unit) {
+    content {}
+}
+
+@Composable
+private fun FirebaseAuthGate(content: @Composable (onLogout: () -> Unit) -> Unit) {
     val auth = remember { FirebaseAuth.getInstance() }
     var authenticated by remember { mutableStateOf(auth.currentUser != null) }
     var signInError by remember { mutableStateOf<String?>(null) }
