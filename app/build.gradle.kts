@@ -99,6 +99,7 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.opencv)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.vosk.android)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ui.auth)

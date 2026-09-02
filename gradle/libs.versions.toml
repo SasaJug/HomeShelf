@@ -46,6 +46,9 @@ mediapipe = "0.10.29"
 # OpenCV
 opencv = "4.10.0"
 
+# Vosk
+vosk = "0.3.75"
+
 # ExifInterface
 exifinterface = "1.3.7"
 
@@ -118,6 +121,9 @@ google-mediapipe-vision = { group = "com.google.mediapipe", name = "tasks-vision
 
 # OpenCV
 opencv = { group = "org.opencv", name = "opencv", version.ref = "opencv" }
+
+# Vosk
+vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 
 # ExifInterface
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }

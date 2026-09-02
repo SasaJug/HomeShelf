@@ -58,7 +58,7 @@ class AudioRecorder @Inject constructor(
             while (isActive) {
                 val read = record.read(buffer, 0, buffer.size)
                 if (read > 0) {
-                    val floatChunk = FloatArray(read) { buffer[it] / 32768.0f }
+                    val floatChunk = FloatArray(read) { buffer[it].toFloat() }
                     synchronized(chunks) { chunks.add(floatChunk) }
                 }
             }
