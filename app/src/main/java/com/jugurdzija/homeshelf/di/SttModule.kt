@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.di
 
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
-import com.jugurdzija.homeshelf.stt.WhisperSpeechToTextEngine
+import com.jugurdzija.homeshelf.stt.VoskSpeechToTextEngine
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ abstract class SttModule {
 
     @Binds
     @Singleton
-    abstract fun bindSpeechToTextEngine(impl: WhisperSpeechToTextEngine): SpeechToTextEngine
+    abstract fun bindSpeechToTextEngine(impl: VoskSpeechToTextEngine): SpeechToTextEngine
 }
