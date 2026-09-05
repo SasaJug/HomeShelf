@@ -172,8 +172,12 @@ class MathUtilsTest {
     @Test
     fun `resolveItemsByCell groups items by their live-resolved cell`() {
         val lines = listOf(
-            GuideLine(id = 1, isHorizontal = true, position = 0.5f),
-            GuideLine(id = 2, isHorizontal = false, position = 0.5f)
+            GuideLine(id = 1, isHorizontal = true, position = 0f),
+            GuideLine(id = 2, isHorizontal = true, position = 0.5f),
+            GuideLine(id = 3, isHorizontal = true, position = 1f),
+            GuideLine(id = 4, isHorizontal = false, position = 0f),
+            GuideLine(id = 5, isHorizontal = false, position = 0.5f),
+            GuideLine(id = 6, isHorizontal = false, position = 1f)
         )
         val topLeftItem = MarkedItem(id = "1", name = "Rice", boundingBox = BoundingBox(0f, 0f, 0.1f, 0.1f))
         val bottomRightItem = MarkedItem(id = "2", name = "Sugar", boundingBox = BoundingBox(0.8f, 0.8f, 0.1f, 0.1f))
@@ -203,8 +207,12 @@ class MathUtilsTest {
         val afterGrid = resolveItemsByCell(
             listOf(item),
             listOf(
-                GuideLine(id = 1, isHorizontal = true, position = 0.5f),
-                GuideLine(id = 2, isHorizontal = false, position = 0.5f)
+                GuideLine(id = 1, isHorizontal = true, position = 0f),
+                GuideLine(id = 2, isHorizontal = true, position = 0.5f),
+                GuideLine(id = 3, isHorizontal = true, position = 1f),
+                GuideLine(id = 4, isHorizontal = false, position = 0f),
+                GuideLine(id = 5, isHorizontal = false, position = 0.5f),
+                GuideLine(id = 6, isHorizontal = false, position = 1f)
             ),
             bitmapWidth = 100, bitmapHeight = 100
         )
