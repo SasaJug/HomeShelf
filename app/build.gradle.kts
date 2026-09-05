@@ -8,6 +8,11 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.google.services)
+    jacoco
+}
+
+jacoco {
+    toolVersion = "0.8.12"
 }
 
 val localProperties = Properties().apply {
@@ -24,6 +29,11 @@ android {
         minSdk = 26
         testInstrumentationRunner = "com.jugurdzija.homeshelf.HiltTestRunner"
         buildConfigField("String", "DEFAULT_WEB_CLIENT_ID", "\"${project.findProperty("DEFAULT_WEB_CLIENT_ID")}\"")
+    }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -112,4 +122,29 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.hilt.android.testing)
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testProductionDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+        "**/*Test*.*", "android/**/*.*", "**/*_Hilt*.class", "**/Hilt_*.class",
+        "**/*_Factory.class", "**/*_MembersInjector.class", "**/Dagger*Component*.class",
+        "**/*Module_*Factory.class", "**/di/**"
+    )
+    val kotlinClasses = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/productionDebug") {
+        exclude(fileFilter)
+    }
+
+    sourceDirectories.setFrom(files("$projectDir/src/main/java"))
+    classDirectories.setFrom(files(kotlinClasses))
+    executionData.setFrom(fileTree(layout.buildDirectory.get()) {
+        include("jacoco/testProductionDebugUnitTest.exec")
+    })
 }
