@@ -17,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -68,6 +69,9 @@ fun ConfirmCaptureScreen(
     ConfirmCaptureScreenContent(
         bitmap = bitmap,
         title = if (vm.isRescan) "Confirm Replace Photo: ${existingName.orEmpty()}" else "Confirm New Storage",
+        isRescan = vm.isRescan,
+        name = vm.name,
+        onNameChange = { vm.name = it },
         onBack = onDiscarded,
         onSave = vm::save,
         onDiscard = vm::discard,
@@ -80,6 +84,9 @@ fun ConfirmCaptureScreen(
 private fun ConfirmCaptureScreenContent(
     bitmap: Bitmap?,
     title: String,
+    isRescan: Boolean,
+    name: String,
+    onNameChange: (String) -> Unit,
     onBack: () -> Unit,
     onSave: () -> Unit,
     onDiscard: () -> Unit,
@@ -109,6 +116,17 @@ private fun ConfirmCaptureScreenContent(
                     )
                 }
             }
+            if (!isRescan) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = onNameChange,
+                    label = { Text("Storage name") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -119,7 +137,11 @@ private fun ConfirmCaptureScreenContent(
                 OutlinedButton(onClick = onDiscard, modifier = Modifier.weight(1f)) {
                     Text("Discard")
                 }
-                Button(onClick = onSave, enabled = bitmap != null, modifier = Modifier.weight(1f)) {
+                Button(
+                    onClick = onSave,
+                    enabled = bitmap != null && (isRescan || name.isNotBlank()),
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text("Save")
                 }
             }
@@ -136,6 +158,9 @@ private fun ConfirmCaptureNewStoragePreview() {
         ConfirmCaptureScreenContent(
             bitmap = previewBitmap,
             title = "Confirm New Storage",
+            isRescan = false,
+            name = "",
+            onNameChange = {},
             onBack = {},
             onSave = {},
             onDiscard = {},
@@ -151,6 +176,9 @@ private fun ConfirmCaptureRescanPreview() {
         ConfirmCaptureScreenContent(
             bitmap = previewBitmap,
             title = "Confirm Replace Photo: Pantry Shelf A",
+            isRescan = true,
+            name = "",
+            onNameChange = {},
             onBack = {},
             onSave = {},
             onDiscard = {},

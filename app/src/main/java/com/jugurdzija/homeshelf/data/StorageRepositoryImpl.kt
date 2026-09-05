@@ -129,6 +129,13 @@ class StorageRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun rename(id: String, name: String) = withContext(Dispatchers.IO) {
+        val meta = readMeta(metaFile(id))
+        if (meta != null) {
+            writeMeta(meta.copy(name = name, updatedAt = System.currentTimeMillis()))
+        }
+    }
+
     override suspend fun getLatestPhotoFile(id: String): File? = withContext(Dispatchers.IO) {
         val file = File(latestDir(id), FILE_PHOTO)
         if (file.exists()) file else null

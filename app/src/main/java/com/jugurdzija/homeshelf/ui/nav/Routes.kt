@@ -30,8 +30,7 @@ object Routes {
     const val GOLDEN_MANAGE = "golden_manage/{$ARG_STORAGE_ID}"
     const val GOLDEN_DETAILS = "golden_details/{$ARG_NAME}"
 
-    fun edit(storageId: String? = null) =
-        if (storageId != null) EDIT.replace("{$ARG_STORAGE_ID}", storageId) else EDIT_BASE
+    fun edit(storageId: String) = EDIT.replace("{$ARG_STORAGE_ID}", storageId)
 
     fun scan(storageId: String? = null, rescan: Boolean = false): String {
         if (storageId == null) return SCAN_BASE

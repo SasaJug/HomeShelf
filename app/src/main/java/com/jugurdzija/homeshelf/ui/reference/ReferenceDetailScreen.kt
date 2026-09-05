@@ -3,15 +3,19 @@ package com.jugurdzija.homeshelf.ui.reference
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -24,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -78,6 +83,7 @@ fun ReferenceDetailScreen(
         onRequestDelete = vm::requestDelete,
         onCancelDelete = vm::cancelDelete,
         onConfirmDelete = vm::confirmDelete,
+        onRename = vm::renameStorage,
         onCaptureTestPhoto = onCaptureTestPhoto,
         onViewHistory = onViewHistory
     )
@@ -95,21 +101,39 @@ private fun ReferenceDetailScreenContent(
     onRequestDelete: () -> Unit,
     onCancelDelete: () -> Unit,
     onConfirmDelete: () -> Unit,
+    onRename: (String) -> Unit = {},
     onCaptureTestPhoto: ((String) -> Unit)? = null,
     onViewHistory: ((String) -> Unit)? = null
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    var isEditingName by remember { mutableStateOf(false) }
+    var nameDraft by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        when (state) {
-                            is ReferenceDetailUiState.Loaded -> state.storageName
-                            else -> ""
+                    val storageName = (state as? ReferenceDetailUiState.Loaded)?.storageName
+                    if (isEditingName && storageName != null) {
+                        OutlinedTextField(
+                            value = nameDraft,
+                            onValueChange = { nameDraft = it },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Row {
+                            Text(storageName ?: "")
+                            if (storageName != null) {
+                                IconButton(onClick = {
+                                    nameDraft = storageName
+                                    isEditingName = true
+                                }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Rename storage")
+                                }
+                            }
                         }
-                    )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -117,11 +141,18 @@ private fun ReferenceDetailScreenContent(
                     }
                 },
                 actions = {
-                    if (state is ReferenceDetailUiState.Loaded) {
+                    if (isEditingName) {
+                        IconButton(onClick = {
+                            onRename(nameDraft)
+                            isEditingName = false
+                        }) {
+                            Icon(Icons.Default.Check, contentDescription = "Save name")
+                        }
+                    } else if (state is ReferenceDetailUiState.Loaded) {
                         BadgedBox(badge = { if (!state.hasGuideLines) Badge() }) {
                             IconButton(onClick = { onNavigateToEdit(state.storageId) }) {
                                 Icon(
-                                    Icons.Default.Edit,
+                                    Icons.Default.GridOn,
                                     contentDescription = if (state.hasGuideLines) {
                                         "Edit Guidelines"
                                     } else {

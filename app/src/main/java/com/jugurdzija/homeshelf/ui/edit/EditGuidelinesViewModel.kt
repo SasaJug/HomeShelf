@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -37,7 +36,7 @@ sealed interface GridGenerateResult {
 }
 
 @HiltViewModel
-class EditViewModel @Inject constructor(
+class EditGuidelinesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val pendingCaptureStore: PendingCaptureStore,
     private val storageRepository: StorageRepository,
@@ -45,10 +44,9 @@ class EditViewModel @Inject constructor(
     private val gridLineGenerator: GridLineGenerator
 ) : ViewModel() {
 
-    val storageId: String? = savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
-    val isNewStorage: Boolean = storageId == null
-
-    var name by mutableStateOf("")
+    val storageId: String = requireNotNull(
+        savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
+    ) { "EditGuidelinesViewModel requires a storageId" }
 
     val guideLines = mutableStateListOf<GuideLine>()
     var nextId by mutableIntStateOf(0)
@@ -67,21 +65,12 @@ class EditViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val pending = pendingCaptureStore.load()
-            _bitmapState.value = pending
-                ?: if (storageId != null) {
-                    storageRepository.decodeLatestBitmap(storageId)
-                } else {
-                    null
-                }
+            _bitmapState.value = pendingCaptureStore.load() ?: storageRepository.decodeLatestBitmap(storageId)
         }
-        if (storageId != null) {
-            viewModelScope.launch {
-                name = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-                val loaded = storageRepository.loadLatestData(storageId).guideLines
-                guideLines.addAll(loaded)
-                nextId = (loaded.maxOfOrNull { it.id } ?: -1) + 1
-            }
+        viewModelScope.launch {
+            val loaded = storageRepository.loadLatestData(storageId).guideLines
+            guideLines.addAll(loaded)
+            nextId = (loaded.maxOfOrNull { it.id } ?: -1) + 1
         }
     }
 
@@ -89,7 +78,7 @@ class EditViewModel @Inject constructor(
         val bitmap = _bitmapState.value ?: return
         viewModelScope.launch {
             val result = storageSavePipeline.run(
-                storageId, name, bitmap, guideLines.toList(), canvasWidth, canvasHeight
+                storageId, "", bitmap, guideLines.toList(), canvasWidth, canvasHeight
             )
             when (result) {
                 is StorageSaveResult.Done -> {
