@@ -88,4 +88,15 @@ class ReferenceDetailViewModel @Inject constructor(
             _navEvent.emit(ReferenceDetailNavEvent.Deleted)
         }
     }
+
+    fun renameStorage(newName: String) {
+        val current = _state.value
+        if (current !is ReferenceDetailUiState.Loaded) return
+        val trimmed = newName.trim()
+        if (trimmed.isBlank() || trimmed == current.storageName) return
+        viewModelScope.launch {
+            storageRepository.rename(storageId, trimmed)
+            _state.value = current.copy(storageName = trimmed)
+        }
+    }
 }

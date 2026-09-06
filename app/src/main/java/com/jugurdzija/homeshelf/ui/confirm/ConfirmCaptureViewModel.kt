@@ -1,6 +1,9 @@
 package com.jugurdzija.homeshelf.ui.confirm
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,8 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val DEFAULT_NEW_STORAGE_NAME = "New Storage"
-
 sealed interface ConfirmCaptureNavEvent {
     data class Saved(val storageId: String) : ConfirmCaptureNavEvent
     data object Discarded : ConfirmCaptureNavEvent
@@ -35,6 +36,8 @@ class ConfirmCaptureViewModel @Inject constructor(
 
     val storageId: String? = savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
     val isRescan: Boolean = storageId != null
+
+    var name by mutableStateOf("")
 
     private val _bitmapState = MutableStateFlow<Bitmap?>(null)
     val bitmapState: StateFlow<Bitmap?> = _bitmapState.asStateFlow()
@@ -61,11 +64,12 @@ class ConfirmCaptureViewModel @Inject constructor(
 
     fun save() {
         val bitmap = _bitmapState.value ?: return
-        val name = existingName.value ?: DEFAULT_NEW_STORAGE_NAME
+        val storageName = if (isRescan) existingName.value.orEmpty() else name.trim()
+        if (!isRescan && storageName.isBlank()) return
         viewModelScope.launch {
             val result = storageSavePipeline.run(
                 storageId = storageId,
-                name = name,
+                name = storageName,
                 bitmap = bitmap,
                 guideLines = emptyList(),
                 canvasWidth = bitmap.width,

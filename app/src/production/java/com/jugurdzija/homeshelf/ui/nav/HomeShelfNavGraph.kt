@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jugurdzija.homeshelf.ui.confirm.ConfirmCaptureScreen
-import com.jugurdzija.homeshelf.ui.edit.EditScreen
+import com.jugurdzija.homeshelf.ui.edit.EditGuidelinesScreen
 import com.jugurdzija.homeshelf.ui.markitems.MarkItemsScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceDetailScreen
 import com.jugurdzija.homeshelf.ui.reference.ReferenceScreen
@@ -117,13 +117,9 @@ fun HomeShelfNavGraph(
         }
         composable(
             route = Routes.EDIT,
-            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
+            arguments = listOf(navArgument(Routes.ARG_STORAGE_ID) { type = NavType.StringType })
         ) {
-            EditScreen(
+            EditGuidelinesScreen(
                 onSaved = { navController.popBackStack(Routes.REFERENCE, inclusive = false) },
                 onDiscarded = { navController.popBackStack(Routes.REFERENCE, inclusive = false) }
             )

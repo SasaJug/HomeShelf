@@ -16,8 +16,11 @@ import com.jugurdzija.homeshelf.ui.nav.Routes
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -48,6 +51,10 @@ class MarkItemsViewModelTest {
         storageRepository = mockk()
         itemDetector = mockk()
         bitmap = mockk(relaxed = true)
+        every { bitmap.width } returns 100
+        every { bitmap.height } returns 100
+        mockkStatic(Bitmap::class)
+        every { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) } returns bitmap
 
         coEvery { storageRepository.loadAll() } returns listOf(
             StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
@@ -60,6 +67,7 @@ class MarkItemsViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkStatic(Bitmap::class)
     }
 
     private fun createViewModel(): MarkItemsViewModel {
