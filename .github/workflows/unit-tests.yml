@@ -29,6 +29,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       # Firebase config is gitignored (contains project secrets) and is not needed to
       # compile or run unit tests. This placeholder just satisfies the google-services
       # plugin so the build can configure the production and capture flavors.
