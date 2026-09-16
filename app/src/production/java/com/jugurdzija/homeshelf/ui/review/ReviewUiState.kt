@@ -1,9 +1,9 @@
 package com.jugurdzija.homeshelf.ui.review
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.GridCell
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.GridCell
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.llm.CellDiffResult
 
 sealed interface ReviewUiState {

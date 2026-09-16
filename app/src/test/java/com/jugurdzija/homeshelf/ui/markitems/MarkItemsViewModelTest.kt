@@ -2,11 +2,11 @@ package com.jugurdzija.homeshelf.ui.markitems
 
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
-import com.jugurdzija.homeshelf.data.BoundingBox
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
-import com.jugurdzija.homeshelf.data.ReferencePhotoData
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.DetectedItem
 import com.jugurdzija.homeshelf.llm.ItemDetector

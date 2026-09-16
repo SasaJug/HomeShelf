@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.llm
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import kotlinx.serialization.Serializable
 
 data class KnownItem(

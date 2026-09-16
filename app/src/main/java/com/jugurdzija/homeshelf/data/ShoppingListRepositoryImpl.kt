@@ -1,6 +1,7 @@
 package com.jugurdzija.homeshelf.data
 
 import com.jugurdzija.homeshelf.di.DiConstants
+import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer

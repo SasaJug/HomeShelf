@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import com.jugurdzija.homeshelf.di.DiConstants
+import com.jugurdzija.homeshelf.domain.model.GridCell
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton

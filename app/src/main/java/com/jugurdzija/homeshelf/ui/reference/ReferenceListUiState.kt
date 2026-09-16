@@ -1,6 +1,6 @@
 package com.jugurdzija.homeshelf.ui.reference
 
-import com.jugurdzija.homeshelf.data.StorageListEntry
+import com.jugurdzija.homeshelf.domain.model.StorageListEntry
 
 sealed interface ReferenceListUiState {
     data object Loading : ReferenceListUiState

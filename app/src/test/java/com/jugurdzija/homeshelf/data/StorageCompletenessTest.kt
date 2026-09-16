@@ -1,5 +1,11 @@
 package com.jugurdzija.homeshelf.data
 
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.StorageCompleteness
+import com.jugurdzija.homeshelf.domain.model.calculateCompleteness
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

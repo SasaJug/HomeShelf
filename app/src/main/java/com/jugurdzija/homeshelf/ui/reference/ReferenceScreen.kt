@@ -44,9 +44,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import com.jugurdzija.homeshelf.data.StorageCompleteness
-import com.jugurdzija.homeshelf.data.StorageItem
-import com.jugurdzija.homeshelf.data.StorageListEntry
+import com.jugurdzija.homeshelf.domain.model.StorageCompleteness
+import com.jugurdzija.homeshelf.domain.model.StorageItem
+import com.jugurdzija.homeshelf.domain.model.StorageListEntry
 import com.jugurdzija.homeshelf.ui.common.HowItWorksDialog
 import com.jugurdzija.homeshelf.ui.common.LifecycleEvents
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme

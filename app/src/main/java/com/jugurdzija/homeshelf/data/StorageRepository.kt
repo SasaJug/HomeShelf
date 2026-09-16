@@ -1,6 +1,10 @@
 package com.jugurdzija.homeshelf.data
 
 import android.graphics.Bitmap
+import com.jugurdzija.homeshelf.domain.model.GridCell
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import java.io.File
 
 interface StorageRepository {

@@ -1,4 +1,4 @@
-package com.jugurdzija.homeshelf.data
+package com.jugurdzija.homeshelf.domain.model
 
 enum class StorageCompleteness {
     COMPLETE, NO_ITEMS, NO_GRID

@@ -3,7 +3,7 @@ package com.jugurdzija.homeshelf.ui.confirm
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline

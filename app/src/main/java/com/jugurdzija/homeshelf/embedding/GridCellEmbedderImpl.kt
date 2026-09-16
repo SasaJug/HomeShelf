@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.embedding
 
 import android.content.Context
-import com.jugurdzija.homeshelf.data.GridCell
+import com.jugurdzija.homeshelf.domain.model.GridCell
 import com.jugurdzija.homeshelf.util.ImageEmbedderHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

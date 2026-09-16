@@ -2,11 +2,11 @@ package com.jugurdzija.homeshelf.ui.golden
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import com.jugurdzija.homeshelf.data.CaptureData
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GroundTruthItem
-import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.util.resolveCellName

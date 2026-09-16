@@ -3,7 +3,7 @@ package com.jugurdzija.homeshelf.ui.review
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
 import com.jugurdzija.homeshelf.data.ShoppingListRepository
 import com.jugurdzija.homeshelf.data.StorageRepository

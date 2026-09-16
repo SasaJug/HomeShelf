@@ -1,6 +1,6 @@
 package com.jugurdzija.homeshelf.pipeline
 
-import com.jugurdzija.homeshelf.data.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import org.json.JSONArray
 import org.json.JSONObject
 

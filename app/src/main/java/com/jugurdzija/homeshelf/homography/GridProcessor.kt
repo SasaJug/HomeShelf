@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.homography
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.GridCell
+import com.jugurdzija.homeshelf.domain.model.GridCell
 import javax.inject.Inject
 import javax.inject.Singleton
 

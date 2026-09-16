@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenStore
-import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel

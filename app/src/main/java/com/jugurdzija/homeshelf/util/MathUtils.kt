@@ -1,9 +1,9 @@
 package com.jugurdzija.homeshelf.util
 
 import android.graphics.RectF
-import com.jugurdzija.homeshelf.data.BoundingBox
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.llm.GeneratedGuideLine
 import kotlin.math.min
 import kotlin.math.sqrt

@@ -3,6 +3,10 @@ package com.jugurdzija.homeshelf.data
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.jugurdzija.homeshelf.di.DiConstants
+import com.jugurdzija.homeshelf.domain.model.GridCell
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json

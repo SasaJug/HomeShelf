@@ -2,10 +2,10 @@ package com.jugurdzija.homeshelf.ui.scan
 
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
-import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.ReferencePhotoData
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch

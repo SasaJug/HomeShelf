@@ -2,9 +2,9 @@ package com.jugurdzija.homeshelf.ui.edit
 
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
-import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.llm.GeneratedGuideLine
 import com.jugurdzija.homeshelf.llm.GridLineGenerator

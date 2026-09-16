@@ -1,9 +1,9 @@
 package com.jugurdzija.homeshelf.usecase
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
-import com.jugurdzija.homeshelf.data.ReferencePhotoData
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
 import com.jugurdzija.homeshelf.data.StorageRepository
 import com.jugurdzija.homeshelf.embedding.GridCellEmbedder
 import com.jugurdzija.homeshelf.homography.GridProcessor

@@ -1,4 +1,4 @@
-package com.jugurdzija.homeshelf.data
+package com.jugurdzija.homeshelf.domain.model
 
 import kotlinx.serialization.Serializable
 

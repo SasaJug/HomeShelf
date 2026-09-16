@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import androidx.core.graphics.createBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +150,7 @@ private fun ConfirmCaptureScreenContent(
     }
 }
 
-private val previewBitmap: Bitmap = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
+private val previewBitmap: Bitmap = createBitmap(4, 4)
 
 @Preview(showBackground = true)
 @Composable

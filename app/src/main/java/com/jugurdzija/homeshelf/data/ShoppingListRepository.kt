@@ -1,5 +1,7 @@
 package com.jugurdzija.homeshelf.data
 
+import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
+
 interface ShoppingListRepository {
     suspend fun loadAll(): List<ShoppingListItem>
     suspend fun add(name: String, storageId: String? = null): ShoppingListItem

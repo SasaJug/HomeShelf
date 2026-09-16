@@ -1,8 +1,8 @@
 package com.jugurdzija.homeshelf.usecase
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
 
 sealed interface StorageSaveResult {
     data class Done(val storageId: String, val cellCount: Int) : StorageSaveResult

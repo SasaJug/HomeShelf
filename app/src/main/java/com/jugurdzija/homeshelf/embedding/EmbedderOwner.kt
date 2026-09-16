@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.embedding
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.util.ImageEmbedderHelper
 import kotlinx.coroutines.flow.SharedFlow
 

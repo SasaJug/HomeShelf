@@ -4,10 +4,10 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.OnboardingPreferences
-import com.jugurdzija.homeshelf.data.StorageItem
-import com.jugurdzija.homeshelf.data.StorageListEntry
+import com.jugurdzija.homeshelf.domain.model.StorageItem
+import com.jugurdzija.homeshelf.domain.model.StorageListEntry
 import com.jugurdzija.homeshelf.data.StorageRepository
-import com.jugurdzija.homeshelf.data.calculateCompleteness
+import com.jugurdzija.homeshelf.domain.model.calculateCompleteness
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
