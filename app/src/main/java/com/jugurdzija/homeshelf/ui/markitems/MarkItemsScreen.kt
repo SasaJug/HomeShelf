@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -121,6 +123,7 @@ fun MarkItemsScreen(
         onUpdateTransparent = vm::updateTransparent,
         onConfirmSelection = vm::confirmSelection,
         onDeleteItem = vm::deleteItem,
+        onSave = vm::save,
         onRunAiDetection = vm::runAiDetection,
         onStartVoiceInput = vm::startVoiceInput,
         onStopVoiceInput = vm::stopVoiceInput,
@@ -146,6 +149,7 @@ private fun MarkItemsScreenContent(
     onUpdateTransparent: (String, Boolean) -> Unit,
     onConfirmSelection: () -> Unit,
     onDeleteItem: (String) -> Unit,
+    onSave: () -> Unit,
     onRunAiDetection: (canvasWidth: Int, canvasHeight: Int) -> Unit,
     onStartVoiceInput: () -> Unit,
     onStopVoiceInput: () -> Unit,
@@ -160,7 +164,11 @@ private fun MarkItemsScreenContent(
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
                 title = {
@@ -190,17 +198,21 @@ private fun MarkItemsScreenContent(
                         )
                         Text("Transparent", style = MaterialTheme.typography.bodySmall)
                         IconButton(onClick = onConfirmSelection) {
-                            Icon(Icons.Default.Check, contentDescription = "Save item")
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = "Save item",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                         IconButton(onClick = { onDeleteItem(selectedItem.id) }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete item",
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     } else {
-                        TextButton(
+                        IconButton(
                             onClick = { onRunAiDetection(canvasSize.width, canvasSize.height) },
                             enabled = bitmap != null && canvasSize != IntSize.Zero && !isDetecting
                         ) {
@@ -210,8 +222,19 @@ private fun MarkItemsScreenContent(
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("Auto Detect")
+                                Icon(
+                                    Icons.Default.AutoAwesome,
+                                    contentDescription = "Auto Detect",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
+                        }
+                        IconButton(onClick = onSave) {
+                            Icon(
+                                Icons.Default.Save,
+                                contentDescription = "Save",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }
@@ -495,6 +518,7 @@ private fun MarkItemsScreenLoadedPreview() {
             onUpdateTransparent = { _, _ -> },
             onConfirmSelection = {},
             onDeleteItem = {},
+            onSave = {},
             onRunAiDetection = { _, _ -> },
             onStartVoiceInput = {},
             onStopVoiceInput = {},
@@ -523,6 +547,7 @@ private fun MarkItemsScreenNoItemsPreview() {
             onUpdateTransparent = { _, _ -> },
             onConfirmSelection = {},
             onDeleteItem = {},
+            onSave = {},
             onRunAiDetection = { _, _ -> },
             onStartVoiceInput = {},
             onStopVoiceInput = {},
@@ -551,6 +576,7 @@ private fun MarkItemsScreenSelectedPreview() {
             onUpdateTransparent = { _, _ -> },
             onConfirmSelection = {},
             onDeleteItem = {},
+            onSave = {},
             onRunAiDetection = { _, _ -> },
             onStartVoiceInput = {},
             onStopVoiceInput = {},

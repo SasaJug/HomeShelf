@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -142,7 +144,11 @@ private fun EditScreenContent(
                 title = { Text("Edit Guidelines") },
                 navigationIcon = {
                     IconButton(onClick = onDiscard) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Discard")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Discard",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
                 actions = {
@@ -154,11 +160,17 @@ private fun EditScreenContent(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete line",
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
-                    TextButton(
+                    TextButton(onClick = { onAddGuideLine(false) }) {
+                        Text("+V", color = MaterialTheme.colorScheme.primary)
+                    }
+                    TextButton(onClick = { onAddGuideLine(true) }) {
+                        Text("+H", color = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(
                         onClick = { onGenerateGridLines(canvasSize.width, canvasSize.height) },
                         enabled = bitmap != null && canvasSize != IntSize.Zero && !isGenerating
                     ) {
@@ -168,15 +180,23 @@ private fun EditScreenContent(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("Auto Grid")
+                            Icon(
+                                Icons.Default.AutoAwesome,
+                                contentDescription = "Auto Grid",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
-                    TextButton(onClick = { onAddGuideLine(true) }) { Text("+H") }
-                    TextButton(onClick = { onAddGuideLine(false) }) { Text("+V") }
-                    TextButton(
+                    IconButton(
                         onClick = { onSave(canvasSize.width, canvasSize.height) },
                         enabled = saveEnabled
-                    ) { Text("Save") }
+                    ) {
+                        Icon(
+                            Icons.Default.Save,
+                            contentDescription = "Save",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             )
         }
