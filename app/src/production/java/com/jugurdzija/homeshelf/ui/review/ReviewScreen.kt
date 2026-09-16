@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -120,17 +122,40 @@ private fun ReviewScreenContent(
                 title = { Text(topBarTitle) },
                 navigationIcon = {
                     IconButton(onClick = onDiscard) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Discard")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Discard",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
                 actions = {
                     if (state is ReviewUiState.Done) {
-                        TextButton(
+                        IconButton(
                             onClick = onAnalyzeWithAi,
                             enabled = aiDiffState !is AiDiffState.Loading
-                        ) { Text("Analyze with AI") }
+                        ) {
+                            if (aiDiffState is AiDiffState.Loading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.width(16.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.AutoAwesome,
+                                    contentDescription = "Analyze with AI",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                         if (aiDiffState is AiDiffState.Done) {
-                            TextButton(onClick = onAddToShoppingList) { Text("Add to List") }
+                            IconButton(onClick = onAddToShoppingList) {
+                                Icon(
+                                    Icons.Default.AddShoppingCart,
+                                    contentDescription = "Add to List",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }

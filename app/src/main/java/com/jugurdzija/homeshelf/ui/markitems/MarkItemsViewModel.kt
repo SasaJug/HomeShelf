@@ -115,6 +115,14 @@ class MarkItemsViewModel @Inject constructor(
         persist()
     }
 
+    fun save() {
+        if (selectedId != null) {
+            confirmSelection()
+        } else {
+            persist()
+        }
+    }
+
     fun deleteItem(id: String) {
         markedItems.removeAll { it.id == id }
         if (selectedId == id) selectedId = null
