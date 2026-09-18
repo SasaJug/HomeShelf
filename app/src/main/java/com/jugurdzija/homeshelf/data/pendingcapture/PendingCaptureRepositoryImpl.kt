@@ -1,4 +1,4 @@
-package com.jugurdzija.homeshelf.data
+package com.jugurdzija.homeshelf.data.pendingcapture
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -12,9 +12,9 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-class PendingCaptureStoreImpl @Inject constructor(
+class PendingCaptureRepositoryImpl @Inject constructor(
     @Named(DiConstants.NAMED_STORAGE_ROOT) private val storageRoot: File
-) : PendingCaptureStore {
+) : PendingCaptureRepository {
 
     private companion object {
         const val DIR_PENDING = "pending"

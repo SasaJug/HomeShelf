@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,13 +54,13 @@ class ReferenceDetailViewModel @Inject constructor(
 
     private fun load() {
         viewModelScope.launch {
-            val item = storageRepository.loadAll().firstOrNull { it.id == storageId }
-            val bitmap = storageRepository.decodeLatestBitmap(storageId)
+            val item = storageRepository.loadAllStorages().firstOrNull { it.id == storageId }
+            val bitmap = storageRepository.getStorageReferenceBitmap(storageId)
             _state.value = when {
                 item == null -> ReferenceDetailUiState.Error("Storage not found")
                 bitmap == null -> ReferenceDetailUiState.Error("No reference photo available")
                 else -> {
-                    val data = storageRepository.loadLatestData(storageId)
+                    val data = storageRepository.loadStorageReferenceData(storageId)
                     ReferenceDetailUiState.Loaded(
                         storageId = storageId,
                         storageName = item.name,
@@ -84,7 +84,7 @@ class ReferenceDetailViewModel @Inject constructor(
     fun confirmDelete() {
         _showDeleteConfirmation.value = false
         viewModelScope.launch {
-            storageRepository.delete(storageId)
+            storageRepository.deleteStorage(storageId)
             _navEvent.emit(ReferenceDetailNavEvent.Deleted)
         }
     }
@@ -95,7 +95,7 @@ class ReferenceDetailViewModel @Inject constructor(
         val trimmed = newName.trim()
         if (trimmed.isBlank() || trimmed == current.storageName) return
         viewModelScope.launch {
-            storageRepository.rename(storageId, trimmed)
+            storageRepository.renameStorage(storageId, trimmed)
             _state.value = current.copy(storageName = trimmed)
         }
     }

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,8 +42,8 @@ class GoldenCaptureViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            referenceLabel = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-            val data = storageRepository.loadLatestData(storageId)
+            referenceLabel = storageRepository.loadAllStorages().firstOrNull { it.id == storageId }?.name ?: ""
+            val data = storageRepository.loadStorageReferenceData(storageId)
             val hasGuideLines = data.guideLines.size >= 4
             val hasMarkedItems = data.markedItems.isNotEmpty()
             _guideLineState.value = when {

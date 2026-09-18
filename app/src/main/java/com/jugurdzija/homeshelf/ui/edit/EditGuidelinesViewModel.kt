@@ -9,8 +9,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.llm.GridLineGenerator
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
@@ -38,7 +38,7 @@ sealed interface GridGenerateResult {
 @HiltViewModel
 class EditGuidelinesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val pendingCaptureStore: PendingCaptureStore,
+    private val pendingCaptureRepository: PendingCaptureRepository,
     private val storageRepository: StorageRepository,
     private val storageSavePipeline: StorageSavePipeline,
     private val gridLineGenerator: GridLineGenerator
@@ -65,10 +65,10 @@ class EditGuidelinesViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _bitmapState.value = pendingCaptureStore.load() ?: storageRepository.decodeLatestBitmap(storageId)
+            _bitmapState.value = pendingCaptureRepository.load() ?: storageRepository.getStorageReferenceBitmap(storageId)
         }
         viewModelScope.launch {
-            val loaded = storageRepository.loadLatestData(storageId).guideLines
+            val loaded = storageRepository.loadStorageReferenceData(storageId).guideLines
             guideLines.addAll(loaded)
             nextId = (loaded.maxOfOrNull { it.id } ?: -1) + 1
         }
@@ -82,7 +82,7 @@ class EditGuidelinesViewModel @Inject constructor(
             )
             when (result) {
                 is StorageSaveResult.Done -> {
-                    pendingCaptureStore.clear()
+                    pendingCaptureRepository.clear()
                     _navEvent.emit(EditNavEvent.Saved)
                 }
                 is StorageSaveResult.Error -> {
@@ -124,7 +124,7 @@ class EditGuidelinesViewModel @Inject constructor(
 
     fun discard() {
         viewModelScope.launch {
-            pendingCaptureStore.clear()
+            pendingCaptureRepository.clear()
             _navEvent.emit(EditNavEvent.Discarded)
         }
     }

@@ -3,10 +3,10 @@ package com.jugurdzija.homeshelf.ui.scan
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
 import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
 import com.jugurdzija.homeshelf.domain.model.StorageItem
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch
 import com.jugurdzija.homeshelf.ui.nav.Routes
@@ -38,7 +38,7 @@ class ScanViewModelTest {
 
     private lateinit var storageRepository: StorageRepository
     private lateinit var embedder: EmbedderOwner
-    private lateinit var pendingCaptureStore: PendingCaptureStore
+    private lateinit var pendingCaptureRepository: PendingCaptureRepository
     private lateinit var errorsFlow: MutableSharedFlow<String>
     private lateinit var bitmap: Bitmap
 
@@ -47,14 +47,14 @@ class ScanViewModelTest {
         Dispatchers.setMain(testDispatcher)
         storageRepository = mockk()
         embedder = mockk()
-        pendingCaptureStore = mockk()
+        pendingCaptureRepository = mockk()
         errorsFlow = MutableSharedFlow(extraBufferCapacity = 1)
         bitmap = mockk(relaxed = true)
 
-        coEvery { storageRepository.loadAll() } returns emptyList()
-        coEvery { storageRepository.decodeLatestBitmap(any(), any()) } returns null
-        coEvery { storageRepository.loadLatestData(any()) } returns ReferencePhotoData()
-        coEvery { pendingCaptureStore.save(any()) } just Runs
+        coEvery { storageRepository.loadAllStorages() } returns emptyList()
+        coEvery { storageRepository.getStorageReferenceBitmap(any()) } returns null
+        coEvery { storageRepository.loadStorageReferenceData(any()) } returns ReferencePhotoData()
+        coEvery { pendingCaptureRepository.save(any()) } just Runs
         every { embedder.errors } returns errorsFlow
     }
 
@@ -70,7 +70,7 @@ class ScanViewModelTest {
                 if (rescan) put(Routes.ARG_MODE, Routes.MODE_RESCAN)
             }
         )
-        val viewModel = ScanViewModel(savedStateHandle, storageRepository, embedder, pendingCaptureStore)
+        val viewModel = ScanViewModel(savedStateHandle, storageRepository, embedder, pendingCaptureRepository)
         testDispatcher.scheduler.advanceUntilIdle()
         return viewModel
     }
@@ -78,8 +78,8 @@ class ScanViewModelTest {
     @Test
     fun `init with no pinned storage loads reference bitmaps and reflects an empty Streaming state`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) } returns bitmap
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.getStorageReferenceBitmap(STORAGE_ID) } returns bitmap
 
         val viewModel = createViewModel()
 
@@ -90,9 +90,9 @@ class ScanViewModelTest {
     fun `init with no pinned storage drops storages that have no bitmap`() = runTest(testDispatcher) {
         val withBitmap = StorageItem(id = "with-bitmap", name = "Fridge", createdAt = 0L, updatedAt = 0L)
         val withoutBitmap = StorageItem(id = "without-bitmap", name = "Pantry", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAll() } returns listOf(withBitmap, withoutBitmap)
-        coEvery { storageRepository.decodeLatestBitmap("with-bitmap", any()) } returns bitmap
-        coEvery { storageRepository.decodeLatestBitmap("without-bitmap", any()) } returns null
+        coEvery { storageRepository.loadAllStorages() } returns listOf(withBitmap, withoutBitmap)
+        coEvery { storageRepository.getStorageReferenceBitmap("with-bitmap") } returns bitmap
+        coEvery { storageRepository.getStorageReferenceBitmap("without-bitmap") } returns null
         coEvery { embedder.embedAll(any(), any(), any()) } returns emptyList()
 
         val viewModel = createViewModel()
@@ -106,8 +106,8 @@ class ScanViewModelTest {
     fun `init with a pinned storage loads its name and cached guide lines`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
         val guideLine = GuideLine(id = 1, isHorizontal = true, position = 0.5f)
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.loadLatestData(STORAGE_ID) } returns ReferencePhotoData(guideLines = listOf(guideLine))
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.loadStorageReferenceData(STORAGE_ID) } returns ReferencePhotoData(guideLines = listOf(guideLine))
 
         val viewModel = createViewModel(pinnedStorageId = STORAGE_ID)
 
@@ -118,7 +118,7 @@ class ScanViewModelTest {
     fun `onFrameReceived is ignored while the initial state is still Loading`() = runTest(testDispatcher) {
         val savedStateHandle = SavedStateHandle()
         coEvery { embedder.embedAll(any(), any(), any()) } returns emptyList()
-        val viewModel = ScanViewModel(savedStateHandle, storageRepository, embedder, pendingCaptureStore)
+        val viewModel = ScanViewModel(savedStateHandle, storageRepository, embedder, pendingCaptureRepository)
 
         viewModel.onFrameReceived(bitmap)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -129,7 +129,7 @@ class ScanViewModelTest {
     @Test
     fun `onFrameReceived is ignored when a storage is pinned`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAll() } returns listOf(item)
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
         val viewModel = createViewModel(pinnedStorageId = STORAGE_ID)
 
         viewModel.onFrameReceived(bitmap)
@@ -143,9 +143,9 @@ class ScanViewModelTest {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
         val guideLine = GuideLine(id = 1, isHorizontal = true, position = 0.5f)
         val matches = listOf(ReferenceMatch(item, similarity = 0.9, inferenceMs = 10))
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) } returns bitmap
-        coEvery { storageRepository.loadLatestData(STORAGE_ID) } returns ReferencePhotoData(guideLines = listOf(guideLine))
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.getStorageReferenceBitmap(STORAGE_ID) } returns bitmap
+        coEvery { storageRepository.loadStorageReferenceData(STORAGE_ID) } returns ReferencePhotoData(guideLines = listOf(guideLine))
         coEvery { embedder.embedAll(any(), any(), any()) } returns matches
         val viewModel = createViewModel()
 
@@ -159,8 +159,8 @@ class ScanViewModelTest {
     fun `onFrameReceived clears the detected storage when the best match is below the threshold`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
         val matches = listOf(ReferenceMatch(item, similarity = 0.3, inferenceMs = 10))
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) } returns bitmap
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.getStorageReferenceBitmap(STORAGE_ID) } returns bitmap
         coEvery { embedder.embedAll(any(), any(), any()) } returns matches
         val viewModel = createViewModel()
 
@@ -184,8 +184,8 @@ class ScanViewModelTest {
     @Test
     fun `onFrameReceived ignores concurrent calls while inference is already in flight`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) } returns bitmap
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.getStorageReferenceBitmap(STORAGE_ID) } returns bitmap
         coEvery { embedder.embedAll(any(), any(), any()) } returns emptyList()
         val viewModel = createViewModel()
 
@@ -199,7 +199,7 @@ class ScanViewModelTest {
     @Test
     fun `onCaptureBitmap navigates to confirm for a rescan of a pinned storage`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAll() } returns listOf(item)
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
         val viewModel = createViewModel(pinnedStorageId = STORAGE_ID, rescan = true)
         val events = mutableListOf<ScanNavEvent>()
         val job = launch { viewModel.navEvent.collect { events.add(it) } }
@@ -208,14 +208,14 @@ class ScanViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(listOf(ScanNavEvent.ToConfirm(STORAGE_ID)), events)
-        coVerify { pendingCaptureStore.save(bitmap) }
+        coVerify { pendingCaptureRepository.save(bitmap) }
         job.cancel()
     }
 
     @Test
     fun `onCaptureBitmap navigates to review for a pinned storage that is not a rescan`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAll() } returns listOf(item)
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
         val viewModel = createViewModel(pinnedStorageId = STORAGE_ID, rescan = false)
         val events = mutableListOf<ScanNavEvent>()
         val job = launch { viewModel.navEvent.collect { events.add(it) } }
@@ -231,8 +231,8 @@ class ScanViewModelTest {
     fun `onCaptureBitmap navigates to review for the detected storage when nothing is pinned`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
         val matches = listOf(ReferenceMatch(item, similarity = 0.9, inferenceMs = 10))
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) } returns bitmap
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.getStorageReferenceBitmap(STORAGE_ID) } returns bitmap
         coEvery { embedder.embedAll(any(), any(), any()) } returns matches
         val viewModel = createViewModel()
         viewModel.onFrameReceived(bitmap)
@@ -274,9 +274,9 @@ class ScanViewModelTest {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
         val guideLine = GuideLine(id = 1, isHorizontal = true, position = 0.5f)
         val matches = listOf(ReferenceMatch(item, similarity = 0.9, inferenceMs = 10))
-        coEvery { storageRepository.loadAll() } returns listOf(item)
-        coEvery { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) } returns bitmap
-        coEvery { storageRepository.loadLatestData(STORAGE_ID) } returns ReferencePhotoData(guideLines = listOf(guideLine))
+        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { storageRepository.getStorageReferenceBitmap(STORAGE_ID) } returns bitmap
+        coEvery { storageRepository.loadStorageReferenceData(STORAGE_ID) } returns ReferencePhotoData(guideLines = listOf(guideLine))
         coEvery { embedder.embedAll(any(), any(), any()) } returns matches
         val viewModel = createViewModel()
         viewModel.onFrameReceived(bitmap)

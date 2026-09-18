@@ -1,4 +1,4 @@
-package com.jugurdzija.homeshelf.data
+package com.jugurdzija.homeshelf.data.shoppinglist
 
 import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
 

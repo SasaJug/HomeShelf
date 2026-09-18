@@ -1,9 +1,8 @@
-package com.jugurdzija.homeshelf.data
+package com.jugurdzija.homeshelf.data.storage
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.jugurdzija.homeshelf.di.DiConstants
-import com.jugurdzija.homeshelf.domain.model.GridCell
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
 import com.jugurdzija.homeshelf.domain.model.StorageItem
@@ -24,12 +23,12 @@ class StorageRepositoryImpl @Inject constructor(
 
     private companion object {
         const val DIR_STORAGES = "storages"
-        const val DIR_LATEST = "latest"
-        const val DIR_HISTORY = "history"
-        const val DIR_CELLS = "cells"
+        const val DIR_REFERENCE = "latest"
         const val FILE_META = "meta.json"
         const val FILE_PHOTO = "photo.jpg"
         const val FILE_DATA = "data.json"
+        const val SAMPLE_SIZE_FULL = 1
+        const val SAMPLE_SIZE_THUMBNAIL = 4
     }
 
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
@@ -41,17 +40,7 @@ class StorageRepositoryImpl @Inject constructor(
 
     private fun metaFile(id: String): File = File(storageDir(id), FILE_META)
 
-    private fun latestDir(id: String): File = File(storageDir(id), DIR_LATEST)
-
-    private fun historyDir(id: String): File = File(storageDir(id), DIR_HISTORY)
-
-    override suspend fun loadAll(): List<StorageItem> = withContext(Dispatchers.IO) {
-        storagesDir()
-            .listFiles { f -> f.isDirectory }
-            ?.mapNotNull { dir -> readMeta(File(dir, FILE_META)) }
-            ?.sortedByDescending { it.updatedAt }
-            ?: emptyList()
-    }
+    private fun referenceDir(id: String): File = File(storageDir(id), DIR_REFERENCE)
 
     private fun readMeta(file: File): StorageItem? {
         if (!file.exists()) return null
@@ -62,8 +51,8 @@ class StorageRepositoryImpl @Inject constructor(
         metaFile(item.id).writeText(json.encodeToString(StorageItem.serializer(), item))
     }
 
-    override suspend fun decodeLatestBitmap(id: String, sampleSize: Int): Bitmap? = withContext(Dispatchers.IO) {
-        val file = File(latestDir(id), FILE_PHOTO)
+    private suspend fun getAndDecodeReferencePhoto(id: String, sampleSize: Int): Bitmap? = withContext(Dispatchers.IO) {
+        val file = File(referenceDir(id), FILE_PHOTO)
         if (!file.exists()) return@withContext null
         BitmapFactory.decodeFile(
             file.absolutePath,
@@ -74,48 +63,47 @@ class StorageRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun loadLatestData(id: String): ReferencePhotoData = withContext(Dispatchers.IO) {
-        val file = File(latestDir(id), FILE_DATA)
+    override suspend fun loadAllStorages(): List<StorageItem> = withContext(Dispatchers.IO) {
+        storagesDir()
+            .listFiles { f -> f.isDirectory }
+            ?.mapNotNull { dir -> readMeta(File(dir, FILE_META)) }
+            ?.sortedByDescending { it.updatedAt }
+            ?: emptyList()
+    }
+
+    override suspend fun getStorageReferenceBitmap(id: String): Bitmap? =
+        getAndDecodeReferencePhoto(id, SAMPLE_SIZE_FULL)
+
+    override suspend fun getStorageReferenceThumbnail(id: String): Bitmap? =
+        getAndDecodeReferencePhoto(id, SAMPLE_SIZE_THUMBNAIL)
+
+
+    override suspend fun loadStorageReferenceData(id: String): ReferencePhotoData = withContext(Dispatchers.IO) {
+        val file = File(referenceDir(id), FILE_DATA)
         if (!file.exists()) return@withContext ReferencePhotoData()
         json.decodeFromString(ReferencePhotoData.serializer(), file.readText())
     }
 
-    override suspend fun createNew(name: String): StorageItem = withContext(Dispatchers.IO) {
+    override suspend fun createStorage(name: String): StorageItem = withContext(Dispatchers.IO) {
         val id = UUID.randomUUID().toString()
-        latestDir(id).mkdirs()
-        historyDir(id).mkdirs()
+        referenceDir(id).mkdirs()
         val now = System.currentTimeMillis()
         val item = StorageItem(id = id, name = name, createdAt = now, updatedAt = now)
         writeMeta(item)
         item
     }
 
-    override suspend fun saveLatest(
+    override suspend fun saveStorageReference(
         id: String,
         bitmap: Bitmap,
-        data: ReferencePhotoData,
-        cells: List<GridCell>
+        data: ReferencePhotoData
     ) = withContext(Dispatchers.IO) {
-        val latest = latestDir(id)
-        if (File(latest, FILE_PHOTO).exists()) {
-            val target = File(historyDir(id), System.currentTimeMillis().toString())
-            latest.renameTo(target)
-            latest.mkdirs()
-        }
+        val reference = referenceDir(id).apply { mkdirs() }
 
-        FileOutputStream(File(latest, FILE_PHOTO)).use { out ->
+        FileOutputStream(File(reference, FILE_PHOTO)).use { out ->
             bitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
         }
-        File(latest, FILE_DATA).writeText(json.encodeToString(ReferencePhotoData.serializer(), data))
-
-        if (cells.isNotEmpty()) {
-            val cellsDir = File(latest, DIR_CELLS).apply { mkdirs() }
-            cells.forEach { cell ->
-                FileOutputStream(File(cellsDir, "${cell.name}.jpg")).use { out ->
-                    cell.bitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
-                }
-            }
-        }
+        File(reference, FILE_DATA).writeText(json.encodeToString(ReferencePhotoData.serializer(), data))
 
         val meta = readMeta(metaFile(id))
         if (meta != null) {
@@ -123,29 +111,24 @@ class StorageRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveMarkedItems(id: String, items: List<MarkedItem>) = withContext(Dispatchers.IO) {
-        val current = loadLatestData(id)
+    override suspend fun saveStorageReferenceMarkedItems(id: String, items: List<MarkedItem>) = withContext(Dispatchers.IO) {
+        val current = loadStorageReferenceData(id)
         val updated = current.copy(markedItems = items)
-        File(latestDir(id), FILE_DATA).writeText(json.encodeToString(ReferencePhotoData.serializer(), updated))
+        File(referenceDir(id), FILE_DATA).writeText(json.encodeToString(ReferencePhotoData.serializer(), updated))
         val meta = readMeta(metaFile(id))
         if (meta != null) {
             writeMeta(meta.copy(updatedAt = System.currentTimeMillis()))
         }
     }
 
-    override suspend fun rename(id: String, name: String) = withContext(Dispatchers.IO) {
+    override suspend fun renameStorage(id: String, name: String) = withContext(Dispatchers.IO) {
         val meta = readMeta(metaFile(id))
         if (meta != null) {
             writeMeta(meta.copy(name = name, updatedAt = System.currentTimeMillis()))
         }
     }
 
-    override suspend fun getLatestPhotoFile(id: String): File? = withContext(Dispatchers.IO) {
-        val file = File(latestDir(id), FILE_PHOTO)
-        if (file.exists()) file else null
-    }
-
-    override suspend fun delete(id: String) = withContext(Dispatchers.IO) {
+    override suspend fun deleteStorage(id: String) = withContext(Dispatchers.IO) {
         storageDir(id).deleteRecursively()
         Unit
     }

@@ -2,7 +2,7 @@ package com.jugurdzija.homeshelf.ui.shoppinglist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
+import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepository
 import com.jugurdzija.homeshelf.stt.AudioRecorder
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
 import com.jugurdzija.homeshelf.stt.VoiceInputState

@@ -7,7 +7,7 @@ import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
 import com.jugurdzija.homeshelf.domain.model.StorageItem
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.llm.DetectedItem
 import com.jugurdzija.homeshelf.llm.ItemDetector
 import com.jugurdzija.homeshelf.stt.AudioRecorder
@@ -56,12 +56,12 @@ class MarkItemsViewModelTest {
         mockkStatic(Bitmap::class)
         every { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) } returns bitmap
 
-        coEvery { storageRepository.loadAll() } returns listOf(
+        coEvery { storageRepository.loadAllStorages() } returns listOf(
             StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
         )
-        coEvery { storageRepository.decodeLatestBitmap(any(), any()) } returns bitmap
-        coEvery { storageRepository.loadLatestData(any()) } returns ReferencePhotoData()
-        coEvery { storageRepository.saveMarkedItems(any(), any()) } just Runs
+        coEvery { storageRepository.getStorageReferenceBitmap(any()) } returns bitmap
+        coEvery { storageRepository.loadStorageReferenceData(any()) } returns ReferencePhotoData()
+        coEvery { storageRepository.saveStorageReferenceMarkedItems(any(), any()) } just Runs
     }
 
     @After
@@ -83,7 +83,7 @@ class MarkItemsViewModelTest {
     fun `init loads storage name and reference data`() = runTest(testDispatcher) {
         val guideLine = GuideLine(id = 1, isHorizontal = true, position = 0.5f)
         val markedItem = MarkedItem(id = "existing", name = "Rice", boundingBox = BoundingBox(0f, 0f, 0.1f, 0.1f))
-        coEvery { storageRepository.loadLatestData(STORAGE_ID) } returns ReferencePhotoData(
+        coEvery { storageRepository.loadStorageReferenceData(STORAGE_ID) } returns ReferencePhotoData(
             guideLines = listOf(guideLine),
             markedItems = listOf(markedItem)
         )
@@ -177,7 +177,7 @@ class MarkItemsViewModelTest {
         assertEquals(1, viewModel.markedItems.size)
         assertEquals("Rice", viewModel.markedItems.first().name)
         assertNull(viewModel.selectedId)
-        coVerify { storageRepository.saveMarkedItems(STORAGE_ID, viewModel.markedItems.toList()) }
+        coVerify { storageRepository.saveStorageReferenceMarkedItems(STORAGE_ID, viewModel.markedItems.toList()) }
     }
 
     @Test
@@ -191,7 +191,7 @@ class MarkItemsViewModelTest {
 
         assertTrue(viewModel.markedItems.isEmpty())
         assertNull(viewModel.selectedId)
-        coVerify { storageRepository.saveMarkedItems(STORAGE_ID, emptyList()) }
+        coVerify { storageRepository.saveStorageReferenceMarkedItems(STORAGE_ID, emptyList()) }
     }
 
     @Test
@@ -211,7 +211,7 @@ class MarkItemsViewModelTest {
         assertEquals(1, viewModel.markedItems.size)
         assertEquals("Rice", viewModel.markedItems.first().name)
         assertNull(viewModel.detectState.value)
-        coVerify { storageRepository.saveMarkedItems(STORAGE_ID, viewModel.markedItems.toList()) }
+        coVerify { storageRepository.saveStorageReferenceMarkedItems(STORAGE_ID, viewModel.markedItems.toList()) }
     }
 
     @Test

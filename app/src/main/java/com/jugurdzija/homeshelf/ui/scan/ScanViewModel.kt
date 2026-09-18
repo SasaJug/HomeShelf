@@ -5,9 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
 import com.jugurdzija.homeshelf.domain.model.StorageItem
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import com.jugurdzija.homeshelf.ui.nav.Routes
@@ -31,7 +31,7 @@ class ScanViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val storageRepository: StorageRepository,
     private val embedder: EmbedderOwner,
-    private val pendingCaptureStore: PendingCaptureStore
+    private val pendingCaptureRepository: PendingCaptureRepository
 ) : ViewModel() {
 
     private val pinnedStorageId: String? = savedStateHandle.get<String>(Routes.ARG_STORAGE_ID)?.takeIf { it.isNotEmpty() }
@@ -51,15 +51,15 @@ class ScanViewModel @Inject constructor(
         val pinnedId = pinnedStorageId
         if (pinnedId != null) {
             viewModelScope.launch {
-                val item = storageRepository.loadAll().firstOrNull { it.id == pinnedId }
+                val item = storageRepository.loadAllStorages().firstOrNull { it.id == pinnedId }
                 val guideLines = loadGuideLinesCached(pinnedId)
                 _state.value = ScanUiState.Streaming(detected = item, guideLines = guideLines)
             }
         } else {
             viewModelScope.launch {
-                val items = storageRepository.loadAll()
+                val items = storageRepository.loadAllStorages()
                 storagesWithBitmaps = items.mapNotNull { item ->
-                    storageRepository.decodeLatestBitmap(item.id)?.let { item to it }
+                    storageRepository.getStorageReferenceBitmap(item.id)?.let { item to it }
                 }
                 _state.value = ScanUiState.Streaming()
             }
@@ -106,7 +106,7 @@ class ScanViewModel @Inject constructor(
     private suspend fun loadGuideLinesCached(storageId: String): List<GuideLine> {
         val cached = cachedGuideLines
         if (cached != null && cached.first == storageId) return cached.second
-        val lines = storageRepository.loadLatestData(storageId).guideLines
+        val lines = storageRepository.loadStorageReferenceData(storageId).guideLines
         cachedGuideLines = storageId to lines
         return lines
     }
@@ -115,7 +115,7 @@ class ScanViewModel @Inject constructor(
         val pinnedId = pinnedStorageId
         val detected = (_state.value as? ScanUiState.Streaming)?.detected
         viewModelScope.launch {
-            pendingCaptureStore.save(bitmap)
+            pendingCaptureRepository.save(bitmap)
             when {
                 pinnedId != null && isRescan -> _navEvent.emit(ScanNavEvent.ToConfirm(pinnedId))
                 pinnedId != null -> _navEvent.emit(ScanNavEvent.ToReview(pinnedId))

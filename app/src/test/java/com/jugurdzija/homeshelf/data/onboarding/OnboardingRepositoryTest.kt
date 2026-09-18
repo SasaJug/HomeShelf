@@ -1,4 +1,4 @@
-package com.jugurdzija.homeshelf.data
+package com.jugurdzija.homeshelf.data.onboarding
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -10,11 +10,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class OnboardingPreferencesTest {
+class OnboardingRepositoryTest {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
-    private lateinit var onboardingPreferences: OnboardingPreferencesImpl
+    private lateinit var onboardingRepository: OnboardingRepositoryImpl
 
     @Before
     fun setUp() {
@@ -26,26 +26,26 @@ class OnboardingPreferencesTest {
         val context = mockk<Context>()
         every { context.getSharedPreferences(any(), any()) } returns prefs
 
-        onboardingPreferences = OnboardingPreferencesImpl(context)
+        onboardingRepository = OnboardingRepositoryImpl(context)
     }
 
     @Test
     fun `hasSeenIntro defaults to false when nothing persisted`() {
         every { prefs.getBoolean(any(), false) } returns false
 
-        assertFalse(onboardingPreferences.hasSeenIntro())
+        assertFalse(onboardingRepository.hasSeenIntro())
     }
 
     @Test
     fun `hasSeenIntro returns a persisted true value`() {
         every { prefs.getBoolean(any(), false) } returns true
 
-        assertTrue(onboardingPreferences.hasSeenIntro())
+        assertTrue(onboardingRepository.hasSeenIntro())
     }
 
     @Test
     fun `markIntroSeen persists true`() {
-        onboardingPreferences.markIntroSeen()
+        onboardingRepository.markIntroSeen()
 
         verify { editor.putBoolean(any(), true) }
     }

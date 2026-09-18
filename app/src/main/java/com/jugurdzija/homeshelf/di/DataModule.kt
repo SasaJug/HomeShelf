@@ -1,15 +1,13 @@
 package com.jugurdzija.homeshelf.di
 
-import com.jugurdzija.homeshelf.data.GridCellStore
-import com.jugurdzija.homeshelf.data.GridCellStoreImpl
-import com.jugurdzija.homeshelf.data.OnboardingPreferences
-import com.jugurdzija.homeshelf.data.OnboardingPreferencesImpl
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.PendingCaptureStoreImpl
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
-import com.jugurdzija.homeshelf.data.ShoppingListRepositoryImpl
-import com.jugurdzija.homeshelf.data.StorageRepository
-import com.jugurdzija.homeshelf.data.StorageRepositoryImpl
+import com.jugurdzija.homeshelf.data.onboarding.OnboardingRepository
+import com.jugurdzija.homeshelf.data.onboarding.OnboardingRepositoryImpl
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepositoryImpl
+import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepository
+import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepositoryImpl
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepositoryImpl
 import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
 import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
@@ -26,15 +24,11 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindGridCellStore(impl: GridCellStoreImpl): GridCellStore
-
-    @Binds
-    @Singleton
     abstract fun bindComparisonPipeline(impl: ComparisonPipelineImpl): ComparisonPipeline
 
     @Binds
     @Singleton
-    abstract fun bindStorageStore(impl: StorageRepositoryImpl): StorageRepository
+    abstract fun bindStorageRepository(impl: StorageRepositoryImpl): StorageRepository
 
     @Binds
     @Singleton
@@ -42,7 +36,7 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindPendingCaptureStore(impl: PendingCaptureStoreImpl): PendingCaptureStore
+    abstract fun bindPendingCaptureRepository(impl: PendingCaptureRepositoryImpl): PendingCaptureRepository
 
     @Binds
     @Singleton
@@ -50,5 +44,5 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindOnboardingPreferences(impl: OnboardingPreferencesImpl): OnboardingPreferences
+    abstract fun bindOnboardingRepository(impl: OnboardingRepositoryImpl): OnboardingRepository
 }

@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
+import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.llm.CellPair
 import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.llm.KnownItem
@@ -33,7 +33,7 @@ sealed interface ReviewNavEvent {
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val pendingCaptureStore: PendingCaptureStore,
+    private val pendingCaptureRepository: PendingCaptureRepository,
     private val storageRepository: StorageRepository,
     private val comparisonPipeline: ComparisonPipeline,
     private val shelfDiffAnalyzer: ShelfDiffAnalyzer,
@@ -56,8 +56,8 @@ class ReviewViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val storageName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-            val pending = pendingCaptureStore.load()
+            val storageName = storageRepository.loadAllStorages().firstOrNull { it.id == storageId }?.name ?: ""
+            val pending = pendingCaptureRepository.load()
             if (pending == null) {
                 _state.value = ReviewUiState.CompareError(storageName, "No captured image found")
                 return@launch
@@ -140,7 +140,7 @@ class ReviewViewModel @Inject constructor(
 
     fun discard() {
         viewModelScope.launch {
-            pendingCaptureStore.clear()
+            pendingCaptureRepository.clear()
             _navEvent.emit(ReviewNavEvent.ToReference)
         }
     }

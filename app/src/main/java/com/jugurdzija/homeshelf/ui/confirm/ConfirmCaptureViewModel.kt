@@ -7,8 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
@@ -29,7 +29,7 @@ sealed interface ConfirmCaptureNavEvent {
 @HiltViewModel
 class ConfirmCaptureViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val pendingCaptureStore: PendingCaptureStore,
+    private val pendingCaptureRepository: PendingCaptureRepository,
     private val storageRepository: StorageRepository,
     private val storageSavePipeline: StorageSavePipeline
 ) : ViewModel() {
@@ -53,11 +53,11 @@ class ConfirmCaptureViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _bitmapState.value = pendingCaptureStore.load()
+            _bitmapState.value = pendingCaptureRepository.load()
         }
         if (storageId != null) {
             viewModelScope.launch {
-                _existingName.value = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name
+                _existingName.value = storageRepository.loadAllStorages().firstOrNull { it.id == storageId }?.name
             }
         }
     }
@@ -78,7 +78,7 @@ class ConfirmCaptureViewModel @Inject constructor(
             )
             when (result) {
                 is StorageSaveResult.Done -> {
-                    pendingCaptureStore.clear()
+                    pendingCaptureRepository.clear()
                     _navEvent.emit(ConfirmCaptureNavEvent.Saved(result.storageId))
                 }
                 is StorageSaveResult.Error -> {
@@ -94,7 +94,7 @@ class ConfirmCaptureViewModel @Inject constructor(
 
     fun discard() {
         viewModelScope.launch {
-            pendingCaptureStore.clear()
+            pendingCaptureRepository.clear()
             _navEvent.emit(ConfirmCaptureNavEvent.Discarded)
         }
     }

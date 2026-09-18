@@ -3,9 +3,9 @@ package com.jugurdzija.homeshelf.ui.edit
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
+import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
 import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.llm.GeneratedGuideLine
 import com.jugurdzija.homeshelf.llm.GridLineGenerator
 import com.jugurdzija.homeshelf.ui.nav.Routes
@@ -37,7 +37,7 @@ class EditGuidelinesViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    private lateinit var pendingCaptureStore: PendingCaptureStore
+    private lateinit var pendingCaptureRepository: PendingCaptureRepository
     private lateinit var storageRepository: StorageRepository
     private lateinit var storageSavePipeline: StorageSavePipeline
     private lateinit var gridLineGenerator: GridLineGenerator
@@ -46,7 +46,7 @@ class EditGuidelinesViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        pendingCaptureStore = mockk()
+        pendingCaptureRepository = mockk()
         storageRepository = mockk()
         storageSavePipeline = mockk()
         gridLineGenerator = mockk()
@@ -54,10 +54,10 @@ class EditGuidelinesViewModelTest {
         every { bitmap.width } returns 100
         every { bitmap.height } returns 100
 
-        coEvery { pendingCaptureStore.load() } returns null
-        coEvery { pendingCaptureStore.clear() } just Runs
-        coEvery { storageRepository.decodeLatestBitmap(any(), any()) } returns bitmap
-        coEvery { storageRepository.loadLatestData(any()) } returns ReferencePhotoData()
+        coEvery { pendingCaptureRepository.load() } returns null
+        coEvery { pendingCaptureRepository.clear() } just Runs
+        coEvery { storageRepository.getStorageReferenceBitmap(any()) } returns bitmap
+        coEvery { storageRepository.loadStorageReferenceData(any()) } returns ReferencePhotoData()
     }
 
     @After
@@ -68,7 +68,7 @@ class EditGuidelinesViewModelTest {
     private fun createViewModel(): EditGuidelinesViewModel {
         val savedStateHandle = SavedStateHandle(mapOf(Routes.ARG_STORAGE_ID to STORAGE_ID))
         val viewModel = EditGuidelinesViewModel(
-            savedStateHandle, pendingCaptureStore, storageRepository, storageSavePipeline, gridLineGenerator
+            savedStateHandle, pendingCaptureRepository, storageRepository, storageSavePipeline, gridLineGenerator
         )
         testDispatcher.scheduler.advanceUntilIdle()
         return viewModel
@@ -76,12 +76,12 @@ class EditGuidelinesViewModelTest {
 
     @Test
     fun `init uses the pending capture bitmap when one exists`() = runTest(testDispatcher) {
-        coEvery { pendingCaptureStore.load() } returns bitmap
+        coEvery { pendingCaptureRepository.load() } returns bitmap
 
         val viewModel = createViewModel()
 
         assertEquals(bitmap, viewModel.bitmapState.value)
-        coVerify(exactly = 0) { storageRepository.decodeLatestBitmap(any(), any()) }
+        coVerify(exactly = 0) { storageRepository.getStorageReferenceBitmap(any()) }
     }
 
     @Test
@@ -89,7 +89,7 @@ class EditGuidelinesViewModelTest {
         val viewModel = createViewModel()
 
         assertEquals(bitmap, viewModel.bitmapState.value)
-        coVerify { storageRepository.decodeLatestBitmap(STORAGE_ID, any()) }
+        coVerify { storageRepository.getStorageReferenceBitmap(STORAGE_ID) }
     }
 
     @Test
@@ -98,7 +98,7 @@ class EditGuidelinesViewModelTest {
             GuideLine(id = 2, isHorizontal = true, position = 0.5f),
             GuideLine(id = 5, isHorizontal = false, position = 0.25f)
         )
-        coEvery { storageRepository.loadLatestData(STORAGE_ID) } returns ReferencePhotoData(guideLines = lines)
+        coEvery { storageRepository.loadStorageReferenceData(STORAGE_ID) } returns ReferencePhotoData(guideLines = lines)
 
         val viewModel = createViewModel()
 
@@ -116,7 +116,7 @@ class EditGuidelinesViewModelTest {
 
     @Test
     fun `save does nothing without a bitmap`() = runTest(testDispatcher) {
-        coEvery { storageRepository.decodeLatestBitmap(any(), any()) } returns null
+        coEvery { storageRepository.getStorageReferenceBitmap(any()) } returns null
         val viewModel = createViewModel()
 
         viewModel.save(canvasWidth = 100, canvasHeight = 100)
@@ -139,7 +139,7 @@ class EditGuidelinesViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(listOf(EditNavEvent.Saved), events)
-        coVerify { pendingCaptureStore.clear() }
+        coVerify { pendingCaptureRepository.clear() }
         job.cancel()
     }
 
@@ -154,7 +154,7 @@ class EditGuidelinesViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(StorageSaveResult.Error("boom"), viewModel.saveState.value)
-        coVerify(exactly = 0) { pendingCaptureStore.clear() }
+        coVerify(exactly = 0) { pendingCaptureRepository.clear() }
     }
 
     @Test
@@ -173,7 +173,7 @@ class EditGuidelinesViewModelTest {
 
     @Test
     fun `generateGridLines replaces the current guide lines with the generated grid`() = runTest(testDispatcher) {
-        coEvery { storageRepository.loadLatestData(STORAGE_ID) } returns ReferencePhotoData(
+        coEvery { storageRepository.loadStorageReferenceData(STORAGE_ID) } returns ReferencePhotoData(
             guideLines = listOf(GuideLine(id = 0, isHorizontal = true, position = 0.1f))
         )
         val generated = listOf(
@@ -199,7 +199,7 @@ class EditGuidelinesViewModelTest {
 
     @Test
     fun `generateGridLines does nothing without a bitmap`() = runTest(testDispatcher) {
-        coEvery { storageRepository.decodeLatestBitmap(any(), any()) } returns null
+        coEvery { storageRepository.getStorageReferenceBitmap(any()) } returns null
         val viewModel = createViewModel()
 
         viewModel.generateGridLines(canvasWidth = 100, canvasHeight = 100)
@@ -242,7 +242,7 @@ class EditGuidelinesViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(listOf(EditNavEvent.Discarded), events)
-        coVerify { pendingCaptureStore.clear() }
+        coVerify { pendingCaptureRepository.clear() }
         job.cancel()
     }
 }

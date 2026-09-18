@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.di.DiConstants
 import com.jugurdzija.homeshelf.llm.CellPair
 import com.jugurdzija.homeshelf.llm.KnownItem
@@ -98,7 +98,7 @@ class ComparisonPipelineGoldenTest {
 
     private suspend fun GoldenItem.hasMarkedItems(): Boolean {
         val id = storageId ?: return false
-        return storageRepository.loadLatestData(id).markedItems.isNotEmpty()
+        return storageRepository.loadStorageReferenceData(id).markedItems.isNotEmpty()
     }
 
     private fun Throwable.describeForReport(): String =

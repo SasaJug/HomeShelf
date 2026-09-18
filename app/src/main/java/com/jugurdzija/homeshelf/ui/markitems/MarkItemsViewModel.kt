@@ -12,7 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.llm.ItemDetector
 import com.jugurdzija.homeshelf.stt.AudioRecorder
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
@@ -68,9 +68,9 @@ class MarkItemsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            storageName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-            _bitmapState.value = storageRepository.decodeLatestBitmap(storageId)
-            val data = storageRepository.loadLatestData(storageId)
+            storageName = storageRepository.loadAllStorages().firstOrNull { it.id == storageId }?.name ?: ""
+            _bitmapState.value = storageRepository.getStorageReferenceBitmap(storageId)
+            val data = storageRepository.loadStorageReferenceData(storageId)
             guideLines.addAll(data.guideLines)
             markedItems.addAll(data.markedItems)
         }
@@ -215,6 +215,6 @@ class MarkItemsViewModel @Inject constructor(
 
     private fun persist() {
         val snapshot = markedItems.toList()
-        viewModelScope.launch { storageRepository.saveMarkedItems(storageId, snapshot) }
+        viewModelScope.launch { storageRepository.saveStorageReferenceMarkedItems(storageId, snapshot) }
     }
 }

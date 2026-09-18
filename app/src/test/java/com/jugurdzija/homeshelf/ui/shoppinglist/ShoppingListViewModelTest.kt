@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.ui.shoppinglist
 
 import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
+import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepository
 import com.jugurdzija.homeshelf.stt.AudioRecorder
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
 import io.mockk.Runs
