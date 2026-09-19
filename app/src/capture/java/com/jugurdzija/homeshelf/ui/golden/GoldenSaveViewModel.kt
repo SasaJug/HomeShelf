@@ -7,7 +7,7 @@ import com.jugurdzija.homeshelf.data.CaptureData
 import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GroundTruthItem
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.data.storage.StorageRepository
+import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
 import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.util.resolveCellName
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +38,7 @@ data class NewAnnotationBox(
 @HiltViewModel
 class GoldenSaveViewModel @Inject constructor(
     private val goldenStore: GoldenStore,
-    private val storageRepository: StorageRepository
+    private val getStorageReferenceUseCase: GetStorageReferenceUseCase
 ) : ViewModel() {
 
     data class GoldenSaveUiState(
@@ -83,7 +83,7 @@ class GoldenSaveViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            val data = storageRepository.loadStorageReferenceData(id)
+            val data = getStorageReferenceUseCase.getData(id)
             _uiState.update {
                 it.copy(
                     guideLines = data.guideLines,

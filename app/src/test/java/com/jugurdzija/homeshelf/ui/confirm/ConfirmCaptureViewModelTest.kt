@@ -2,9 +2,9 @@ package com.jugurdzija.homeshelf.ui.confirm
 
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
-import com.jugurdzija.homeshelf.data.pendingcapture.PendingCaptureRepository
+import com.jugurdzija.homeshelf.domain.usecases.pendingcapture.PendingCaptureUseCase
 import com.jugurdzija.homeshelf.domain.model.StorageItem
-import com.jugurdzija.homeshelf.data.storage.StorageRepository
+import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
 import com.jugurdzija.homeshelf.usecase.StorageSaveResult
@@ -33,22 +33,22 @@ class ConfirmCaptureViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    private lateinit var pendingCaptureRepository: PendingCaptureRepository
-    private lateinit var storageRepository: StorageRepository
+    private lateinit var pendingCaptureUseCase: PendingCaptureUseCase
+    private lateinit var getStorageUseCase: GetStorageUseCase
     private lateinit var storageSavePipeline: StorageSavePipeline
     private lateinit var bitmap: Bitmap
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        pendingCaptureRepository = mockk()
-        storageRepository = mockk()
+        pendingCaptureUseCase = mockk()
+        getStorageUseCase = mockk()
         storageSavePipeline = mockk()
         bitmap = mockk(relaxed = true)
 
-        coEvery { pendingCaptureRepository.load() } returns bitmap
-        coEvery { pendingCaptureRepository.clear() } just Runs
-        coEvery { storageRepository.loadAllStorages() } returns emptyList()
+        coEvery { pendingCaptureUseCase.load() } returns bitmap
+        coEvery { pendingCaptureUseCase.clear() } just Runs
+        coEvery { getStorageUseCase.getStorage(any()) } returns null
     }
 
     @After
@@ -60,7 +60,7 @@ class ConfirmCaptureViewModelTest {
         val savedStateHandle = SavedStateHandle(
             buildMap { pinnedStorageId?.let { put(Routes.ARG_STORAGE_ID, it) } }
         )
-        val viewModel = ConfirmCaptureViewModel(savedStateHandle, pendingCaptureRepository, storageRepository, storageSavePipeline)
+        val viewModel = ConfirmCaptureViewModel(savedStateHandle, pendingCaptureUseCase, getStorageUseCase, storageSavePipeline)
         testDispatcher.scheduler.advanceUntilIdle()
         return viewModel
     }
@@ -76,7 +76,7 @@ class ConfirmCaptureViewModelTest {
     @Test
     fun `init with a pinned storage loads its existing name`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { getStorageUseCase.getStorage(STORAGE_ID) } returns item
 
         val viewModel = createViewModel(pinnedStorageId = STORAGE_ID)
 
@@ -86,7 +86,7 @@ class ConfirmCaptureViewModelTest {
 
     @Test
     fun `save does nothing when there is no bitmap yet`() = runTest(testDispatcher) {
-        coEvery { pendingCaptureRepository.load() } returns null
+        coEvery { pendingCaptureUseCase.load() } returns null
         val viewModel = createViewModel()
         viewModel.name = "Fridge"
 
@@ -121,14 +121,14 @@ class ConfirmCaptureViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(listOf(ConfirmCaptureNavEvent.Saved("new-id")), events)
-        coVerify { pendingCaptureRepository.clear() }
+        coVerify { pendingCaptureUseCase.clear() }
         job.cancel()
     }
 
     @Test
     fun `save uses the existing name for a rescan regardless of the name field`() = runTest(testDispatcher) {
         val item = StorageItem(id = STORAGE_ID, name = "Fridge", createdAt = 0L, updatedAt = 0L)
-        coEvery { storageRepository.loadAllStorages() } returns listOf(item)
+        coEvery { getStorageUseCase.getStorage(STORAGE_ID) } returns item
         coEvery {
             storageSavePipeline.run(STORAGE_ID, "Fridge", bitmap, emptyList(), bitmap.width, bitmap.height, emptyList())
         } returns StorageSaveResult.Done(STORAGE_ID, 0)
@@ -155,7 +155,7 @@ class ConfirmCaptureViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(StorageSaveResult.Error("boom"), viewModel.saveState.value)
-        coVerify(exactly = 0) { pendingCaptureRepository.clear() }
+        coVerify(exactly = 0) { pendingCaptureUseCase.clear() }
     }
 
     @Test
@@ -183,7 +183,7 @@ class ConfirmCaptureViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(listOf(ConfirmCaptureNavEvent.Discarded), events)
-        coVerify { pendingCaptureRepository.clear() }
+        coVerify { pendingCaptureUseCase.clear() }
         job.cancel()
     }
 }
