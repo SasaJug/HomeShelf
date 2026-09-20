@@ -1,10 +1,10 @@
 package com.jugurdzija.homeshelf.usecase
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
-import com.jugurdzija.homeshelf.data.ReferencePhotoData
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.embedding.GridCellEmbedder
 import com.jugurdzija.homeshelf.homography.GridProcessor
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
@@ -28,9 +28,9 @@ class StorageSavePipelineImpl @Inject constructor(
         resolvedMarkedItems: List<MarkedItem>?
     ): StorageSaveResult {
         return try {
-            val id = storageId ?: storageRepository.createNew(name).id
+            val id = storageId ?: storageRepository.createStorage(name).id
             val markedItems = resolvedMarkedItems ?: if (storageId != null) {
-                storageRepository.loadLatestData(id).markedItems
+                storageRepository.loadStorageReferenceData(id).markedItems
             } else {
                 emptyList()
             }
@@ -41,15 +41,14 @@ class StorageSavePipelineImpl @Inject constructor(
             val cells = gridProcessor.extract(bitmap, hPixels, vPixels)
             val embeddings = gridCellEmbedder.embed(cells)
 
-            storageRepository.saveLatest(
+            storageRepository.saveStorageReference(
                 id,
                 bitmap,
                 ReferencePhotoData(
                     guideLines = guideLines,
                     embeddings = embeddings.mapValues { it.value.toList() },
                     markedItems = markedItems
-                ),
-                cells
+                )
             )
             StorageSaveResult.Done(id, cells.size)
         } catch (e: Exception) {

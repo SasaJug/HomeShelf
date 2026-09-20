@@ -1,6 +1,6 @@
 package com.jugurdzija.homeshelf.ui.shoppinglist
 
-import com.jugurdzija.homeshelf.data.ShoppingListItem
+import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
 
 sealed interface ShoppingListUiState {
     data object Loading : ShoppingListUiState

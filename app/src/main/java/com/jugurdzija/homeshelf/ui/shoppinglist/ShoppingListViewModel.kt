@@ -2,7 +2,7 @@ package com.jugurdzija.homeshelf.ui.shoppinglist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
+import com.jugurdzija.homeshelf.domain.usecases.shoppinglist.ShoppingListUseCase
 import com.jugurdzija.homeshelf.stt.AudioRecorder
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
 import com.jugurdzija.homeshelf.stt.VoiceInputState
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
-    private val shoppingListRepository: ShoppingListRepository,
+    private val shoppingListUseCase: ShoppingListUseCase,
     private val audioRecorder: AudioRecorder,
     private val speechToTextEngine: SpeechToTextEngine
 ) : ViewModel() {
@@ -38,7 +38,7 @@ class ShoppingListViewModel @Inject constructor(
 
     fun reload() {
         viewModelScope.launch {
-            val items = shoppingListRepository.loadAll()
+            val items = shoppingListUseCase.getItems()
             _state.value = if (items.isEmpty()) ShoppingListUiState.Empty else ShoppingListUiState.Loaded(items)
         }
     }
@@ -51,7 +51,7 @@ class ShoppingListViewModel @Inject constructor(
         val trimmed = _newItemName.value.trim()
         if (trimmed.isEmpty()) return
         viewModelScope.launch {
-            shoppingListRepository.add(trimmed)
+            shoppingListUseCase.addItem(trimmed)
             _newItemName.value = ""
             reload()
         }
@@ -59,7 +59,7 @@ class ShoppingListViewModel @Inject constructor(
 
     fun onRemove(id: String) {
         viewModelScope.launch {
-            shoppingListRepository.remove(id)
+            shoppingListUseCase.removeItem(id)
             reload()
         }
     }

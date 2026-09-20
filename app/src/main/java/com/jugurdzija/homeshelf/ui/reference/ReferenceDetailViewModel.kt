@@ -4,7 +4,9 @@ import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
+import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
+import com.jugurdzija.homeshelf.domain.usecases.managestorage.ManageStorageUseCase
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,7 +36,9 @@ sealed interface ReferenceDetailNavEvent {
 @HiltViewModel
 class ReferenceDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val storageRepository: StorageRepository
+    private val getStorageUseCase: GetStorageUseCase,
+    private val getStorageReferenceUseCase: GetStorageReferenceUseCase,
+    private val manageStorageUseCase: ManageStorageUseCase
 ) : ViewModel() {
 
     private val storageId: String = requireNotNull(savedStateHandle.get<String>(Routes.ARG_STORAGE_ID))
@@ -54,13 +58,13 @@ class ReferenceDetailViewModel @Inject constructor(
 
     private fun load() {
         viewModelScope.launch {
-            val item = storageRepository.loadAll().firstOrNull { it.id == storageId }
-            val bitmap = storageRepository.decodeLatestBitmap(storageId)
+            val item = getStorageUseCase.getStorage(storageId)
+            val bitmap = getStorageReferenceUseCase.getBitmap(storageId)
             _state.value = when {
                 item == null -> ReferenceDetailUiState.Error("Storage not found")
                 bitmap == null -> ReferenceDetailUiState.Error("No reference photo available")
                 else -> {
-                    val data = storageRepository.loadLatestData(storageId)
+                    val data = getStorageReferenceUseCase.getData(storageId)
                     ReferenceDetailUiState.Loaded(
                         storageId = storageId,
                         storageName = item.name,
@@ -84,7 +88,7 @@ class ReferenceDetailViewModel @Inject constructor(
     fun confirmDelete() {
         _showDeleteConfirmation.value = false
         viewModelScope.launch {
-            storageRepository.delete(storageId)
+            manageStorageUseCase.deleteStorage(storageId)
             _navEvent.emit(ReferenceDetailNavEvent.Deleted)
         }
     }
@@ -95,7 +99,7 @@ class ReferenceDetailViewModel @Inject constructor(
         val trimmed = newName.trim()
         if (trimmed.isBlank() || trimmed == current.storageName) return
         viewModelScope.launch {
-            storageRepository.rename(storageId, trimmed)
+            manageStorageUseCase.renameStorage(storageId, trimmed)
             _state.value = current.copy(storageName = trimmed)
         }
     }

@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.usecase
 
 import android.graphics.Bitmap
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.embedding.GridCellEmbedder
 import com.jugurdzija.homeshelf.homography.GridProcessor
 import com.jugurdzija.homeshelf.homography.HomographyProcessor
@@ -20,10 +20,10 @@ class ComparisonPipelineImpl @Inject constructor(
 ) : ComparisonPipeline {
 
     override suspend fun run(capturedBitmap: Bitmap, storageId: String): ComparisonResult {
-        val data = storageRepository.loadLatestData(storageId)
+        val data = storageRepository.loadStorageReferenceData(storageId)
         if (data.embeddings.isEmpty()) return ComparisonResult.NoEmbeddings
 
-        val referenceBitmap = storageRepository.decodeLatestBitmap(storageId)
+        val referenceBitmap = storageRepository.getStorageReferenceBitmap(storageId)
             ?: return ComparisonResult.AlignmentFailed
 
         val aligned = withContext(Dispatchers.Default) {

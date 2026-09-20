@@ -9,10 +9,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.BoundingBox
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
+import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
+import com.jugurdzija.homeshelf.domain.usecases.managestorage.ManageStorageUseCase
 import com.jugurdzija.homeshelf.llm.ItemDetector
 import com.jugurdzija.homeshelf.stt.AudioRecorder
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
@@ -37,7 +39,9 @@ sealed interface DetectState {
 @HiltViewModel
 class MarkItemsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val storageRepository: StorageRepository,
+    private val getStorageUseCase: GetStorageUseCase,
+    private val getStorageReferenceUseCase: GetStorageReferenceUseCase,
+    private val manageStorageUseCase: ManageStorageUseCase,
     private val itemDetector: ItemDetector,
     private val audioRecorder: AudioRecorder,
     private val speechToTextEngine: SpeechToTextEngine
@@ -68,9 +72,9 @@ class MarkItemsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            storageName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-            _bitmapState.value = storageRepository.decodeLatestBitmap(storageId)
-            val data = storageRepository.loadLatestData(storageId)
+            storageName = getStorageUseCase.getStorage(storageId)?.name ?: ""
+            _bitmapState.value = getStorageReferenceUseCase.getBitmap(storageId)
+            val data = getStorageReferenceUseCase.getData(storageId)
             guideLines.addAll(data.guideLines)
             markedItems.addAll(data.markedItems)
         }
@@ -215,6 +219,6 @@ class MarkItemsViewModel @Inject constructor(
 
     private fun persist() {
         val snapshot = markedItems.toList()
-        viewModelScope.launch { storageRepository.saveMarkedItems(storageId, snapshot) }
+        viewModelScope.launch { manageStorageUseCase.saveMarkedItems(storageId, snapshot) }
     }
 }

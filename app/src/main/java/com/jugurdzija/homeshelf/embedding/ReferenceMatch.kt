@@ -1,6 +1,6 @@
 package com.jugurdzija.homeshelf.embedding
 
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 
 data class ReferenceMatch(
     val item: StorageItem,

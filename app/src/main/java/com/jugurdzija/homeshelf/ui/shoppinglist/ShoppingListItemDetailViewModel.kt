@@ -3,8 +3,8 @@ package com.jugurdzija.homeshelf.ui.shoppinglist
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
+import com.jugurdzija.homeshelf.domain.usecases.shoppinglist.ShoppingListUseCase
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ShoppingListItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val shoppingListRepository: ShoppingListRepository,
-    private val storageRepository: StorageRepository
+    private val shoppingListUseCase: ShoppingListUseCase,
+    private val getStorageUseCase: GetStorageUseCase
 ) : ViewModel() {
 
     val itemId: String = checkNotNull(savedStateHandle[Routes.ARG_ITEM_ID])
@@ -27,10 +27,8 @@ class ShoppingListItemDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val item = shoppingListRepository.loadAll().firstOrNull { it.id == itemId }
-            val storageName = item?.storageId?.let { storageId ->
-                storageRepository.loadAll().firstOrNull { it.id == storageId }?.name
-            }
+            val item = shoppingListUseCase.getItem(itemId)
+            val storageName = item?.storageId?.let { storageId -> getStorageUseCase.getStorage(storageId)?.name }
             _state.value = ShoppingListItemDetailUiState.Loaded(item?.name ?: "", storageName)
         }
     }

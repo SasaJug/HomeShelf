@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.data.GoldenItem
 import com.jugurdzija.homeshelf.data.GoldenStore
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class GoldenManageViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val goldenStore: GoldenStore,
-    private val storageRepository: StorageRepository
+    private val getStorageUseCase: GetStorageUseCase
 ) : ViewModel() {
 
     sealed interface Event {
@@ -49,7 +49,7 @@ class GoldenManageViewModel @Inject constructor(
     private fun load() {
         viewModelScope.launch {
             val items = goldenStore.loadAll().filter { it.storageId == storageId }
-            val referenceName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
+            val referenceName = getStorageUseCase.getStorage(storageId)?.name ?: ""
             _state.value = if (items.isEmpty()) State.Empty
             else State.Loaded(referenceName, items)
         }

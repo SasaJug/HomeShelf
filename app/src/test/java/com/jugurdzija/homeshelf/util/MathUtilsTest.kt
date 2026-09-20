@@ -1,8 +1,8 @@
 package com.jugurdzija.homeshelf.util
 
-import com.jugurdzija.homeshelf.data.BoundingBox
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.MarkedItem
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue

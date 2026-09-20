@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.ui.shoppinglist
 
-import com.jugurdzija.homeshelf.data.ShoppingListItem
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
+import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
+import com.jugurdzija.homeshelf.domain.usecases.shoppinglist.ShoppingListUseCase
 import com.jugurdzija.homeshelf.stt.AudioRecorder
 import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
 import io.mockk.Runs
@@ -26,13 +26,13 @@ class ShoppingListViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    private lateinit var shoppingListRepository: ShoppingListRepository
+    private lateinit var shoppingListUseCase: ShoppingListUseCase
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        shoppingListRepository = mockk()
-        coEvery { shoppingListRepository.loadAll() } returns emptyList()
+        shoppingListUseCase = mockk()
+        coEvery { shoppingListUseCase.getItems() } returns emptyList()
     }
 
     @After
@@ -41,7 +41,7 @@ class ShoppingListViewModelTest {
     }
 
     private fun createViewModel(): ShoppingListViewModel {
-        val viewModel = ShoppingListViewModel(shoppingListRepository, mockk<AudioRecorder>(), mockk<SpeechToTextEngine>())
+        val viewModel = ShoppingListViewModel(shoppingListUseCase, mockk<AudioRecorder>(), mockk<SpeechToTextEngine>())
         testDispatcher.scheduler.advanceUntilIdle()
         return viewModel
     }
@@ -56,7 +56,7 @@ class ShoppingListViewModelTest {
     @Test
     fun `init with items reflects Loaded state`() = runTest(testDispatcher) {
         val items = listOf(ShoppingListItem(id = "1", name = "Milk", createdAt = 0L))
-        coEvery { shoppingListRepository.loadAll() } returns items
+        coEvery { shoppingListUseCase.getItems() } returns items
 
         val viewModel = createViewModel()
 
@@ -66,13 +66,13 @@ class ShoppingListViewModelTest {
     @Test
     fun `onAdd trims name, adds it and reloads`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        coEvery { shoppingListRepository.add("Eggs", null) } returns ShoppingListItem(id = "1", name = "Eggs", createdAt = 0L)
+        coEvery { shoppingListUseCase.addItem("Eggs") } returns ShoppingListItem(id = "1", name = "Eggs", createdAt = 0L)
 
         viewModel.onNewItemNameChange("  Eggs  ")
         viewModel.onAdd()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { shoppingListRepository.add("Eggs", null) }
+        coVerify { shoppingListUseCase.addItem("Eggs") }
     }
 
     @Test
@@ -83,18 +83,18 @@ class ShoppingListViewModelTest {
         viewModel.onAdd()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify(exactly = 0) { shoppingListRepository.add(any(), any()) }
+        coVerify(exactly = 0) { shoppingListUseCase.addItem(any()) }
     }
 
     @Test
     fun `onRemove removes the item and reloads`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        coEvery { shoppingListRepository.remove("1") } just Runs
+        coEvery { shoppingListUseCase.removeItem("1") } just Runs
 
         viewModel.onRemove("1")
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { shoppingListRepository.remove("1") }
+        coVerify { shoppingListUseCase.removeItem("1") }
         assertTrue(viewModel.state.value is ShoppingListUiState.Empty)
     }
 }

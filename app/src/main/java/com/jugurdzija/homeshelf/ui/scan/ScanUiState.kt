@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.ui.scan
 
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.embedding.ReferenceMatch
 
 sealed interface ScanUiState {

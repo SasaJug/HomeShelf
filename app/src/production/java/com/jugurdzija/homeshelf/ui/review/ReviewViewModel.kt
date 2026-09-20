@@ -3,10 +3,10 @@ package com.jugurdzija.homeshelf.ui.review
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.MarkedItem
-import com.jugurdzija.homeshelf.data.PendingCaptureStore
-import com.jugurdzija.homeshelf.data.ShoppingListRepository
-import com.jugurdzija.homeshelf.data.StorageRepository
+import com.jugurdzija.homeshelf.domain.model.MarkedItem
+import com.jugurdzija.homeshelf.domain.usecases.pendingcapture.PendingCaptureUseCase
+import com.jugurdzija.homeshelf.domain.usecases.shoppinglist.ShoppingListUseCase
+import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.llm.CellPair
 import com.jugurdzija.homeshelf.llm.ItemChange
 import com.jugurdzija.homeshelf.llm.KnownItem
@@ -33,11 +33,11 @@ sealed interface ReviewNavEvent {
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val pendingCaptureStore: PendingCaptureStore,
-    private val storageRepository: StorageRepository,
+    private val pendingCaptureUseCase: PendingCaptureUseCase,
+    private val getStorageUseCase: GetStorageUseCase,
     private val comparisonPipeline: ComparisonPipeline,
     private val shelfDiffAnalyzer: ShelfDiffAnalyzer,
-    private val shoppingListRepository: ShoppingListRepository
+    private val shoppingListUseCase: ShoppingListUseCase
 ) : ViewModel() {
 
     val storageId: String = checkNotNull(savedStateHandle[Routes.ARG_STORAGE_ID])
@@ -56,8 +56,8 @@ class ReviewViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val storageName = storageRepository.loadAll().firstOrNull { it.id == storageId }?.name ?: ""
-            val pending = pendingCaptureStore.load()
+            val storageName = getStorageUseCase.getStorage(storageId)?.name ?: ""
+            val pending = pendingCaptureUseCase.load()
             if (pending == null) {
                 _state.value = ReviewUiState.CompareError(storageName, "No captured image found")
                 return@launch
@@ -91,7 +91,7 @@ class ReviewViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            val added = shoppingListRepository.addAutoDetected(candidates)
+            val added = shoppingListUseCase.addAutoDetectedItems(candidates)
             _shoppingListAdded.emit(added.size)
         }
     }
@@ -140,7 +140,7 @@ class ReviewViewModel @Inject constructor(
 
     fun discard() {
         viewModelScope.launch {
-            pendingCaptureStore.clear()
+            pendingCaptureUseCase.clear()
             _navEvent.emit(ReviewNavEvent.ToReference)
         }
     }

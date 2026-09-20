@@ -33,8 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.jugurdzija.homeshelf.data.GuideLine
-import com.jugurdzija.homeshelf.data.StorageItem
+import com.jugurdzija.homeshelf.domain.model.GuideLine
+import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.ui.common.CameraPermissionGate
 import com.jugurdzija.homeshelf.ui.common.CameraPreview
 import com.jugurdzija.homeshelf.ui.common.DetectionBadge

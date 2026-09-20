@@ -1,5 +1,6 @@
 package com.jugurdzija.homeshelf.data
 
+import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import com.jugurdzija.homeshelf.llm.ItemChange
 
 data class GroundTruthItem(

@@ -3,11 +3,10 @@ package com.jugurdzija.homeshelf.ui.reference
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jugurdzija.homeshelf.data.OnboardingPreferences
-import com.jugurdzija.homeshelf.data.StorageItem
-import com.jugurdzija.homeshelf.data.StorageListEntry
-import com.jugurdzija.homeshelf.data.StorageRepository
-import com.jugurdzija.homeshelf.data.calculateCompleteness
+import com.jugurdzija.homeshelf.domain.model.StorageListEntry
+import com.jugurdzija.homeshelf.domain.usecases.getstorageoverview.GetStorageOverviewUseCase
+import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
+import com.jugurdzija.homeshelf.domain.usecases.introseen.IntroSeenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReferenceViewModel @Inject constructor(
-    private val storageRepository: StorageRepository,
-    private val onboardingPreferences: OnboardingPreferences,
+    private val getStorageOverviewUseCase: GetStorageOverviewUseCase,
+    private val getStorageReferenceUseCase: GetStorageReferenceUseCase,
+    private val introSeenUseCase: IntroSeenUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ReferenceListUiState>(ReferenceListUiState.Loading)
@@ -28,35 +28,28 @@ class ReferenceViewModel @Inject constructor(
     private val _thumbnails = MutableStateFlow<Map<String, Bitmap>>(emptyMap())
     val thumbnails: StateFlow<Map<String, Bitmap>> = _thumbnails.asStateFlow()
 
-    private val _showIntroDialog = MutableStateFlow(!onboardingPreferences.hasSeenIntro())
+    private val _showIntroDialog = MutableStateFlow(!introSeenUseCase.hasSeenIntro())
     val showIntroDialog: StateFlow<Boolean> = _showIntroDialog.asStateFlow()
 
     init { reload() }
 
     fun dismissIntro() {
-        onboardingPreferences.markIntroSeen()
+        introSeenUseCase.markIntroSeen()
         _showIntroDialog.value = false
     }
 
     fun reload() {
         viewModelScope.launch {
-            val items = storageRepository.loadAll()
-            if (items.isEmpty()) {
-                _state.value = ReferenceListUiState.Empty
-            } else {
-                val entries = items.map { item ->
-                    StorageListEntry(item, calculateCompleteness(storageRepository.loadLatestData(item.id)))
-                }
-                _state.value = ReferenceListUiState.Loaded(entries)
-            }
-            loadThumbnails(items)
+            val entries = getStorageOverviewUseCase.getOverview()
+            _state.value = if (entries.isEmpty()) ReferenceListUiState.Empty else ReferenceListUiState.Loaded(entries)
+            loadThumbnails(entries)
         }
     }
 
-    private fun loadThumbnails(items: List<StorageItem>) {
+    private fun loadThumbnails(entries: List<StorageListEntry>) {
         viewModelScope.launch {
-            items.filter { !_thumbnails.value.containsKey(it.id) }.forEach { item ->
-                val bmp = storageRepository.decodeLatestBitmap(item.id, sampleSize = 4)
+            entries.map { it.item }.filter { !_thumbnails.value.containsKey(it.id) }.forEach { item ->
+                val bmp = getStorageReferenceUseCase.getThumbnail(item.id)
                 if (bmp != null) _thumbnails.update { it + (item.id to bmp) }
             }
         }

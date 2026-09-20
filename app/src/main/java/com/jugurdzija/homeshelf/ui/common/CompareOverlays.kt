@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jugurdzija.homeshelf.data.GuideLine
+import com.jugurdzija.homeshelf.domain.model.GuideLine
 
 @Composable
 fun DetectionBadge(
