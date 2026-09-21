@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 2.52,
+  "prompt_tokens": 3191,
+  "output_tokens": 478,
+  "thinking_tokens": null,
+  "text": "[\n  {\n    \"cellId\": \"Cell A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The stack of yellow saucers is still present in the same location.\",\n        \"box\": [834, 91, 963, 332]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The top cup with yellow floral pattern is missing.\",\n        \"box\": [631, 133, 755, 264]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The middle cup with yellow floral pattern is still present.\",\n        \"box\": [737, 142, 843, 266]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The right cup with floral pattern is still present.\",\n        \"box\": [737, 255, 916, 370]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The left glass is missing.\",\n        \"box\": [626, 498, 881, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The pink cup is still present.\",\n        \"box\": [676, 591, 929, 706]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The printed glass is still present.\",\n        \"box\": [712, 698, 925, 807]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The rightmost glass is still present.\",\n        \"box\": [678, 755, 901, 874]\n      }\n    ]\n  }\n]"
+}

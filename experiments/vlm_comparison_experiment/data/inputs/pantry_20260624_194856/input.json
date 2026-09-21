@@ -1,0 +1,432 @@
+{
+  "cells": [
+    {
+      "cellId": "A1",
+      "referenceImage": "A1_reference.jpg",
+      "newImage": "A1_new.jpg",
+      "knownItems": [
+        {
+          "id": "4c47ae4d-551e-4509-af7f-395adfe1d952",
+          "name": "Flour container",
+          "isTransparentContainer": true,
+          "box": [
+            185,
+            27,
+            934,
+            144
+          ]
+        },
+        {
+          "id": "f6839a61-3cf4-492c-8875-d6e1413af50c",
+          "name": "Pasta container",
+          "isTransparentContainer": true,
+          "box": [
+            212,
+            149,
+            934,
+            249
+          ]
+        },
+        {
+          "id": "9726856f-df21-4121-afee-3a2f0f900423",
+          "name": "Powder container",
+          "isTransparentContainer": true,
+          "box": [
+            225,
+            249,
+            934,
+            344
+          ]
+        },
+        {
+          "id": "96e2472a-db8b-4988-bd46-3c55910b3925",
+          "name": "Cereal box",
+          "isTransparentContainer": false,
+          "box": [
+            292,
+            334,
+            934,
+            404
+          ]
+        },
+        {
+          "id": "6e5e39a3-ab7c-4890-86a0-d98f880fbdf1",
+          "name": "Tall yellow box",
+          "isTransparentContainer": false,
+          "box": [
+            399,
+            389,
+            934,
+            444
+          ]
+        },
+        {
+          "id": "80ebdbaa-af39-4ebd-9323-87946a874468",
+          "name": "Small green box",
+          "isTransparentContainer": false,
+          "box": [
+            586,
+            504,
+            800,
+            574
+          ]
+        },
+        {
+          "id": "f18d7299-ca45-47aa-8071-6e881c336d91",
+          "name": "Small blue box",
+          "isTransparentContainer": false,
+          "box": [
+            800,
+            434,
+            934,
+            504
+          ]
+        },
+        {
+          "id": "f1111e64-9247-4722-8fcf-b8d82b7755d9",
+          "name": "Round container",
+          "isTransparentContainer": false,
+          "box": [
+            800,
+            509,
+            934,
+            574
+          ]
+        },
+        {
+          "id": "8e6eb65d-e2d2-497e-8fb0-f3262fce5fbb",
+          "name": "Green box",
+          "isTransparentContainer": false,
+          "box": [
+            600,
+            574,
+            800,
+            659
+          ]
+        },
+        {
+          "id": "fed07c85-e601-4e55-ae95-9c909229880f",
+          "name": "Red Puma shoe box",
+          "isTransparentContainer": false,
+          "box": [
+            533,
+            664,
+            934,
+            959
+          ]
+        },
+        {
+          "id": "4c9f1455-b67a-4962-9ef6-d4c427513768",
+          "name": "Yellow box",
+          "isTransparentContainer": false,
+          "box": [
+            346,
+            669,
+            613,
+            914
+          ]
+        },
+        {
+          "id": "16c90dc5-d9db-431b-a2b8-1b3cec4d455a",
+          "name": "Small brown box",
+          "isTransparentContainer": false,
+          "box": [
+            800,
+            574,
+            934,
+            659
+          ]
+        }
+      ]
+    },
+    {
+      "cellId": "A2",
+      "referenceImage": "A2_reference.jpg",
+      "newImage": "A2_new.jpg",
+      "knownItems": [
+        {
+          "id": "571c31c2-95d5-46a6-a096-0ff13ab7caea",
+          "name": "Corn kernels jar",
+          "isTransparentContainer": true,
+          "box": [
+            138,
+            53,
+            874,
+            159
+          ]
+        },
+        {
+          "id": "6b0d2116-f4fb-4552-985f-609ec7aa5a6c",
+          "name": "Oats jar",
+          "isTransparentContainer": true,
+          "box": [
+            138,
+            159,
+            874,
+            259
+          ]
+        },
+        {
+          "id": "6c94ed47-2956-470b-9c46-a6a5241092c9",
+          "name": "Nescafe Gold coffee jar",
+          "isTransparentContainer": false,
+          "box": [
+            138,
+            259,
+            874,
+            344
+          ]
+        },
+        {
+          "id": "b4ee53ce-a5e7-4d43-8ff1-e5648a22234e",
+          "name": "Jacobs coffee jar",
+          "isTransparentContainer": false,
+          "box": [
+            138,
+            339,
+            874,
+            449
+          ]
+        },
+        {
+          "id": "2283b2cd-2480-4b3e-a61e-4266fc3fbb64",
+          "name": "Small jam jar",
+          "isTransparentContainer": false,
+          "box": [
+            506,
+            449,
+            859,
+            504
+          ]
+        },
+        {
+          "id": "f9e76437-4d44-4d51-97be-2bf5a6d644e6",
+          "name": "Small jam jar",
+          "isTransparentContainer": false,
+          "box": [
+            506,
+            504,
+            859,
+            574
+          ]
+        },
+        {
+          "id": "84d0702a-158f-40e7-a043-3f2017a35106",
+          "name": "Cereal box",
+          "isTransparentContainer": false,
+          "box": [
+            200,
+            589,
+            859,
+            624
+          ]
+        },
+        {
+          "id": "b2a490f9-5a5c-4843-8330-d1436be4b574",
+          "name": "Cereal box",
+          "isTransparentContainer": false,
+          "box": [
+            200,
+            624,
+            859,
+            659
+          ]
+        },
+        {
+          "id": "3ad815c0-e592-4f92-b91e-048bcbdd52af",
+          "name": "Spice sticks",
+          "isTransparentContainer": false,
+          "box": [
+            292,
+            659,
+            859,
+            719
+          ]
+        },
+        {
+          "id": "e8f586f2-1076-4351-b99c-565e029673da",
+          "name": "Green spice box",
+          "isTransparentContainer": false,
+          "box": [
+            322,
+            719,
+            859,
+            759
+          ]
+        },
+        {
+          "id": "45e11678-d6d7-4339-8db0-7deff98276ed",
+          "name": "Green spice box",
+          "isTransparentContainer": false,
+          "box": [
+            322,
+            759,
+            859,
+            794
+          ]
+        },
+        {
+          "id": "68fd2ede-b1e8-46f8-b161-762434aa7133",
+          "name": "Green spice box",
+          "isTransparentContainer": false,
+          "box": [
+            322,
+            794,
+            859,
+            829
+          ]
+        },
+        {
+          "id": "6696dcf0-89c7-4029-bcc7-61b2858c99d0",
+          "name": "Blue spice box",
+          "isTransparentContainer": false,
+          "box": [
+            322,
+            829,
+            859,
+            879
+          ]
+        }
+      ]
+    },
+    {
+      "cellId": "A3",
+      "referenceImage": "A3_reference.jpg",
+      "newImage": "A3_new.jpg",
+      "knownItems": [
+        {
+          "id": "1ed5424c-dd01-4ad1-bac3-26b5fb064877",
+          "name": "Milk container",
+          "isTransparentContainer": true,
+          "box": [
+            -2,
+            48,
+            699,
+            144
+          ]
+        },
+        {
+          "id": "e8c77329-48b3-41ff-9129-f68c478018a8",
+          "name": "Milk container",
+          "isTransparentContainer": true,
+          "box": [
+            -2,
+            139,
+            699,
+            229
+          ]
+        },
+        {
+          "id": "8871e060-fc81-4134-b5e2-782a80ea17dc",
+          "name": "Nutella jar",
+          "isTransparentContainer": false,
+          "box": [
+            97,
+            189,
+            866,
+            309
+          ]
+        },
+        {
+          "id": "fda49459-08c6-476b-bda7-6ce1c99c8dd9",
+          "name": "Chickpeas container",
+          "isTransparentContainer": true,
+          "box": [
+            -2,
+            309,
+            665,
+            399
+          ]
+        },
+        {
+          "id": "dbfcd1f6-799b-464d-b3ef-b41eac3d68ae",
+          "name": "Rice container",
+          "isTransparentContainer": true,
+          "box": [
+            -2,
+            394,
+            665,
+            484
+          ]
+        },
+        {
+          "id": "a5d52c92-b25a-4dbf-9662-5da0b8f2063e",
+          "name": "Grains container",
+          "isTransparentContainer": true,
+          "box": [
+            -2,
+            484,
+            665,
+            569
+          ]
+        },
+        {
+          "id": "9399068a-858f-4371-9344-7481dbe48301",
+          "name": "Snacks container",
+          "isTransparentContainer": true,
+          "box": [
+            -2,
+            594,
+            648,
+            684
+          ]
+        },
+        {
+          "id": "565aec81-70dc-4952-a948-682e792795c7",
+          "name": "Spice shaker",
+          "isTransparentContainer": false,
+          "box": [
+            -2,
+            679,
+            682,
+            759
+          ]
+        },
+        {
+          "id": "62553f98-bbc3-45cf-954b-b9b95225a2cd",
+          "name": "Spice shaker",
+          "isTransparentContainer": false,
+          "box": [
+            -2,
+            759,
+            682,
+            829
+          ]
+        },
+        {
+          "id": "05a31022-2863-49c6-a0c0-7772a66cdb8a",
+          "name": "Small oil bottle",
+          "isTransparentContainer": false,
+          "box": [
+            364,
+            819,
+            715,
+            854
+          ]
+        },
+        {
+          "id": "649b9965-664b-4501-ac15-bee1480e5247",
+          "name": "White pill bottle",
+          "isTransparentContainer": false,
+          "box": [
+            364,
+            854,
+            765,
+            924
+          ]
+        },
+        {
+          "id": "720aca8f-e4b7-4b99-b19c-7da5626d3e28",
+          "name": "Small brown box",
+          "isTransparentContainer": false,
+          "box": [
+            97,
+            849,
+            465,
+            894
+          ]
+        }
+      ]
+    }
+  ]
+}

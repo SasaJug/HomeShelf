@@ -1,0 +1,459 @@
+{
+  "cells": [
+    "A1",
+    "A2",
+    "A3"
+  ],
+  "guideLines": [
+    {
+      "id": 0,
+      "isHorizontal": true,
+      "position": 0.28919187
+    },
+    {
+      "id": 1,
+      "isHorizontal": true,
+      "position": 0.45517254
+    },
+    {
+      "id": 2,
+      "isHorizontal": true,
+      "position": 0.59982115
+    },
+    {
+      "id": 3,
+      "isHorizontal": true,
+      "position": 0.7324888
+    },
+    {
+      "id": 4,
+      "isHorizontal": false,
+      "position": 0.9355469
+    },
+    {
+      "id": 5,
+      "isHorizontal": false,
+      "position": 0.049072266
+    }
+  ],
+  "markedItems": [
+    {
+      "id": "4c47ae4d-551e-4509-af7f-395adfe1d952",
+      "name": "Flour container",
+      "boundingBox": {
+        "x": 0.07387222,
+        "y": 0.32004604,
+        "width": 0.102896295,
+        "height": 0.12417391
+      },
+      "cellName": "A1",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "f6839a61-3cf4-492c-8875-d6e1413af50c",
+      "name": "Pasta container",
+      "boundingBox": {
+        "x": 0.18120371,
+        "y": 0.3244808,
+        "width": 0.08870371,
+        "height": 0.11973914
+      },
+      "cellName": "A1",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "9726856f-df21-4121-afee-3a2f0f900423",
+      "name": "Powder container",
+      "boundingBox": {
+        "x": 0.26990741,
+        "y": 0.3266982,
+        "width": 0.08426852,
+        "height": 0.11752173
+      },
+      "cellName": "A1",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "96e2472a-db8b-4988-bd46-3c55910b3925",
+      "name": "Cereal box",
+      "boundingBox": {
+        "x": 0.3453056,
+        "y": 0.33778515,
+        "width": 0.06209259,
+        "height": 0.106434785
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "6e5e39a3-ab7c-4890-86a0-d98f880fbdf1",
+      "name": "Tall yellow box",
+      "boundingBox": {
+        "x": 0.3940926,
+        "y": 0.3555243,
+        "width": 0.048787035,
+        "height": 0.08869566
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "80ebdbaa-af39-4ebd-9323-87946a874468",
+      "name": "Small green box",
+      "boundingBox": {
+        "x": 0.4961019,
+        "y": 0.38656777,
+        "width": 0.06209259,
+        "height": 0.03547826
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "f18d7299-ca45-47aa-8071-6e881c336d91",
+      "name": "Small blue box",
+      "boundingBox": {
+        "x": 0.43400928,
+        "y": 0.42204604,
+        "width": 0.06209259,
+        "height": 0.022173915
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "f1111e64-9247-4722-8fcf-b8d82b7755d9",
+      "name": "Round container",
+      "boundingBox": {
+        "x": 0.500537,
+        "y": 0.42204604,
+        "width": 0.057657406,
+        "height": 0.022173915
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "8e6eb65d-e2d2-497e-8fb0-f3262fce5fbb",
+      "name": "Green box",
+      "boundingBox": {
+        "x": 0.5581944,
+        "y": 0.38878518,
+        "width": 0.07539815,
+        "height": 0.03326087
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "fed07c85-e601-4e55-ae95-9c909229880f",
+      "name": "Red Puma shoe box",
+      "boundingBox": {
+        "x": 0.6380278,
+        "y": 0.3776982,
+        "width": 0.26167592,
+        "height": 0.06652174
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "4c9f1455-b67a-4962-9ef6-d4c427513768",
+      "name": "Yellow box",
+      "boundingBox": {
+        "x": 0.642463,
+        "y": 0.34665474,
+        "width": 0.21732408,
+        "height": 0.04434783
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "16c90dc5-d9db-431b-a2b8-1b3cec4d455a",
+      "name": "Small brown box",
+      "boundingBox": {
+        "x": 0.5581944,
+        "y": 0.42204604,
+        "width": 0.07539815,
+        "height": 0.022173915
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "571c31c2-95d5-46a6-a096-0ff13ab7caea",
+      "name": "Corn kernels jar",
+      "boundingBox": {
+        "x": 0.09693519,
+        "y": 0.47526345,
+        "width": 0.09313889,
+        "height": 0.106434785
+      },
+      "cellName": "A2",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "6b0d2116-f4fb-4552-985f-609ec7aa5a6c",
+      "name": "Oats jar",
+      "boundingBox": {
+        "x": 0.19007407,
+        "y": 0.47526345,
+        "width": 0.08870371,
+        "height": 0.106434785
+      },
+      "cellName": "A2",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "6c94ed47-2956-470b-9c46-a6a5241092c9",
+      "name": "Nescafe Gold coffee jar",
+      "boundingBox": {
+        "x": 0.27877778,
+        "y": 0.47526345,
+        "width": 0.07539815,
+        "height": 0.106434785
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "b4ee53ce-a5e7-4d43-8ff1-e5648a22234e",
+      "name": "Jacobs coffee jar",
+      "boundingBox": {
+        "x": 0.34974074,
+        "y": 0.47526345,
+        "width": 0.09757407,
+        "height": 0.106434785
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "2283b2cd-2480-4b3e-a61e-4266fc3fbb64",
+      "name": "Small jam jar",
+      "boundingBox": {
+        "x": 0.4473148,
+        "y": 0.5284808,
+        "width": 0.048787035,
+        "height": 0.051000003
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "f9e76437-4d44-4d51-97be-2bf5a6d644e6",
+      "name": "Small jam jar",
+      "boundingBox": {
+        "x": 0.4961019,
+        "y": 0.5284808,
+        "width": 0.06209259,
+        "height": 0.051000003
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "84d0702a-158f-40e7-a043-3f2017a35106",
+      "name": "Cereal box",
+      "boundingBox": {
+        "x": 0.57149994,
+        "y": 0.48413298,
+        "width": 0.031046296,
+        "height": 0.09534783
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "b2a490f9-5a5c-4843-8330-d1436be4b574",
+      "name": "Cereal box",
+      "boundingBox": {
+        "x": 0.6025463,
+        "y": 0.48413298,
+        "width": 0.031046296,
+        "height": 0.09534783
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "3ad815c0-e592-4f92-b91e-048bcbdd52af",
+      "name": "Spice sticks",
+      "boundingBox": {
+        "x": 0.6335926,
+        "y": 0.49743733,
+        "width": 0.05322222,
+        "height": 0.082043484
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "e8f586f2-1076-4351-b99c-565e029673da",
+      "name": "Green spice box",
+      "boundingBox": {
+        "x": 0.68681484,
+        "y": 0.5018721,
+        "width": 0.035481483,
+        "height": 0.07760869
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "45e11678-d6d7-4339-8db0-7deff98276ed",
+      "name": "Green spice box",
+      "boundingBox": {
+        "x": 0.7222963,
+        "y": 0.5018721,
+        "width": 0.031046296,
+        "height": 0.07760869
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "68fd2ede-b1e8-46f8-b161-762434aa7133",
+      "name": "Green spice box",
+      "boundingBox": {
+        "x": 0.7533426,
+        "y": 0.5018721,
+        "width": 0.031046296,
+        "height": 0.07760869
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "6696dcf0-89c7-4029-bcc7-61b2858c99d0",
+      "name": "Blue spice box",
+      "boundingBox": {
+        "x": 0.78438884,
+        "y": 0.5018721,
+        "width": 0.044351853,
+        "height": 0.07760869
+      },
+      "cellName": "A2"
+    },
+    {
+      "id": "1ed5424c-dd01-4ad1-bac3-26b5fb064877",
+      "name": "Milk container",
+      "boundingBox": {
+        "x": 0.0925,
+        "y": 0.5994373,
+        "width": 0.08426852,
+        "height": 0.09313043
+      },
+      "cellName": "A3",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "e8c77329-48b3-41ff-9129-f68c478018a8",
+      "name": "Milk container",
+      "boundingBox": {
+        "x": 0.17233333,
+        "y": 0.5994373,
+        "width": 0.079833336,
+        "height": 0.09313043
+      },
+      "cellName": "A3",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "8871e060-fc81-4134-b5e2-782a80ea17dc",
+      "name": "Nutella jar",
+      "boundingBox": {
+        "x": 0.21668519,
+        "y": 0.6127417,
+        "width": 0.10644444,
+        "height": 0.102000006
+      },
+      "cellName": "A3"
+    },
+    {
+      "id": "fda49459-08c6-476b-bda7-6ce1c99c8dd9",
+      "name": "Chickpeas container",
+      "boundingBox": {
+        "x": 0.32312965,
+        "y": 0.5994373,
+        "width": 0.079833336,
+        "height": 0.08869566
+      },
+      "cellName": "A3",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "dbfcd1f6-799b-464d-b3ef-b41eac3d68ae",
+      "name": "Rice container",
+      "boundingBox": {
+        "x": 0.39852777,
+        "y": 0.5994373,
+        "width": 0.079833336,
+        "height": 0.08869566
+      },
+      "cellName": "A3",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "a5d52c92-b25a-4dbf-9662-5da0b8f2063e",
+      "name": "Grains container",
+      "boundingBox": {
+        "x": 0.47836113,
+        "y": 0.5994373,
+        "width": 0.07539815,
+        "height": 0.08869566
+      },
+      "cellName": "A3",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "9399068a-858f-4371-9344-7481dbe48301",
+      "name": "Snacks container",
+      "boundingBox": {
+        "x": 0.5759352,
+        "y": 0.5994373,
+        "width": 0.079833336,
+        "height": 0.086478256
+      },
+      "cellName": "A3",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "565aec81-70dc-4952-a948-682e792795c7",
+      "name": "Spice shaker",
+      "boundingBox": {
+        "x": 0.65133333,
+        "y": 0.5994373,
+        "width": 0.070962965,
+        "height": 0.09091304
+      },
+      "cellName": "A3"
+    },
+    {
+      "id": "62553f98-bbc3-45cf-954b-b9b95225a2cd",
+      "name": "Spice shaker",
+      "boundingBox": {
+        "x": 0.7222963,
+        "y": 0.5994373,
+        "width": 0.06209259,
+        "height": 0.09091304
+      },
+      "cellName": "A3"
+    },
+    {
+      "id": "05a31022-2863-49c6-a0c0-7772a66cdb8a",
+      "name": "Small oil bottle",
+      "boundingBox": {
+        "x": 0.77551854,
+        "y": 0.64821994,
+        "width": 0.031046296,
+        "height": 0.046565216
+      },
+      "cellName": "A3"
+    },
+    {
+      "id": "649b9965-664b-4501-ac15-bee1480e5247",
+      "name": "White pill bottle",
+      "boundingBox": {
+        "x": 0.80656487,
+        "y": 0.64821994,
+        "width": 0.06209259,
+        "height": 0.053217392
+      },
+      "cellName": "A3"
+    },
+    {
+      "id": "720aca8f-e4b7-4b99-b19c-7da5626d3e28",
+      "name": "Small brown box",
+      "boundingBox": {
+        "x": 0.8021297,
+        "y": 0.6127417,
+        "width": 0.039916668,
+        "height": 0.04878261
+      },
+      "cellName": "A3"
+    }
+  ]
+}

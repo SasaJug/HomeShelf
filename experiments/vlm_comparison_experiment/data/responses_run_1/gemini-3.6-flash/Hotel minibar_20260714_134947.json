@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.6-flash",
+  "golden": "Hotel minibar_20260714_134947",
+  "latency_s": 16.06,
+  "prompt_tokens": 5342,
+  "output_tokens": 438,
+  "thinking_tokens": 2716,
+  "text": "[{\"cellId\":\"A1\",\"items\":[{\"change\":\"UNCHANGED\",\"description\":\"Coca-Cola Zero can remains in position on the left.\",\"box\":[470,168,915,307],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"UNCHANGED\",\"description\":\"Coca-Cola Zero can remains in position.\",\"box\":[482,303,915,435],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"UNCHANGED\",\"description\":\"Coca-Cola Zero can remains in position.\",\"box\":[485,430,915,568],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"ADDED\",\"description\":\"New Coca-Cola Zero can placed on the right.\",\"box\":[485,560,915,698],\"name\":\"Coca-Cola Zero\",\"isTransparentContainer\":false}]},{\"cellId\":\"A2\",\"items\":[{\"change\":\"REMOVED\",\"description\":\"Water bottle in the front left position is no longer present.\",\"box\":[24,119,807,324],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"UNCHANGED\",\"description\":\"Water bottle remains in position at the back.\",\"box\":[24,332,650,476],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"UNCHANGED\",\"description\":\"Water bottle remains in position at the back.\",\"box\":[24,476,660,625],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"UNCHANGED\",\"description\":\"Water bottle remains in position at the back right.\",\"box\":[24,634,660,788],\"name\":null,\"isTransparentContainer\":null},{\"change\":\"ADDED\",\"description\":\"Water bottle present in the back left position.\",\"box\":[24,186,650,340],\"name\":\"Water bottle\",\"isTransparentContainer\":true}]}]"
+}

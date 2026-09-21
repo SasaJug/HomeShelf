@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.6-flash",
+  "golden": "Hotel minibar_20260715_102847",
+  "latency_s": 8.88,
+  "prompt_tokens": 5353,
+  "output_tokens": 462,
+  "thinking_tokens": 1118,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Coca-Cola Zero can remains in the same position on the left.\",\n        \"box\": [500, 169, 940, 309]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Coca-Cola Zero can remains in the middle position.\",\n        \"box\": [506, 306, 946, 439]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Coca-Cola Zero can remains in the position next to the middle can.\",\n        \"box\": [511, 435, 949, 566]\n      }\n    ]\n  },\n  {\n    \"cellId\": \"A2\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle on the front left is still present and full.\",\n        \"box\": [14, 137, 735, 319]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle second from left is still present and full.\",\n        \"box\": [4, 368, 646, 513]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle third from left is still present and full.\",\n        \"box\": [4, 508, 647, 656]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle on the far right is still present and full.\",\n        \"box\": [13, 651, 650, 810]\n      }\n    ]\n  }\n]"
+}

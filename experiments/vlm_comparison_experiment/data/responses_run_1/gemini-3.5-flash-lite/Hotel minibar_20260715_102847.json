@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "golden": "Hotel minibar_20260715_102847",
+  "latency_s": 2.85,
+  "prompt_tokens": 5353,
+  "output_tokens": 477,
+  "thinking_tokens": null,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The Coca-Cola Zero can on the left is still present in the same position.\",\n        \"box\": [501, 155, 940, 290]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The middle Coca-Cola Zero can is still present in the same position.\",\n        \"box\": [510, 298, 942, 426]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The right Coca-Cola Zero can is still present in the same position.\",\n        \"box\": [510, 427, 942, 555]\n      }\n    ]\n  },\n  {\n    \"cellId\": \"A2\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The water bottle on the front left is still present and unchanged.\",\n        \"box\": [35, 142, 742, 311]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The water bottle on the second column is still present and unchanged.\",\n        \"box\": [33, 362, 656, 508]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The water bottle on the third column is still present and unchanged.\",\n        \"box\": [33, 506, 655, 654]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The water bottle on the right is still present and unchanged.\",\n        \"box\": [35, 649, 657, 804]\n      }\n    ]\n  }\n]"
+}

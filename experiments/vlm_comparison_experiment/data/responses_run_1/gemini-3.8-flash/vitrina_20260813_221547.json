@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.8-flash",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 13.73,
+  "prompt_tokens": 3191,
+  "output_tokens": 381,
+  "thinking_tokens": 4247,
+  "text": "[\n  {\"cellId\": \"A1\", \"items\": [{\"change\": \"UNCHANGED\", \"description\": \"Stack of yellow saucers is still present at the bottom left.\", \"box\": [833, 91, 963, 304]}, {\"change\": \"UNCHANGED\", \"description\": \"Top cup of the stacked cups is still present.\", \"box\": [638, 131, 755, 267]}, {\"change\": \"UNCHANGED\", \"description\": \"Lower cup of the stacked cups is still present.\", \"box\": [746, 142, 843, 270]}, {\"change\": \"UNCHANGED\", \"description\": \"Mug next to the saucers is still present.\", \"box\": [736, 258, 915, 373]}, {\"change\": \"UNCHANGED\", \"description\": \"Clear glass is still present, shifted behind the pink cup.\", \"box\": [664, 578, 892, 633]}, {\"change\": \"UNCHANGED\", \"description\": \"Pink cup is still present on the shelf.\", \"box\": [678, 592, 933, 709]}, {\"change\": \"UNCHANGED\", \"description\": \"Clear glass with printed markings is still present.\", \"box\": [704, 701, 929, 811]}, {\"change\": \"UNCHANGED\", \"description\": \"Tall clear glass at the back right is still present.\", \"box\": [671, 762, 908, 876]}]}\n]"
+}

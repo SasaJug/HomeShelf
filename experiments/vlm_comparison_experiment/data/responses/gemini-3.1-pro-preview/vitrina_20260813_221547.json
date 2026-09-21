@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.1-pro-preview",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 35.6,
+  "prompt_tokens": 3191,
+  "output_tokens": 495,
+  "thinking_tokens": 4761,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The saucers are still present in their original location.\",\n        \"box\": [834, 91, 961, 301]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The top cup with yellow flowers is still present.\",\n        \"box\": [634, 132, 754, 263]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The bottom cup with yellow flowers is still present.\",\n        \"box\": [748, 143, 843, 268]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The white cup with a handle is still present.\",\n        \"box\": [738, 257, 914, 371]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The clear glass is still present in the region, though pushed back and partially occluded.\",\n        \"box\": [668, 578, 886, 615]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The pink cup is still present, slightly shifted to the left.\",\n        \"box\": [678, 592, 931, 707]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The clear glass with writing is still present.\",\n        \"box\": [706, 701, 926, 809]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The clear glass on the far right is still present.\",\n        \"box\": [674, 755, 900, 874]\n      }\n    ]\n  }\n]"
+}

@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-06-24T17:49:16.966208Z",
+  "name": "pantry_20260624_194856",
+  "storage_id": "7cb361f2-c1a7-4172-bfd8-9653dd0466ba",
+  "reference": "storages/7cb361f2-c1a7-4172-bfd8-9653dd0466ba/latest/photo.jpg",
+  "reference_label": "pantry",
+  "all_match_scores": {},
+  "image_width": 1080,
+  "image_height": 1955,
+  "device_model": "samsung SM-S921B",
+  "android_api": 36,
+  "ground_truth": []
+}

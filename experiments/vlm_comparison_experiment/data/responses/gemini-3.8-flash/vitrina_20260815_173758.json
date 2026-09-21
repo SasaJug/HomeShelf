@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.8-flash",
+  "golden": "vitrina_20260815_173758",
+  "latency_s": 31.06,
+  "prompt_tokens": 3191,
+  "output_tokens": 519,
+  "thinking_tokens": 7594,
+  "text": "[\n  {\"cellId\": \"A1\", \"items\": [\n    {\"change\": \"REMOVED\", \"description\": \"The stack of yellow saucers has been removed from the shelf.\", \"box\": [791, 109, 927, 320]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The cup previously stacked on top remains present.\", \"box\": [572, 144, 716, 280]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The cup that was resting on the saucers is now directly on the shelf.\", \"box\": [704, 155, 868, 286]},\n    {\"change\": \"UNCHANGED\", \"description\": \"White floral cup remains on the shelf.\", \"box\": [687, 342, 867, 471]},\n    {\"change\": \"REMOVED\", \"description\": \"The clear drinking glass on the left has been removed, leaving bare shelf space.\", \"box\": [631, 497, 886, 617]},\n    {\"change\": \"UNCHANGED\", \"description\": \"Pink cup remains on the shelf.\", \"box\": [648, 571, 894, 686]},\n    {\"change\": \"UNCHANGED\", \"description\": \"Patterned drinking glass remains present.\", \"box\": [676, 682, 888, 792]},\n    {\"change\": \"UNCHANGED\", \"description\": \"Drinking glass remains present on the right side of the shelf.\", \"box\": [643, 783, 885, 884]},\n    {\"change\": \"ADDED\", \"description\": \"A drinking glass behind the pink cup.\", \"box\": [628, 571, 854, 706], \"name\": \"Drinking glass\", \"isTransparentContainer\": true},\n    {\"change\": \"ADDED\", \"description\": \"A drinking glass placed behind the patterned glass.\", \"box\": [638, 742, 852, 826], \"name\": \"Drinking glass\", \"isTransparentContainer\": true}\n  ]}\n]"
+}

@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.6-flash",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 18.5,
+  "prompt_tokens": 3191,
+  "output_tokens": 505,
+  "thinking_tokens": 3054,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Yellow saucers remain in the same location at the bottom left.\",\n        \"box\": [835, 91, 960, 298]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Top floral cup remains stacked on the middle cup.\",\n        \"box\": [638, 131, 755, 264]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Middle floral cup remains stacked above the yellow saucers.\",\n        \"box\": [746, 142, 843, 269]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"White floral cup remains on the shelf to the right of the saucers.\",\n        \"box\": [739, 256, 915, 370]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"Clear glass previously located to the left of the pink cup is now gone.\",\n        \"box\": [631, 497, 886, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Pink cup remains in place on the right side of the shelf.\",\n        \"box\": [678, 591, 932, 709]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Clear patterned glass remains in place to the right of the pink cup.\",\n        \"box\": [710, 701, 928, 809]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Tall clear glass in the back right corner remains unchanged.\",\n        \"box\": [673, 760, 901, 875]\n      }\n    ]\n  }\n]"
+}

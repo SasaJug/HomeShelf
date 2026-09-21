@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.1-pro-preview",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 28.93,
+  "prompt_tokens": 3191,
+  "output_tokens": 562,
+  "thinking_tokens": 3385,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The saucers are still present in the same location.\",\n        \"box\": [833, 91, 964, 302]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup is still present in the same location.\",\n        \"box\": [634, 132, 754, 263]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup is still present in the same location.\",\n        \"box\": [747, 143, 843, 268]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup is still present in the same location.\",\n        \"box\": [738, 258, 914, 371]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The glass is no longer in this position, leaving mostly empty shelf space.\",\n        \"box\": [631, 497, 886, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The pink cup is still present in the same location.\",\n        \"box\": [678, 593, 930, 707]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The glass is still present in the same location.\",\n        \"box\": [707, 698, 926, 809]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The glass is still present in the same location.\",\n        \"box\": [674, 758, 900, 874]\n      },\n      {\n        \"change\": \"ADDED\",\n        \"description\": \"A clear glass is now visible behind the pink cup.\",\n        \"box\": [668, 579, 888, 645],\n        \"name\": \"Glass\",\n        \"isTransparentContainer\": true\n      }\n    ]\n  }\n]"
+}

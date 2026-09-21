@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.5-flash",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 12.7,
+  "prompt_tokens": 3191,
+  "output_tokens": 563,
+  "thinking_tokens": 2396,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The stack of yellow saucers is still in the same position.\",\n        \"box\": [830, 91, 964, 305]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The top cup in the left stack is still present.\",\n        \"box\": [631, 131, 756, 264]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The bottom cup in the left stack is still present.\",\n        \"box\": [746, 143, 842, 268]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup to the right of the stack is still present.\",\n        \"box\": [738, 256, 915, 372]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The clear glass on the left side of the right group has been removed.\",\n        \"box\": [631, 497, 886, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The pink cup is still present.\",\n        \"box\": [678, 593, 933, 708]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The glass with markings is still present.\",\n        \"box\": [702, 701, 927, 810]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The tall glass on the far right is still present.\",\n        \"box\": [670, 765, 902, 876]\n      },\n      {\n        \"change\": \"ADDED\",\n        \"description\": \"A clear glass is now visible behind the pink cup.\",\n        \"box\": [665, 579, 881, 641],\n        \"name\": \"Glass\",\n        \"isTransparentContainer\": true\n      }\n    ]\n  }\n]"
+}

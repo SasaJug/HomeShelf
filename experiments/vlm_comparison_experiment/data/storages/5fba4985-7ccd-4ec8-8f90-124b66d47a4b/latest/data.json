@@ -1,0 +1,116 @@
+{
+  "cells": [
+    "A1",
+    "A2"
+  ],
+  "guideLines": [
+    {
+      "id": 0,
+      "isHorizontal": true,
+      "position": 0.17142743
+    },
+    {
+      "id": 1,
+      "isHorizontal": true,
+      "position": 0.7938549
+    },
+    {
+      "id": 2,
+      "isHorizontal": true,
+      "position": 0.5
+    },
+    {
+      "id": 3,
+      "isHorizontal": false,
+      "position": 0.8955078
+    },
+    {
+      "id": 4,
+      "isHorizontal": false,
+      "position": 0.11450195
+    }
+  ],
+  "markedItems": [
+    {
+      "id": "89b82205-2be7-4c98-9c70-bc37aba8e769",
+      "name": "Coca-Cola Zero",
+      "boundingBox": {
+        "x": 0.23111112,
+        "y": 0.33929414,
+        "width": 0.10940741,
+        "height": 0.1461688
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "3cb953e5-6a5a-46cc-8865-ef97b838f72f",
+      "name": "Coca-Cola Zero",
+      "boundingBox": {
+        "x": 0.34051853,
+        "y": 0.33929414,
+        "width": 0.105500005,
+        "height": 0.1461688
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "95a429af-ac47-4b4c-8709-62c7e9178666",
+      "name": "Coca-Cola Zero",
+      "boundingBox": {
+        "x": 0.44601852,
+        "y": 0.33929414,
+        "width": 0.105500005,
+        "height": 0.1461688
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "2508b839-6466-4374-9f76-cde7f23ffe37",
+      "name": "Water bottle",
+      "boundingBox": {
+        "x": 0.20766667,
+        "y": 0.5072327,
+        "width": 0.16020371,
+        "height": 0.23013811
+      },
+      "cellName": "A2",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "05e77a7b-95c7-4fb8-930a-b9ab0d03c004",
+      "name": "Water bottle",
+      "boundingBox": {
+        "x": 0.39522225,
+        "y": 0.5072327,
+        "width": 0.11722223,
+        "height": 0.19903836
+      },
+      "cellName": "A2",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "3812db62-edd2-4d09-b406-b1483ebbcae1",
+      "name": "Water bottle",
+      "boundingBox": {
+        "x": 0.508537,
+        "y": 0.5072327,
+        "width": 0.11722223,
+        "height": 0.19903836
+      },
+      "cellName": "A2",
+      "isTransparentContainer": true
+    },
+    {
+      "id": "39f251dd-3495-4bbd-9029-d090c736b2a1",
+      "name": "Water bottle",
+      "boundingBox": {
+        "x": 0.6218518,
+        "y": 0.5072327,
+        "width": 0.12894446,
+        "height": 0.19903836
+      },
+      "cellName": "A2",
+      "isTransparentContainer": true
+    }
+  ]
+}

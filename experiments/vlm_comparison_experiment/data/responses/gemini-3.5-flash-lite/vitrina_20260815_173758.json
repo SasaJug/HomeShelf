@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "golden": "vitrina_20260815_173758",
+  "latency_s": 2.11,
+  "prompt_tokens": 3191,
+  "output_tokens": 486,
+  "thinking_tokens": null,
+  "text": "[\n  {\n    \"cellId\": \"Cell A1\",\n    \"items\": [\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The saucer stack is no longer present on the bottom left.\",\n        \"box\": [791, 109, 927, 320]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Top cup in the left stack remains in place.\",\n        \"box\": [596, 152, 714, 284]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Bottom cup in the left stack remains in place.\",\n        \"box\": [702, 165, 803, 288]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Cup to the right of the stack remains in place.\",\n        \"box\": [691, 281, 872, 395]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The glass on the left side of the right group is gone.\",\n        \"box\": [631, 497, 886, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Pink cup remains in place.\",\n        \"box\": [629, 610, 884, 729]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Glass next to the pink cup remains in place.\",\n        \"box\": [649, 721, 879, 830]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Glass on the far right remains in place.\",\n        \"box\": [620, 780, 852, 897]\n      }\n    ]\n  }\n]"
+}
