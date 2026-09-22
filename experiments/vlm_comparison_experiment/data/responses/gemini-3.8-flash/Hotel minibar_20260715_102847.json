@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.8-flash",
+  "golden": "Hotel minibar_20260715_102847",
+  "latency_s": 5.3,
+  "prompt_tokens": 5353,
+  "output_tokens": 286,
+  "thinking_tokens": 1396,
+  "text": "[\n  {\"cellId\":\"A1\",\"items\":[{\"change\":\"UNCHANGED\",\"description\":\"The can of Coca-Cola Zero remains in place.\",\"box\":[500,169,946,310]},{\"change\":\"UNCHANGED\",\"description\":\"The can of Coca-Cola remains in place.\",\"box\":[506,305,946,439]},{\"change\":\"UNCHANGED\",\"description\":\"The can of Coca-Cola Zero remains in place.\",\"box\":[510,434,946,568]}]},{\"cellId\":\"A2\",\"items\":[{\"change\":\"UNCHANGED\",\"description\":\"The water bottle on the left remains full and in place.\",\"box\":[24,137,750,324]},{\"change\":\"UNCHANGED\",\"description\":\"The water bottle remains full and in place.\",\"box\":[6,366,650,513]},{\"change\":\"UNCHANGED\",\"description\":\"The water bottle remains full and in place.\",\"box\":[5,508,653,656]},{\"change\":\"UNCHANGED\",\"description\":\"The water bottle on the right remains full and in place.\",\"box\":[9,652,656,814]}]}\n]"
+}

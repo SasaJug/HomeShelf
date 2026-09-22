@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.8-flash",
+  "golden": "vitrina_20260815_173758",
+  "latency_s": 42.89,
+  "prompt_tokens": 3191,
+  "output_tokens": 420,
+  "thinking_tokens": 14882,
+  "text": "[\n  {\"cellId\": \"A1\", \"items\": [\n    {\"change\": \"REMOVED\", \"description\": \"The stack of yellow saucers has been removed from underneath the cups.\", \"box\": [791, 109, 927, 320]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The top floral cup is still present, resting slightly lower on the cup beneath it.\", \"box\": [575, 143, 717, 279]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The bottom floral cup is still present, now resting directly on the shelf surface.\", \"box\": [704, 153, 868, 287]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The floral cup to the right is still present on the shelf.\", \"box\": [690, 342, 865, 467]},\n    {\"change\": \"REMOVED\", \"description\": \"The clear glass previously at this position on the front left has been removed.\", \"box\": [631, 497, 886, 617]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The pink cup is still present on the shelf.\", \"box\": [645, 573, 893, 686]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The glass with printed markings is still present.\", \"box\": [673, 681, 889, 792]},\n    {\"change\": \"UNCHANGED\", \"description\": \"The textured glass on the right is still present.\", \"box\": [644, 780, 885, 883]}\n  ]}\n]"
+}

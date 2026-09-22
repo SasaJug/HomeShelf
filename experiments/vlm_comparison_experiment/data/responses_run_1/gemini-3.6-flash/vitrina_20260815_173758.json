@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.6-flash",
+  "golden": "vitrina_20260815_173758",
+  "latency_s": 14.33,
+  "prompt_tokens": 3191,
+  "output_tokens": 376,
+  "thinking_tokens": 2334,
+  "text": "[{\"cellId\":\"A1\",\"items\":[{\"change\":\"REMOVED\",\"description\":\"The yellow saucers stack is missing from the shelf.\",\"box\":[791,109,927,320]},{\"change\":\"UNCHANGED\",\"description\":\"The top floral cup in the left stack remains in place.\",\"box\":[576,144,713,277]},{\"change\":\"UNCHANGED\",\"description\":\"The bottom floral cup in the left stack remains in place.\",\"box\":[702,153,868,286]},{\"change\":\"UNCHANGED\",\"description\":\"The floral cup in the middle area remains present.\",\"box\":[698,342,865,465]},{\"change\":\"REMOVED\",\"description\":\"The clear glass on the left side of the right group is no longer at this location.\",\"box\":[631,497,886,617]},{\"change\":\"UNCHANGED\",\"description\":\"The pink cup remains present on the shelf, shifted slightly left.\",\"box\":[647,572,893,685]},{\"change\":\"UNCHANGED\",\"description\":\"The glass with printed text remains present.\",\"box\":[671,681,888,788]},{\"change\":\"UNCHANGED\",\"description\":\"The tall glass on the far right remains present.\",\"box\":[642,786,886,882]},{\"change\":\"ADDED\",\"description\":\"A clear glass is now visible behind the pink cup.\",\"box\":[622,570,848,705],\"name\":\"Clear glass\",\"isTransparentContainer\":true}]}]"
+}

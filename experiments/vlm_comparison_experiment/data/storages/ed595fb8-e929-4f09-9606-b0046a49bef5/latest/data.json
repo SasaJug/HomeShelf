@@ -1,0 +1,120 @@
+{
+  "cells": [
+    "A1"
+  ],
+  "guideLines": [
+    {
+      "id": 0,
+      "isHorizontal": true,
+      "position": 0.39439088
+    },
+    {
+      "id": 1,
+      "isHorizontal": true,
+      "position": 0.671415
+    },
+    {
+      "id": 2,
+      "isHorizontal": false,
+      "position": 0.90478516
+    },
+    {
+      "id": 3,
+      "isHorizontal": false,
+      "position": 0.036376953
+    }
+  ],
+  "markedItems": [
+    {
+      "id": "de3e7403-7b6e-4b22-8919-2d5a544a6f61",
+      "name": "Saucer",
+      "boundingBox": {
+        "x": 0.13164814,
+        "y": 0.61354065,
+        "width": 0.1832574,
+        "height": 0.03791151
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "16a83298-be42-472c-ac1f-7ca16675c3fd",
+      "name": "Cup",
+      "boundingBox": {
+        "x": 0.16899444,
+        "y": 0.5595791,
+        "width": 0.114644445,
+        "height": 0.032653708
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "ad33b608-f942-4aa8-8634-fe24ca6839df",
+      "name": "Cup",
+      "boundingBox": {
+        "x": 0.18028519,
+        "y": 0.588912,
+        "width": 0.10682778,
+        "height": 0.027949361
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "4bda39db-b8b0-4c7f-8c7d-8f96c40da446",
+      "name": "Cup",
+      "boundingBox": {
+        "x": 0.28103334,
+        "y": 0.585868,
+        "width": 0.09901111,
+        "height": 0.050364193
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+      "name": "Glass",
+      "boundingBox": {
+        "x": 0.46863332,
+        "y": 0.5692645,
+        "width": 0.10422222,
+        "height": 0.070841946
+      },
+      "isTransparentContainer": true,
+      "cellName": "A1"
+    },
+    {
+      "id": "30ef06fe-b972-44bf-8dc1-8af7a27f480e",
+      "name": "Cup",
+      "boundingBox": {
+        "x": 0.5667759,
+        "y": 0.568711,
+        "width": 0.1033537,
+        "height": 0.070841946
+      },
+      "cellName": "A1"
+    },
+    {
+      "id": "0b1ac9c5-59cf-43d4-893f-cb698641747b",
+      "name": "Glass",
+      "boundingBox": {
+        "x": 0.6631815,
+        "y": 0.5742455,
+        "width": 0.094668515,
+        "height": 0.06392378
+      },
+      "isTransparentContainer": true,
+      "cellName": "A1"
+    },
+    {
+      "id": "7d40eca1-1684-407a-af0f-d03f40488acc",
+      "name": "Glass",
+      "boundingBox": {
+        "x": 0.7144241,
+        "y": 0.5662204,
+        "width": 0.101616666,
+        "height": 0.064200506
+      },
+      "isTransparentContainer": true,
+      "cellName": "A1"
+    }
+  ]
+}

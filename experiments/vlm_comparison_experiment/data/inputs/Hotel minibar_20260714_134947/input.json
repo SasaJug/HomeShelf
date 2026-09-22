@@ -1,0 +1,95 @@
+{
+  "cells": [
+    {
+      "cellId": "A1",
+      "referenceImage": "A1_reference.jpg",
+      "newImage": "A1_new.jpg",
+      "knownItems": [
+        {
+          "id": "89b82205-2be7-4c98-9c70-bc37aba8e769",
+          "name": "Coca-Cola Zero",
+          "isTransparentContainer": false,
+          "box": [
+            510,
+            149,
+            955,
+            289
+          ]
+        },
+        {
+          "id": "3cb953e5-6a5a-46cc-8865-ef97b838f72f",
+          "name": "Coca-Cola Zero",
+          "isTransparentContainer": false,
+          "box": [
+            510,
+            289,
+            955,
+            424
+          ]
+        },
+        {
+          "id": "95a429af-ac47-4b4c-8709-62c7e9178666",
+          "name": "Coca-Cola Zero",
+          "isTransparentContainer": false,
+          "box": [
+            510,
+            424,
+            955,
+            559
+          ]
+        }
+      ]
+    },
+    {
+      "cellId": "A2",
+      "referenceImage": "A2_reference.jpg",
+      "newImage": "A2_new.jpg",
+      "knownItems": [
+        {
+          "id": "2508b839-6466-4374-9f76-cde7f23ffe37",
+          "name": "Water bottle",
+          "isTransparentContainer": true,
+          "box": [
+            24,
+            119,
+            807,
+            324
+          ]
+        },
+        {
+          "id": "05e77a7b-95c7-4fb8-930a-b9ab0d03c004",
+          "name": "Water bottle",
+          "isTransparentContainer": true,
+          "box": [
+            24,
+            359,
+            701,
+            509
+          ]
+        },
+        {
+          "id": "3812db62-edd2-4d09-b406-b1483ebbcae1",
+          "name": "Water bottle",
+          "isTransparentContainer": true,
+          "box": [
+            24,
+            504,
+            701,
+            654
+          ]
+        },
+        {
+          "id": "39f251dd-3495-4bbd-9029-d090c736b2a1",
+          "name": "Water bottle",
+          "isTransparentContainer": true,
+          "box": [
+            24,
+            649,
+            701,
+            814
+          ]
+        }
+      ]
+    }
+  ]
+}

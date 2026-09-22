@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.6-flash",
+  "golden": "vitrina_20260815_173758",
+  "latency_s": 9.58,
+  "prompt_tokens": 3191,
+  "output_tokens": 506,
+  "thinking_tokens": 1104,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The stack of yellow saucers is no longer on the shelf.\",\n        \"box\": [791, 109, 927, 320]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The upper cup in the left stack remains in position.\",\n        \"box\": [575, 145, 712, 280]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The lower cup in the left stack remains in position.\",\n        \"box\": [702, 154, 868, 285]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The white patterned cup in the middle area is still present.\",\n        \"box\": [691, 342, 864, 467]\n      },\n      {\n        \"change\": \"REMOVED\",\n        \"description\": \"The clear drinking glass previously located on the left of the pink mug is gone.\",\n        \"box\": [631, 497, 886, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The pink tumbler/cup is still on the shelf, slightly shifted to the left.\",\n        \"box\": [648, 571, 893, 684]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The short glass with printed text remains on the shelf.\",\n        \"box\": [677, 686, 887, 788]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The textured clear glass on the right remains in position.\",\n        \"box\": [639, 783, 887, 883]\n      }\n    ]\n  }\n]"
+}

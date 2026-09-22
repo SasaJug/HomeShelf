@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-08-01T15:19:14.573288Z",
+  "name": "pantry_20260627_143831",
+  "storage_id": "7cb361f2-c1a7-4172-bfd8-9653dd0466ba",
+  "reference": "storages/7cb361f2-c1a7-4172-bfd8-9653dd0466ba/latest/photo.jpg",
+  "reference_label": "pantry",
+  "all_match_scores": {},
+  "capture_attempt": 0,
+  "image_width": 1080,
+  "image_height": 1955,
+  "device_model": "samsung SM-S921B",
+  "android_api": 36,
+  "ground_truth": [
+    {
+      "cell": "A1",
+      "change": "REPLACED",
+      "item_id": "4c9f1455-b67a-4962-9ef6-d4c427513768"
+    },
+    {
+      "cell": "A1",
+      "change": "ADDED",
+      "box": {
+        "x": 0.68141,
+        "y": 0.31589,
+        "width": 0.21805,
+        "height": 0.0466
+      }
+    },
+    {
+      "cell": "A3",
+      "change": "REMOVED",
+      "item_id": "8871e060-fc81-4134-b5e2-782a80ea17dc"
+    },
+    {
+      "cell": "A3",
+      "change": "ADDED",
+      "box": {
+        "x": 0.68399,
+        "y": 0.67816,
+        "width": 0.13736,
+        "height": 0.02446
+      }
+    },
+    {
+      "cell": "A3",
+      "change": "ADDED",
+      "box": {
+        "x": 0.8222,
+        "y": 0.64071,
+        "width": 0.06782,
+        "height": 0.06246
+      }
+    }
+  ]
+}

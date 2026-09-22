@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "golden": "Hotel minibar_20260714_134947",
+  "latency_s": 2.44,
+  "prompt_tokens": 5342,
+  "output_tokens": 536,
+  "thinking_tokens": null,
+  "text": "[\n  {\n    \"cellId\": \"Cell A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The Coca-Cola Zero can is still present in its position.\",\n        \"box\": [474, 171, 915, 305]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The Coca-Cola Zero can is still present in its position.\",\n        \"box\": [480, 302, 915, 434]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The Coca-Cola Zero can is still present in its position.\",\n        \"box\": [487, 429, 915, 563]\n      },\n      {\n        \"change\": \"ADDED\",\n        \"description\": \"An additional Coca-Cola Zero can has been added to the shelf.\",\n        \"box\": [487, 563, 908, 695],\n        \"name\": \"Coca Cola Zero\",\n        \"isTransparentContainer\": false\n      }\n    ]\n  },\n  {\n    \"cellId\": \"Cell A2\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle remains full and unchanged in its position.\",\n        \"box\": [24, 182, 658, 335]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle remains full and unchanged in its position.\",\n        \"box\": [24, 331, 663, 483]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle remains full and unchanged in its position.\",\n        \"box\": [24, 480, 670, 632]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Water bottle remains full and unchanged in its position.\",\n        \"box\": [24, 634, 674, 786]\n      }\n    ]\n  }\n]"
+}

@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.6-flash",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 26.47,
+  "prompt_tokens": 3191,
+  "output_tokens": 473,
+  "thinking_tokens": 4240,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Stack of yellow saucers remains in place.\",\n        \"box\": [836, 91, 963, 298]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Top floral cup remains stacked on top.\",\n        \"box\": [638, 131, 755, 264]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Lower floral cup remains in the stack.\",\n        \"box\": [746, 143, 842, 267]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"White patterned cup remains next to the stack.\",\n        \"box\": [739, 258, 916, 372]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Clear glass remains behind/left of the pink cup.\",\n        \"box\": [666, 580, 892, 663]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Pink cup remains in position.\",\n        \"box\": [681, 592, 933, 709]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Glass with logo printed on front remains in place.\",\n        \"box\": [710, 700, 928, 809]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"Clear glass in the back right remains present.\",\n        \"box\": [678, 762, 903, 874]\n      }\n    ]\n  }\n]"
+}

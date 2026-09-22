@@ -1,0 +1,99 @@
+{
+  "cells": [
+    {
+      "cellId": "A1",
+      "referenceImage": "A1_reference.jpg",
+      "newImage": "A1_new.jpg",
+      "knownItems": [
+        {
+          "id": "de3e7403-7b6e-4b22-8919-2d5a544a6f61",
+          "name": "Saucer",
+          "isTransparentContainer": false,
+          "box": [
+            791,
+            109,
+            927,
+            320
+          ]
+        },
+        {
+          "id": "16a83298-be42-472c-ac1f-7ca16675c3fd",
+          "name": "Cup",
+          "isTransparentContainer": false,
+          "box": [
+            596,
+            152,
+            714,
+            284
+          ]
+        },
+        {
+          "id": "ad33b608-f942-4aa8-8634-fe24ca6839df",
+          "name": "Cup",
+          "isTransparentContainer": false,
+          "box": [
+            702,
+            165,
+            803,
+            288
+          ]
+        },
+        {
+          "id": "4bda39db-b8b0-4c7f-8c7d-8f96c40da446",
+          "name": "Cup",
+          "isTransparentContainer": false,
+          "box": [
+            691,
+            281,
+            872,
+            395
+          ]
+        },
+        {
+          "id": "1da9b1c5-7176-46ac-9db9-5f03e9961501",
+          "name": "Glass",
+          "isTransparentContainer": true,
+          "box": [
+            631,
+            497,
+            886,
+            617
+          ]
+        },
+        {
+          "id": "30ef06fe-b972-44bf-8dc1-8af7a27f480e",
+          "name": "Cup",
+          "isTransparentContainer": false,
+          "box": [
+            629,
+            610,
+            884,
+            729
+          ]
+        },
+        {
+          "id": "0b1ac9c5-59cf-43d4-893f-cb698641747b",
+          "name": "Glass",
+          "isTransparentContainer": true,
+          "box": [
+            649,
+            721,
+            879,
+            830
+          ]
+        },
+        {
+          "id": "7d40eca1-1684-407a-af0f-d03f40488acc",
+          "name": "Glass",
+          "isTransparentContainer": true,
+          "box": [
+            620,
+            780,
+            852,
+            897
+          ]
+        }
+      ]
+    }
+  ]
+}

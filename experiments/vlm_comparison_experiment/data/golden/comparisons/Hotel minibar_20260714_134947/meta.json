@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-08-01T15:12:55.105707Z",
+  "name": "Hotel minibar_20260714_134947",
+  "storage_id": "5fba4985-7ccd-4ec8-8f90-124b66d47a4b",
+  "reference": "storages/5fba4985-7ccd-4ec8-8f90-124b66d47a4b/latest/photo.jpg",
+  "reference_label": "Hotel minibar",
+  "all_match_scores": {},
+  "capture_attempt": 0,
+  "image_width": 1080,
+  "image_height": 1955,
+  "device_model": "samsung SM-S921B",
+  "android_api": 36,
+  "ground_truth": [
+    {
+      "cell": "A1",
+      "change": "ADDED",
+      "box": {
+        "x": 0.57723,
+        "y": 0.32903,
+        "width": 0.10895,
+        "height": 0.1442
+      }
+    },
+    {
+      "cell": "A2",
+      "change": "REMOVED",
+      "item_id": "2508b839-6466-4374-9f76-cde7f23ffe37"
+    }
+  ]
+}

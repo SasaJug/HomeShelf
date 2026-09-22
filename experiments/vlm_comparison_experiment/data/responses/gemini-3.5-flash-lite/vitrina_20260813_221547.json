@@ -1,0 +1,9 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "golden": "vitrina_20260813_221547",
+  "latency_s": 2.13,
+  "prompt_tokens": 3191,
+  "output_tokens": 478,
+  "thinking_tokens": null,
+  "text": "[\n  {\n    \"cellId\": \"A1\",\n    \"items\": [\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The saucer stack is present at the same location.\",\n        \"box\": [791, 109, 927, 320]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup is present at the same location.\",\n        \"box\": [596, 152, 714, 284]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup is present at the same location.\",\n        \"box\": [702, 165, 803, 288]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The cup is present at the same location.\",\n        \"box\": [691, 281, 872, 395]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The glass is present at the same location.\",\n        \"box\": [631, 497, 886, 617]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The pink cup is present at the same location.\",\n        \"box\": [629, 610, 884, 729]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The glass is present at the same location.\",\n        \"box\": [649, 721, 879, 830]\n      },\n      {\n        \"change\": \"UNCHANGED\",\n        \"description\": \"The glass is present at the same location.\",\n        \"box\": [620, 780, 852, 897]\n      }\n    ]\n  }\n]"
+}
