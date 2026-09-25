@@ -10,10 +10,10 @@ import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
 import com.jugurdzija.homeshelf.domain.usecases.managestorage.ManageStorageUseCase
-import com.jugurdzija.homeshelf.llm.DetectedItem
-import com.jugurdzija.homeshelf.llm.ItemDetector
-import com.jugurdzija.homeshelf.stt.AudioRecorder
-import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
+import com.jugurdzija.homeshelf.aipipeline.llm.DetectedItem
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemDetector
+import com.jugurdzija.homeshelf.aipipeline.stt.AudioRecorder
+import com.jugurdzija.homeshelf.aipipeline.stt.SpeechToTextEngine
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import io.mockk.Runs
 import io.mockk.coEvery

@@ -34,7 +34,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +62,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
-import com.jugurdzija.homeshelf.stt.VoiceInputState
+import com.jugurdzija.homeshelf.aipipeline.stt.VoiceInputState
 import com.jugurdzija.homeshelf.ui.common.VoiceInputIcon
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
@@ -398,7 +397,7 @@ private fun MarkItemsScreenContent(
                             modifier = Modifier.height(16.dp).width(16.dp)
                         )
                         Text(
-                            text = "No items marked yet — tap the photo to add one",
+                            text = "No items marked yet. Tap the photo to add one",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White
                         )

@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import com.jugurdzija.homeshelf.domain.model.GuideLine
-import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemChange
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
 import com.jugurdzija.homeshelf.util.resolveCellName
 import kotlin.math.abs

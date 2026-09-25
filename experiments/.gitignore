@@ -5,3 +5,4 @@ __pycache__/
 .ipynb_checkpoints/
 *.env
 01_vlm_roi/mobileclip_blt.ts
+01_vlm_roi/yoloe-26l-seg-pf.pt

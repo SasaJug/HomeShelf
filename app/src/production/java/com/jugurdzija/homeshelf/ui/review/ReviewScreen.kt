@@ -48,9 +48,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.domain.model.BoundingBox
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
-import com.jugurdzija.homeshelf.llm.CellDiffResult
-import com.jugurdzija.homeshelf.llm.ItemChange
-import com.jugurdzija.homeshelf.llm.ItemDiffResult
+import com.jugurdzija.homeshelf.aipipeline.llm.CellDiffResult
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemChange
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemDiffResult
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
 import com.jugurdzija.homeshelf.util.fromCellLocalFraction
@@ -82,7 +82,7 @@ fun ReviewScreen(
     LaunchedEffect(vm.shoppingListAdded) {
         vm.shoppingListAdded.collect { addedCount ->
             snackbarHostState.showSnackbar(
-                if (addedCount > 0) "Added $addedCount item(s) to shopping list" else "No new items to add"
+                if (addedCount > 0) "Added $addedCount item(s) to shopping list." else "No new items to add."
             )
         }
     }
@@ -400,7 +400,7 @@ private fun AiDiffPanel(
         }
         is AiDiffState.Error -> {
             Text(
-                text = "AI analysis failed: ${aiDiffState.message}",
+                text = "AI analysis failed: ${aiDiffState.message}.",
                 modifier = modifier
                     .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
                     .padding(12.dp),

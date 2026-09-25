@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
-import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.aipipeline.pipeline.StorageSaveResult
 import kotlin.math.abs
 import androidx.core.graphics.createBitmap
 

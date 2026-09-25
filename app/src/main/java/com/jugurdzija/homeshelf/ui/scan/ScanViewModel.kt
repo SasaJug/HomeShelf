@@ -9,7 +9,7 @@ import com.jugurdzija.homeshelf.domain.usecases.pendingcapture.PendingCaptureUse
 import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
-import com.jugurdzija.homeshelf.embedding.EmbedderOwner
+import com.jugurdzija.homeshelf.aipipeline.embedding.EmbedderOwner
 import com.jugurdzija.homeshelf.ui.common.CAPTURE_SIMILARITY_THRESHOLD
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -128,6 +128,6 @@ class ScanViewModel @Inject constructor(
     }
 
     fun onPermissionDenied() {
-        _state.value = ScanUiState.Error("Camera permission is required", null, emptyList())
+        _state.value = ScanUiState.Error("Camera permission is required.", null, emptyList())
     }
 }

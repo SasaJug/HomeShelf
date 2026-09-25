@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 import java.time.Instant
 import com.jugurdzija.homeshelf.di.DiConstants
 import com.jugurdzija.homeshelf.domain.model.BoundingBox
-import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemChange
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton

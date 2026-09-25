@@ -1,7 +1,7 @@
 package com.jugurdzija.homeshelf.ui.golden
 
 import androidx.compose.ui.graphics.Color
-import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemChange
 
 internal val ItemChange.symbol: String
     get() = when (this) {

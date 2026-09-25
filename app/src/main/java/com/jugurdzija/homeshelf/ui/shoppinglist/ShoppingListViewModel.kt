@@ -3,9 +3,9 @@ package com.jugurdzija.homeshelf.ui.shoppinglist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.domain.usecases.shoppinglist.ShoppingListUseCase
-import com.jugurdzija.homeshelf.stt.AudioRecorder
-import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
-import com.jugurdzija.homeshelf.stt.VoiceInputState
+import com.jugurdzija.homeshelf.aipipeline.stt.AudioRecorder
+import com.jugurdzija.homeshelf.aipipeline.stt.SpeechToTextEngine
+import com.jugurdzija.homeshelf.aipipeline.stt.VoiceInputState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,13 +78,13 @@ class ShoppingListViewModel @Inject constructor(
             speechToTextEngine.transcribe(samples)
                 .onSuccess { text ->
                     if (text.isBlank()) {
-                        _voiceError.tryEmit("Didn't understand that — try again")
+                        _voiceError.tryEmit("Didn't understand that, please try again")
                     } else {
                         _newItemName.value = text
                     }
                 }
                 .onFailure { e ->
-                    _voiceError.tryEmit(e.message ?: "Voice input failed")
+                    _voiceError.tryEmit(e.message ?: "Voice input failed.")
                 }
             _voiceInputState.value = VoiceInputState.IDLE
         }
