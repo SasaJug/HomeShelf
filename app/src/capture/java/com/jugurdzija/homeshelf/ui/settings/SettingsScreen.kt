@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.firebase.ui.auth.AuthUI
+import com.jugurdzija.homeshelf.ui.common.AUTH_ENABLED
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,18 +49,20 @@ fun SettingsScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Button(
-                onClick = {
-                    AuthUI.getInstance().signOut(context).addOnCompleteListener { onLogout() }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Logout")
+            if (AUTH_ENABLED) {
+                Button(
+                    onClick = {
+                        AuthUI.getInstance().signOut(context).addOnCompleteListener { onLogout() }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Logout")
+                }
             }
         }
     }

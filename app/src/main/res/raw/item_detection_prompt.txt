@@ -1,0 +1,4 @@
+Detect individual items stored inside the storage unit in this image - the fridge, pantry, cabinet, or shelving unit that holds the items.
+Only detect items inside the storage unit's interior opening; ignore the surrounding room, door, walls, or anything outside the storage unit.
+For each item, return a short name a person would use for it (e.g. 'Rice', 'Olive oil'), a tight bounding box around it, and whether it is a transparent or translucent container (a jar, bottle, or bin you can see the contents through).
+The bounding box is [ymin, xmin, ymax, xmax], normalized to the range 0 to 1000 relative to the image dimensions, with the origin at the top-left.

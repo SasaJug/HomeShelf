@@ -8,10 +8,6 @@ import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepository
 import com.jugurdzija.homeshelf.data.shoppinglist.ShoppingListRepositoryImpl
 import com.jugurdzija.homeshelf.data.storage.StorageRepository
 import com.jugurdzija.homeshelf.data.storage.StorageRepositoryImpl
-import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
-import com.jugurdzija.homeshelf.usecase.ComparisonPipelineImpl
-import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
-import com.jugurdzija.homeshelf.usecase.StorageSavePipelineImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -24,15 +20,7 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindComparisonPipeline(impl: ComparisonPipelineImpl): ComparisonPipeline
-
-    @Binds
-    @Singleton
     abstract fun bindStorageRepository(impl: StorageRepositoryImpl): StorageRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindStorageSavePipeline(impl: StorageSavePipelineImpl): StorageSavePipeline
 
     @Binds
     @Singleton

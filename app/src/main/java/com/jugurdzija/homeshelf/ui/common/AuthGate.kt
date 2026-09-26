@@ -31,8 +31,14 @@ import com.jugurdzija.homeshelf.R
 
 private const val TAG = "AuthGate"
 
+internal const val AUTH_ENABLED = false
+
 @Composable
 fun AuthGate(content: @Composable (onLogout: () -> Unit) -> Unit) {
+    if (!AUTH_ENABLED) {
+        content {}
+        return
+    }
     val auth = remember { FirebaseAuth.getInstance() }
     var authenticated by remember { mutableStateOf(auth.currentUser != null) }
     var signInError by remember { mutableStateOf<String?>(null) }

@@ -35,7 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme
-import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.aipipeline.pipeline.StorageSaveResult
 import androidx.core.graphics.createBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +69,7 @@ fun ConfirmCaptureScreen(
 
     ConfirmCaptureScreenContent(
         bitmap = bitmap,
-        title = if (vm.isRescan) "Confirm Replace Photo: ${existingName.orEmpty()}" else "Confirm New Storage",
+        title = if (vm.isRescan) "Confirm Replace Photo: ${existingName.orEmpty()}." else "Confirm New Storage.",
         isRescan = vm.isRescan,
         name = vm.name,
         onNameChange = { vm.name = it },

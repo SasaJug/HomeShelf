@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import com.jugurdzija.homeshelf.domain.model.ShoppingListItem
-import com.jugurdzija.homeshelf.stt.VoiceInputState
+import com.jugurdzija.homeshelf.aipipeline.stt.VoiceInputState
 import com.jugurdzija.homeshelf.ui.common.LifecycleEvents
 import com.jugurdzija.homeshelf.ui.common.VoiceInputIcon
 import com.jugurdzija.homeshelf.ui.theme.HomeShelfTheme

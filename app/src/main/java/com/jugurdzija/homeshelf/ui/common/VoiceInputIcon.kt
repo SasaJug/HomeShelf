@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import com.jugurdzija.homeshelf.stt.VoiceInputState
+import com.jugurdzija.homeshelf.aipipeline.stt.VoiceInputState
 
 @Composable
 fun VoiceInputIcon(

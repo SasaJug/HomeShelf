@@ -6,8 +6,8 @@ import com.jugurdzija.homeshelf.domain.usecases.pendingcapture.PendingCaptureUse
 import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.ui.nav.Routes
-import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
-import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.aipipeline.pipeline.StorageSavePipeline
+import com.jugurdzija.homeshelf.aipipeline.pipeline.StorageSaveResult
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify

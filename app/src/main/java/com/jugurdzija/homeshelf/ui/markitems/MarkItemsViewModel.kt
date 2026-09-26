@@ -15,10 +15,10 @@ import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
 import com.jugurdzija.homeshelf.domain.usecases.managestorage.ManageStorageUseCase
-import com.jugurdzija.homeshelf.llm.ItemDetector
-import com.jugurdzija.homeshelf.stt.AudioRecorder
-import com.jugurdzija.homeshelf.stt.SpeechToTextEngine
-import com.jugurdzija.homeshelf.stt.VoiceInputState
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemDetector
+import com.jugurdzija.homeshelf.aipipeline.stt.AudioRecorder
+import com.jugurdzija.homeshelf.aipipeline.stt.SpeechToTextEngine
+import com.jugurdzija.homeshelf.aipipeline.stt.VoiceInputState
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import com.jugurdzija.homeshelf.util.mapLinesToImageCoords
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -205,13 +205,13 @@ class MarkItemsViewModel @Inject constructor(
             speechToTextEngine.transcribe(samples)
                 .onSuccess { text ->
                     if (text.isBlank()) {
-                        _voiceError.tryEmit("Didn't understand that — try again")
+                        _voiceError.tryEmit("Didn't understand that, please try again")
                     } else {
                         updateName(id, text)
                     }
                 }
                 .onFailure { e ->
-                    _voiceError.tryEmit(e.message ?: "Voice input failed")
+                    _voiceError.tryEmit(e.message ?: "Voice input failed.")
                 }
             _voiceInputState.value = VoiceInputState.IDLE
         }

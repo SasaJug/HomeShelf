@@ -11,10 +11,10 @@ import androidx.lifecycle.viewModelScope
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.usecases.pendingcapture.PendingCaptureUseCase
 import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
-import com.jugurdzija.homeshelf.llm.GridLineGenerator
+import com.jugurdzija.homeshelf.aipipeline.llm.GridLineGenerator
 import com.jugurdzija.homeshelf.ui.nav.Routes
-import com.jugurdzija.homeshelf.usecase.StorageSavePipeline
-import com.jugurdzija.homeshelf.usecase.StorageSaveResult
+import com.jugurdzija.homeshelf.aipipeline.pipeline.StorageSavePipeline
+import com.jugurdzija.homeshelf.aipipeline.pipeline.StorageSaveResult
 import com.jugurdzija.homeshelf.util.mapGeneratedLinesToCanvasGuideLines
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

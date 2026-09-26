@@ -8,7 +8,7 @@ import com.jugurdzija.homeshelf.data.GoldenStore
 import com.jugurdzija.homeshelf.data.GroundTruthItem
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
-import com.jugurdzija.homeshelf.llm.ItemChange
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemChange
 import com.jugurdzija.homeshelf.util.resolveCellName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime

@@ -14,4 +14,3 @@ experiments/.venv/
 experiments/**/__pycache__/
 experiments/**/.ipynb_checkpoints/
 student-test.jks
-.firebase/

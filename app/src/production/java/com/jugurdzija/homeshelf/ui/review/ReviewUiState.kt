@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.jugurdzija.homeshelf.domain.model.GridCell
 import com.jugurdzija.homeshelf.domain.model.GuideLine
 import com.jugurdzija.homeshelf.domain.model.MarkedItem
-import com.jugurdzija.homeshelf.llm.CellDiffResult
+import com.jugurdzija.homeshelf.aipipeline.llm.CellDiffResult
 
 sealed interface ReviewUiState {
     data object Loading : ReviewUiState

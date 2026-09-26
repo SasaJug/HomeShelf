@@ -8,8 +8,8 @@ import com.jugurdzija.homeshelf.domain.model.ReferencePhotoData
 import com.jugurdzija.homeshelf.domain.model.StorageItem
 import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
 import com.jugurdzija.homeshelf.domain.usecases.getstoragereference.GetStorageReferenceUseCase
-import com.jugurdzija.homeshelf.embedding.EmbedderOwner
-import com.jugurdzija.homeshelf.embedding.ReferenceMatch
+import com.jugurdzija.homeshelf.aipipeline.embedding.EmbedderOwner
+import com.jugurdzija.homeshelf.aipipeline.embedding.ReferenceMatch
 import com.jugurdzija.homeshelf.ui.nav.Routes
 import io.mockk.Runs
 import io.mockk.coEvery

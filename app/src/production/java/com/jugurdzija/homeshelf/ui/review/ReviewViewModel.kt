@@ -7,13 +7,13 @@ import com.jugurdzija.homeshelf.domain.model.MarkedItem
 import com.jugurdzija.homeshelf.domain.usecases.pendingcapture.PendingCaptureUseCase
 import com.jugurdzija.homeshelf.domain.usecases.shoppinglist.ShoppingListUseCase
 import com.jugurdzija.homeshelf.domain.usecases.getstorage.GetStorageUseCase
-import com.jugurdzija.homeshelf.llm.CellPair
-import com.jugurdzija.homeshelf.llm.ItemChange
-import com.jugurdzija.homeshelf.llm.KnownItem
-import com.jugurdzija.homeshelf.llm.ShelfDiffAnalyzer
+import com.jugurdzija.homeshelf.aipipeline.llm.CellPair
+import com.jugurdzija.homeshelf.aipipeline.llm.ItemChange
+import com.jugurdzija.homeshelf.aipipeline.llm.KnownItem
+import com.jugurdzija.homeshelf.aipipeline.llm.ShelfDiffAnalyzer
 import com.jugurdzija.homeshelf.ui.nav.Routes
-import com.jugurdzija.homeshelf.usecase.ComparisonPipeline
-import com.jugurdzija.homeshelf.usecase.ComparisonResult
+import com.jugurdzija.homeshelf.aipipeline.pipeline.ComparisonPipeline
+import com.jugurdzija.homeshelf.aipipeline.pipeline.ComparisonResult
 import com.jugurdzija.homeshelf.util.cellBoundsAsFraction
 import com.jugurdzija.homeshelf.util.resolveItemsByCell
 import com.jugurdzija.homeshelf.util.toCellLocalFraction
@@ -59,7 +59,7 @@ class ReviewViewModel @Inject constructor(
             val storageName = getStorageUseCase.getStorage(storageId)?.name ?: ""
             val pending = pendingCaptureUseCase.load()
             if (pending == null) {
-                _state.value = ReviewUiState.CompareError(storageName, "No captured image found")
+                _state.value = ReviewUiState.CompareError(storageName, "No captured image found.")
                 return@launch
             }
             _state.value = when (val result = comparisonPipeline.run(pending, storageId)) {
@@ -72,9 +72,9 @@ class ReviewViewModel @Inject constructor(
                     newCells = result.newCells,
                     markedItems = result.markedItems
                 )
-                ComparisonResult.AlignmentFailed -> ReviewUiState.CompareError(storageName, "Alignment failed — try capturing again")
-                ComparisonResult.NoEmbeddings -> ReviewUiState.CompareError(storageName, "No reference data saved for this storage")
-                ComparisonResult.NoCells -> ReviewUiState.CompareError(storageName, "Could not extract grid cells")
+                ComparisonResult.AlignmentFailed -> ReviewUiState.CompareError(storageName, "Alignment failed. Try capturing again.")
+                ComparisonResult.NoEmbeddings -> ReviewUiState.CompareError(storageName, "No reference data saved for this storage.")
+                ComparisonResult.NoCells -> ReviewUiState.CompareError(storageName, "Could not extract grid cells.")
             }
         }
     }
