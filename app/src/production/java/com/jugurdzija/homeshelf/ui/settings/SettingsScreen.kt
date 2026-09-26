@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.firebase.ui.auth.AuthUI
+import com.jugurdzija.homeshelf.ui.common.AUTH_ENABLED
 import com.jugurdzija.homeshelf.ui.common.HowItWorksDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,16 +65,18 @@ fun SettingsScreen(
                 Icon(Icons.Default.Info, contentDescription = null)
                 Text(" Help")
             }
-            Button(
-                onClick = {
-                    AuthUI.getInstance().signOut(context).addOnCompleteListener { onLogout() }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Logout")
+            if (AUTH_ENABLED) {
+                Button(
+                    onClick = {
+                        AuthUI.getInstance().signOut(context).addOnCompleteListener { onLogout() }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Logout")
+                }
             }
         }
     }
